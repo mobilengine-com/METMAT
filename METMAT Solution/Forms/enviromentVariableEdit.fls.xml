@@ -1,0 +1,28 @@
+<form id='enviromentVariableEdit' menuName='Enviroment variable edit' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
+
+    <header>
+        <submitbutton text="Submit" closeForm="{false}"/>
+        <discardbutton text="Back to dashboard" confirm="{false}"/>
+    </header>
+
+	<table id='envVariableTb' record='evt' recordset='{select ev.name, ev.value from environmentValues ev}'>
+			<header>
+				<row>
+					<cell>
+						<textview text='Name'/>
+					</cell>
+					<cell>
+						<textview text='Value'/>
+					</cell>				
+				</row>           
+			</header>
+			<row>				
+				<cell>
+					<textview id='envName' text='{evt.name}'/>
+				</cell>
+				<cell>
+					<textbox id='envValue' text='{evt.value}'/>
+				</cell>						
+			</row>
+		</table>
+</form>

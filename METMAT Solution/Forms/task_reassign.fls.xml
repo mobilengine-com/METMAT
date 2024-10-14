@@ -1,0 +1,128 @@
+<form id='task_reassign' menuName='Task Reassign' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
+	<declarations>
+		<let id="letpage" shape="scalar" value='{0}'/>
+	</declarations>
+	<header>
+		<discardbutton text="X"/>
+	</header>
+	<table id="btns" record="r" recordset="{select 1 where 1=2}">
+		<header>
+			<row>
+				<cell>
+					<actionbutton text="pre">
+						<set value="{letpage-1}" target="letpage" />
+					</actionbutton>
+				</cell>
+				<cell>
+					<actionbutton text="next">
+						<set value="{letpage+1}" target="letpage" />
+					</actionbutton>
+				</cell>
+				<cell>
+					<dropdown id='modify_to_env' 
+							label="Reassign to: "
+							keyMap="{env_name}" 
+							textMap="{env_name}"
+							choices='{select env.env_name from environment env}'>
+					</dropdown>
+				</cell>	
+				<cell>
+					<submitbutton id="assignBtnUpper" text="Reassign Selected" closeForm="{false}"></submitbutton>
+				</cell>
+			</row>
+			
+		</header>
+		<row>
+			<cell>
+				<block></block>
+			</cell>
+		</row>
+	</table>
+	
+	
+	
+	
+	<table id='tsk' label='Tasks' record='tsk' recordset='{select tsk.guid, tsk.task_id, tsk.result, tsk.env_name, tsk.platformID from task tsk
+		where UPPER(tsk.task_id) LIKE "%" || UPPER(filter_taskid.text) || "%"  and
+				(tsk.env_name = filter_envname.selectedKey OR filter_envname.selectedKey IS NULL) and
+				(tsk.result = filter_result.selectedKey OR filter_result.selectedKey IS NULL) and
+				(tsk.platformID = filter_platform.selectedKey OR filter_platform.selectedKey IS NULL)
+				order by env_name limit 33 offset letpage*33}'>
+		<header>
+			<row>
+				<cell>
+					<textview text='guid'/> 
+				</cell>
+				<cell>
+					<textview text='Platform'/>
+					<dropdown id='filter_platform' 
+						keyMap="{v}" 
+						textMap="{v}"
+						choices='{["Android", "Android Release" , "iOS","iOS Release", "BO", "BO Release", "Wef", "Wef Release"]}'>
+					</dropdown>
+				</cell>
+				<cell>
+					<textview text='TC ID'/>
+					<textbox id='filter_taskid'/> 
+				</cell>
+				<cell>
+					<textview text='Result'/>
+					<dropdown id='filter_result' 
+						keyMap="{v}" 
+						textMap="{v}"
+						choices='{["not yet started", "success" , "failed", "not tested", "bad test case"]}'>
+					</dropdown>
+				</cell>
+				<cell>
+					<textview text='Actual Environment'/>
+					<dropdown id='filter_envname' 
+						keyMap="{env_name}" 
+						textMap="{env_name}"
+						choices='{select env.env_name from environment env}'>
+					</dropdown>
+				</cell>
+				<!--<cell>
+					<textview text='Choose envirenment to reassign to'/>
+				</cell>-->
+				<cell>
+					<textview text='Marker'/>
+				</cell>
+				
+			</row>
+		</header>
+		<row>
+			<cell>
+				<textview id="tsk_guid" text='{tsk.guid}'/>
+			</cell>
+			<cell>
+				<textview id="tsk_platform" text='{tsk.platformID}'/>
+			</cell>
+			<cell>
+				<textview id="tskid" text='{tsk.task_id}'/>
+			</cell>
+			<cell>
+				<textview id="tsk_result" text='{tsk.result}'/>
+			</cell>
+			<cell>
+				<textview id="tsk_actual_env" text='{tsk.env_name}'/>
+			</cell>
+			
+			<!--<cell>
+				<dropdown id='modify_to_env' 
+				keyMap="{env_name}" 
+				textMap="{env_name}"
+				choices='{select env.env_name from environment env}'>
+				</dropdown>
+				
+			</cell>	-->
+			<cell>
+				<checkbox id= 'mark_to_reassign' checked='{false}'/>
+			</cell>	
+			
+			
+				
+		</row>
+	</table>
+	
+	<submitbutton id="assignBtnButton" text="Reassign Selected" closeForm="{false}"></submitbutton>
+</form>

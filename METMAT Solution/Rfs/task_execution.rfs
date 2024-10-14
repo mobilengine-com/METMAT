@@ -1,0 +1,119 @@
+server program task_execution for form task_execution
+using reftab task;
+using reftab test_case;
+using reftab tc_list;
+using reftab test_case_tag;
+using reftab tc_jira_list;
+{
+	trace form.task_env_table;
+	var act_start_tc_date = form.open_form.DtlToDtdb();
+	var act_end_tc_date = dtl.Now().DtlToDtdb();
+	var act_task_type= form.dd_task_type.selectedKey;
+	var act_platform = form.platformID.selectedKey;
+	var act_tc_id;
+	var avarage_tc_timeneed = 0.0;
+	var numOfSelectedTcRows = 0.0;
+	
+	//itt "t" volt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if (act_task_type=="t"){
+		//trace form;
+		
+		foreach (var envTableTRow in form.env_table_t.rows){
+			var act_task_id = envTableTRow.selected_tc;
+			act_tc_id = act_task_id;
+			var act_env_name = envTableTRow.env_name.text;
+			var guid_tsk = envTableTRow.guid_tsk;
+			avarage_tc_timeneed = avarage_tc_timeneed + envTableTRow.tcTimeNeed.number;
+			numOfSelectedTcRows = numOfSelectedTcRows + 1.0;
+			//trace avarage_tc_timeneed;
+			//trace act_tc_id;
+			
+
+			//update tc result if changed in task list and in tc_list with sent in date
+			if (envTableTRow.dd_result.fChanged) {
+				trace "updating result for ", act_env_name, act_task_id, " to ", envTableTRow.dd_result.selectedText;
+				db.task.Update({guid: guid_tsk}, {result: envTableTRow.dd_result.selectedText, start_tc_date: act_start_tc_date, end_tc_date: act_end_tc_date, time_need: envTableTRow.tcTimeNeed.number.ToString()});
+				db.tc_list.Update({tc_id: act_task_id}, {last_status: envTableTRow.dd_result.selectedText});
+				db.tc_list.Update({tc_id: act_task_id}, {last_sent_in: act_end_tc_date});
+			}
+			
+			if (envTableTRow.dd_version.fChanged)
+				db.task.Update({guid: guid_tsk}, {version: envTableTRow.dd_version.selectedText, start_tc_date: act_start_tc_date, end_tc_date: act_end_tc_date});
+
+			if (envTableTRow.tb_note.fChanged)
+				db.task.Update({guid: guid_tsk}, {note: envTableTRow.tb_note.text, start_tc_date: act_start_tc_date, end_tc_date: act_end_tc_date});
+
+			//link
+			//if (envTableTRow.tb_link.fChanged)
+			//	db.test_case.Update({id: act_task_id}, {link: envTableTRow.tb_link.text}); != ""
+			if (envTableTRow.selected_tc_link_update.text != "")
+				db.test_case.Update({id: act_task_id, platform: act_platform}, {link: envTableTRow.selected_tc_link_update.text});
+
+			
+
+			//tags 
+			//delete all selected tags from reftable
+			foreach(var tags in db.test_case_tag.Read({tc_id: act_task_id})) {
+			
+				trace tags;
+				//trace envTableTRow.tgs.selectedTags;
+				db.test_case_tag.Delete(tags);
+
+
+			}
+			//newly insert all selected tags to reftable
+			foreach(var stags in envTableTRow.tgs.selectedTags) {
+				trace stags;
+				db.test_case_tag.Insert({tc_id: act_task_id, platform: act_platform, tag: stags.v});
+			}
+
+									
+			if (envTableTRow.jira_id.fChanged) {
+				foreach(var rowJira in db.tc_jira_list.Read({task_id: act_task_id, env_name: act_env_name}))
+					db.tc_jira_list.Delete({task_id: act_task_id, env_name: act_env_name, jira_id: rowJira.jira_id, platform: act_platform, tested_version: envTableTRow.dd_version.selectedText});
+					
+				foreach (var jiraIdRow in envTableTRow.jira_id.rows)
+					if (jiraIdRow.tb_jira_id.text != "")
+						db.tc_jira_list.Insert({task_id: act_task_id, env_name: act_env_name, jira_id: jiraIdRow.tb_jira_id.text, platform: act_platform, tested_version: envTableTRow.dd_version.selectedText});
+			}			
+		}
+		
+	} else if (act_task_type=="j") {
+		foreach (var envTableJRow in form.env_table_j.rows){
+			var act_task_id = envTableJRow.selected_jira.text;
+			var guid_tsk = envTableJRow.guid_tsk;
+
+			if (envTableJRow.dd_result.fChanged) {
+				trace "updating result for ", act_task_id, " to ", envTableJRow.dd_result.selectedText;
+				db.task.Update({guid: guid_tsk}, {result: envTableJRow.dd_result.selectedText, start_tc_date: act_start_tc_date, end_tc_date: act_end_tc_date});
+			}
+			
+			if (envTableJRow.tb_note.fChanged)
+				db.task.Update({guid: guid_tsk}, {note: envTableJRow.tb_note.text, start_tc_date: act_start_tc_date, end_tc_date: act_end_tc_date});
+		}
+	}
+
+	//avarage time needed for TC
+	avarage_tc_timeneed = avarage_tc_timeneed/numOfSelectedTcRows;
+	if (avarage_tc_timeneed != null && avarage_tc_timeneed != 0)
+	{
+		db.test_case.Update({id: act_tc_id, platform: act_platform}, {time: avarage_tc_timeneed});
+		trace avarage_tc_timeneed;
+		trace act_tc_id;
+	}else{
+		trace "wrong tc time need";
+	}
+				
+
+	//tags
+
+
+
+	/*if(form.editTcBtn.submitter) {
+		trace form;
+		foreach (var envTableTRow in form.env_table_t.rows){
+				db.test_case.Update({id: act_task_id}, {link: envTableTRow.tb_link.text});
+		}
+		
+	}*/
+}

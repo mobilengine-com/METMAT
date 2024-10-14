@@ -1,0 +1,16 @@
+<Reftab Name="task" Push='true' xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>
+		<Column Name="guid" Type="Text" NotNull='true' PrimaryKey="true"/>
+		<Column Name="task_id" Type="Text" NotNull='true'/>
+		<Column Name="result" Type="Text"/>
+		<Column Name="version" Type="Text"/>
+		<Column Name="env_name" Type="Text"/>
+		<Column Name="note" Type="Text"/>
+		<Column Name="start_tc_date" Type="Date"/>
+		<Column Name="end_tc_date" Type="Date"/>
+		<Column Name="task_type" Type="Text"/>
+		<Column Name="platformID" Type="Text" NotNull='true'/>
+		<Column Name="time_need" Type="Text"/>
+		<Column Name="saved" Type="Integer"/>
+	</Columns>
+</Reftab>

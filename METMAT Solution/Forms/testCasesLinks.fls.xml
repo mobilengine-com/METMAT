@@ -1,0 +1,188 @@
+<form id='tclinks' menuName='Test Cases With Links' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
+	<declarations>
+		<let id="let_tags" shape="table" value='{select t.tag from tc_tag t}'/>
+		<let id="letpage" shape="scalar" value='{0}'/>
+		<let id="adntc" shape="scalar" value= '{false}'/>
+		<let id='defaultCheckboxState' shape='scalar' access='private' value='{false}'/>
+		<let id="testCount" shape="scalar" value='{SELECT Count(tcs.id) FROM test_case tcs}' />
+		<let id="iLabelEditedRows" shape="scalar" value="{0}" />
+	</declarations>
+	<header>
+		<discardbutton text="X"/>
+	</header>
+	<!--Header buttons-->
+	<hbox style="{styles.hbox100w}">
+		<textview text='Tester'/>
+		<dropdown id="selected_tester" keyMap="{tester_name}" textMap="{tester_name}" choices='{select tester.tester_name from tester tester}'></dropdown>
+		<textview text='Enviroment'/>
+		<dropdown id="selected_environment" keyMap="{env_name}" textMap="{env_name}" choices='{select env.env_name from environment env where env.tester_name = selected_tester.selectedKey }'></dropdown>
+		<combinedbutton id='assignBtn' text='Assign Selected'>
+			<actionbutton>
+				<set target='defaultCheckboxState' value='{false}'/>
+			</actionbutton>
+			<submitbutton closeForm="{false}"/>
+		</combinedbutton> 
+		<submitbutton id="save_tags" text="Save Tags" closeForm="{false}"></submitbutton>
+	</hbox>
+	<!--Testcase List-->
+	<if cond='{not (selected_environment.selectedKey = "none")}'>
+		<if cond="{iLabelEditedRows>0}">
+			<submitbutton id="prMove" text="Process move" closeForm="{false}"></submitbutton>
+		</if>
+		<table id="assignedTb" label="Assigned tests" record="at" recordset="{loadNewerFromServer:SELECT ta.guid, ta.task_id, ta.result, ta.platformID FROM task ta where ta.env_name = selected_environment.selectedKey order by task_id}">
+			
+			<header>
+				<row>
+					<cell><textview text='Test ID'/></cell>
+					<cell><textview text='Result'/></cell>
+					<cell><textview text='Platform'/></cell>
+					<cell><textview text='Move task'/></cell>
+				</row>
+			</header>
+			 <row>
+				<declarations>
+					<let id="edited" shape="scalar" value="{false}" />
+					<let id="delete" shape="scalar" value="{false}" />
+				</declarations>
+				<cell><textview id="move_task" text='{at.task_id}'/> <if cond="{false}"><textview id="move_task_guid" text='{at.guid}'/></if></cell>
+				
+				<cell><textview text='{at.result}'/></cell>
+				<cell><textview text='{at.platformID}'/></cell>
+				<cell>
+					<if cond="{not edited}">
+						<actionbutton text="Move test">
+							<set value="{true}" target="edited" />
+							<set value="{iLabelEditedRows+1}" target="iLabelEditedRows" />
+						</actionbutton>
+					</if>
+					<if cond="{edited}">
+						<hbox style="{styles.hbox100w}">
+							<dropdown id="selected_environment_to_move" keyMap="{env_name}" textMap="{env_name}" choices='{select env.env_name from environment env}'></dropdown>
+						<textview text="{select env.tester_name from environment env Where env.env_name = selected_environment_to_move.selectedKey  }" />
+						<actionbutton text="Undo">
+							<set value="{false}" target="edited" />
+							<set value="{iLabelEditedRows-1}" target="iLabelEditedRows" />
+						</actionbutton>
+						</hbox>
+					</if>
+				</cell>
+			 </row>
+		</table>
+	</if>
+	<table id='tcs' label='TCs' record='tcs' recordset='{loadNewerFromServer:SELECT tcs.id, tcs.desc, tcs.platform, tcs.link, tcs.time, formatDtl(tcs.lastAssigned, (dtf yyyy"-"MM"-"dd" "HH":"mm":"ss)) lastAssigned FROM test_case tcs where UPPER(tcs.id) LIKE "%" || UPPER(filter_taskid.text) || "%" and 
+	UPPER(tcs.desc) LIKE "%" || UPPER(filter_desc.text) || "%" and
+	(tcs.platform = filter_platform.selectedKey OR filter_platform.selectedKey IS NULL) and
+	(exists (select t.tag from test_case_tag t where t.tag = tag_filter.text and t.tc_id = tcs.id) OR tag_filter.text="") 
+	order by id limit 20 offset letpage*20}'>
+		<header>
+			<row>
+				<cell>
+					<textview text='Select'/>
+				</cell>
+				<cell>
+					<textview text='TC ID'/>
+					<textbox id='filter_taskid'/> 
+				</cell>
+				<cell>
+					<textview text='Description'/>
+					<textbox id='filter_desc'/>
+				</cell>
+				<cell>
+					<textview text='Platform'/>
+					<dropdown id='filter_platform' 
+						keyMap="{v}" 
+						textMap="{v}"
+						choices='{["Android", "Android Release" , "iOS","iOS Release", "BO", "BO Release", "Wef", "Wef Release"]}'>
+					</dropdown>
+				</cell>
+				<cell>
+					<textview text='Link'/>
+				</cell>
+				<cell>
+					<textview text='Tag'/>
+					<!--<dropdown id="tag_filter" keyMap="{tag}" textMap="{tag}" choices='{select tag.tag from tc_tag tag}'></dropdown>-->
+					<textbox id='tag_filter'/>
+				</cell>
+				<cell>
+					<textview text='Last status'/>
+				</cell>
+				<cell>
+					<textview text='Last sent in'/>
+				</cell>
+				<cell>
+					<textview text='TC time need [min]'/>
+				</cell>
+				<cell>
+					<textview text="Last time assigned"/>
+				</cell>
+				<cell>
+					<textview id='tvDelete' text=''/>
+				</cell>
+			</row>
+		</header>
+		<row>
+			<declarations>
+				<let id='bToDelete' shape='scalar' value='{false}'/>
+			</declarations>
+			<cell>
+				<checkbox id= 'mark_to_run' checked='{updateUserInput:SELECT defaultCheckboxState}'/>
+			</cell>
+			<cell>
+				<textview id="tcsid" text='{tcs.id}'/>
+			</cell>
+			<cell>
+				<textview id="tcsdesc" text='{tcs.desc}'/>
+			</cell>
+			<cell>
+				<textview id="tcsplatform" text='{tcs.platform}'/>
+			</cell>
+			<cell>
+				<linkview text='{tcs.link}' url='{tcs.link}'/>
+			</cell>		
+			<cell>
+				<tags id= 'tags_ctr' availableTags='{select t.tag v from let_tags t}' selectedTags='{select t.tag v from test_case_tag t where tcs.id = t.tc_id}' 
+				hint="tags" 
+				readonly="{false}"/>
+			</cell>	
+			<cell>
+				<textview id='last_status' text='{select tc_list.last_status from tc_list tc_list where tc_list.tc_id=tcsid.text}'/>
+			</cell>
+			<cell>
+				<textview id='last_sent_in' text='{select formatDtl(tc_list.last_sent_in, (dtf yyyy"-"MM"-"dd" "HH":"mm":"ss)) from tc_list tc_list where tc_list.tc_id=tcsid.text}'/>
+			</cell>
+			<cell>
+				<textview id='time_need' text='{TOSTRING(tcs.time)}' />
+			</cell>
+			<cell>
+				<textview id='last_assigned' text='{TOSTRING(tcs.lastAssigned)}'  />
+			</cell>
+			<cell>
+				<if cond='{bToDelete}'>
+					<actionbutton id='abtnUndo' text='Undo'>
+						<set value='{false}' target='bToDelete'/>
+					</actionbutton>
+				</if>
+				<if cond='{not bToDelete}'>
+					<actionbutton id='abtnDelete' text='Delete'>
+						<set value='{true}' target='bToDelete'/>
+					</actionbutton>
+				</if>
+			</cell>
+		</row>
+	</table>
+	<hbox style="{styles.hbox100w}">
+		<if cond="{letpage>0}">
+			<actionbutton text="Previous">
+				<set value="{letpage-1}" target="letpage"/>
+			</actionbutton>
+		</if>
+	
+		<textview text='{toString(letpage)||" / "||toString(testCount/20)}'/>
+		<if cond="{letpage &lt; testCount/20 }">
+			<actionbutton text="Next">
+				<set value="{letpage+1}" target="letpage"/>
+			</actionbutton>
+		</if>
+	</hbox>
+    
+</form>

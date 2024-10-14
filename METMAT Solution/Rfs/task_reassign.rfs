@@ -1,0 +1,29 @@
+server program taskReassign for form task_reassign
+using reftab task;
+{
+	if(form.assignBtnButton.submitter || form.btns.assignBtnUpper.submitter) {
+	
+		foreach (var tskTableRow in form.tsk.rows){
+			var act_task_guid = tskTableRow.tsk_guid.text;
+			var act_task_id = tskTableRow.tskid.text;
+			var act_env_name = tskTableRow.tsk_actual_env.text; 
+			var modify_to_env_name = form.btns.modify_to_env.selectedKey; 
+			var act_tc_platform = tskTableRow.tsk_platform.text;
+
+			//if marker checked, test update according to guid with newly selected environment
+			if (tskTableRow.mark_to_reassign.checked) {
+				trace "update ", act_task_id, " with env ", act_env_name, " to environment: ", modify_to_env_name;
+				db.task.Update({guid: act_task_guid},
+				{env_name: modify_to_env_name});
+				
+			}
+
+			
+			
+						
+		}
+	}
+
+	
+	
+}

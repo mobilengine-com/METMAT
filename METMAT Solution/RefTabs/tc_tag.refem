@@ -1,0 +1,5 @@
+<Reftab Name="tc_tag" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>
+		<Column Name="tag" Type="Text" PrimaryKey="true" NotNull = "true"/>
+	</Columns>
+</Reftab>

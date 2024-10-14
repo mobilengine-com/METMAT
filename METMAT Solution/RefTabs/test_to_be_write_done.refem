@@ -1,0 +1,13 @@
+<Reftab Name="test_to_be_write_done" Push="true" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>
+        <Column Name="category" Type="Text" />
+		<Column Name="id" PrimaryKey="true" NotNull="true" Type="Text" />
+		<Column Name="label" Type="Text" />
+		<Column Name="type" Type="Text" />
+		<Column Name="platform" Type="Text" />
+		<Column Name="status" Type="Text" />
+		<Column Name="location" Type="Text" />
+		<Column Name="creator" Type="Text" />
+		<Column Name="note" Type="Text" />
+	</Columns>
+</Reftab>

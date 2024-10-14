@@ -1,0 +1,16 @@
+<Reftab Name="progress_history" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>		
+		<Column Name="date" Type="Date" PrimaryKey="true" NotNull="true" DateFormat='(dtf yyyy "." MM "." dd)' />
+		<Column Name="imp_done" Type="Integer"/>
+		<Column Name="imp_total" Type="Integer"/>
+		<Column Name="imp_perc" Type="Integer"/>
+		<Column Name="tc_exec_done" Type="Integer"/>
+		<Column Name="tc_exec_total" Type="Integer"/>
+		<Column Name="tc_perc" Type="Integer"/>
+		<Column Name="sum_done" Type="Integer"/>
+		<Column Name="sum_total" Type="Integer"/>
+		<Column Name="sum_perc" Type="Integer"/>
+		<Column Name="tester_number" Type="Float"/>
+		<Column Name="exp_end_of_testing" Type="Date"/>
+	</Columns>
+</Reftab>

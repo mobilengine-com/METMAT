@@ -1,0 +1,92 @@
+<form id='testingStatus' menuName='Testing status' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2" showHeader="false">
+    <declarations>
+        <let id='stLoggedUserRole' shape='scalar'
+            value='{
+        SELECT
+            U.tester_role
+        FROM
+            tester U
+        WHERE
+            U.tester_email = sysp.user
+        }' />
+        <let id="editOrder" shape="scalar" value="{false}" />
+    </declarations>
+   
+    <if id="adminPanel" cond='{stLoggedUserRole == "Admin"}'>
+        <hbox style="{styles.hbox100w}">
+            <submitbutton text="Save changes" id="saveChange"/>
+            <if cond="{ not editOrder}">
+                <actionbutton text="Edit order">
+                    <set value="{true}" target="editOrder" />
+                </actionbutton>
+            </if>
+            <if cond="{editOrder}">
+                <hbox style="{styles.hbox100w}">
+                    <combinedbutton text="Save order" id="saveOrder">
+                        <actionbutton>
+                            <set value="{false}" target="editOrder" />
+                        </actionbutton>
+                        <submitbutton closeForm="{false}"/>
+                    </combinedbutton>
+                    <actionbutton text="Cancel order editing" > 
+                        <set value="{false}" target="editOrder" />
+                    </actionbutton>
+                </hbox>
+            </if>
+        </hbox>
+    </if>
+    <table id="tasks" record="t" recordset="{loadnewerfromserver:SELECT tc.id, tc.done, tc.task, tc.ordernum FROM testingChecklist tc ORDER BY ordernum asc}">
+        <header>
+            <row>
+                <cell><textview/></cell>
+                <cell><textview text="Status"/></cell>
+                <cell><textview text="Task" /></cell>
+                
+            </row>
+        </header>
+        <row>
+            <declarations>
+                <let id="edit" shape="scalar" value="{false}" />
+                <let id="id" shape="scalar" value="{t.id}" />
+            </declarations>
+            <cell>
+                <if id="editButton" cond='{stLoggedUserRole == "Admin"}'>
+                    <if cond="{not edit}">
+                        <actionbutton text="Edit status">
+                            <set value="{true}" target="edit" />
+                        </actionbutton>
+                    </if>
+                    <if cond="{edit}">
+                        <actionbutton text="Undo">
+                            <set value="{false}" target="edit" />
+                        </actionbutton>
+                    </if>
+                </if>
+            </cell>
+            <cell>
+                <if cond="{edit}">
+                    <dropdown id="editedResult" keyMap="{code}" textMap='{text}' choices='{TABLE code, text (0, "Not started yet"; 1, "Done"; 2, "In progress")}' />
+                </if>
+                <if cond="{not edit}">
+                    <if cond="{t.done == 1}">
+                        <textview text="Done" />
+                    </if>
+                    <if cond="{t.done == 0}">
+                        <textview text="Not started yet" />
+                    </if>
+                    <if cond="{t.done == 2}">
+                        <textview text="In progress" />
+                    </if>
+                </if>
+            </cell>
+            <cell>
+                <textview text="{t.task}" />
+            </cell>
+            <cell>
+                <if cond="{editOrder}">
+                    <textbox id="editedOrder" text="{SELECT tostring(t.ordernum)}"/>
+                </if>
+            </cell>
+        </row>
+    </table>
+</form>

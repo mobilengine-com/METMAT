@@ -1,0 +1,7 @@
+<Reftab Name="test_case_tag" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>
+		<Column Name="tc_id" Type="Text" PrimaryKey="true" NotNull = "true"/>
+		<Column Name="tag" Type="Text" PrimaryKey="true" NotNull = "true"/>
+		<Column Name="platform" Type="Text" PrimaryKey="true" NotNull = "true"/>
+	</Columns>
+</Reftab>

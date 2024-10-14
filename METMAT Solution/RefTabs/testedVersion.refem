@@ -1,0 +1,6 @@
+<Reftab Name="testedVersion" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>
+		<Column Name="version" Type="Text"/>
+		<Column Name="platformID" Type="Text" NotNull='true'/>
+	</Columns>
+</Reftab>

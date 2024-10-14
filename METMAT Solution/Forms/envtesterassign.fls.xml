@@ -1,0 +1,50 @@
+<form id='envtesterassign' menuName='Assign Environment to Tester' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2" >
+	<header>
+		<submitbutton text="Submit" closeForm="{false}"/>
+	</header>
+	<chapter id='addenv' title='Add environment'>
+		<textbox id='env_name' label='Environment name:'/>
+		<textbox id='env_detail' label='Environment details:'/>
+		<dropdown id='env_tester' 
+			keyMap='{tester_email}' 
+			textMap='{tester_name}' 
+			choices='{select t.tester_name, t.tester_email from tester t}'>
+				<validation>
+					<validator cond='{env_tester.selectedText is not null}'
+							   message='Nem választottál tesztelőt!'/>
+				</validation>
+		</dropdown>
+	</chapter>
+	<table label='Created environments' record='env' recordset='{select e.env_name, e.tester_email, e.tester_name, e.env_detail from environment e}'>
+		<header>
+			<row>
+				<cell>
+					<textview text='Environment name'/>
+				</cell>
+				<cell>
+					<textview text='Tester name'/>
+				</cell>
+				<cell>
+					<textview text='Tester email'/>
+				</cell>
+				<cell>
+					<textview text='Details'/>
+				</cell>
+			</row>
+		</header>
+		<row>
+			<cell>
+				<textview text='{env.env_name}'/>
+			</cell>
+			<cell>
+				<textview text='{env.tester_name}'/>
+			</cell>
+			<cell>
+				<textview text='{env.tester_email}'/>
+			</cell>
+			<cell>
+				<textview text='{env.env_detail}'/>
+			</cell>			
+		</row>
+	</table>
+</form>

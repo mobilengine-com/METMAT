@@ -1,0 +1,46 @@
+styles {
+    style taskAndList {
+        table {
+            columnWidth = 10em, 30em, 2em, 3em, 60em, 15em
+        }
+    }
+    
+    style executeButtons{
+		hbox {
+			sizes = 200px, 200px, 200px, 200px, 1, 160px
+		}
+	}
+    style SearchBar{
+		hbox {
+			sizes = 200px
+		}
+	}
+
+    style hbox100w {
+        hbox {
+            sizes = 0
+        }
+    }
+    style fullPageTable {
+        table {
+            width = fill
+            columnWidth = 400px, 200px, 200px, 100px, 100px, 200px
+            
+        }
+        cell{
+            content = allignContent
+        }
+    }
+    style allignContent{
+        all{
+            verticalAlign  = middle
+        }
+    }
+    style dropdownNoraml{
+        dropdown{
+			button{
+				width = 150px
+			}
+        }
+    }
+}

@@ -1,0 +1,17 @@
+{
+  "CompanyId": 109,
+  "ReportGenerationTaskId": "ad91fdee-4c97-442f-8b65-a18d3e193b19",
+  "DtuArchive": {
+    "Dt": "2020-09-08T14:56:56.876738Z",
+    "Yr": 2020,
+    "Moy": 9,
+    "Dom": 8,
+    "Dow": 2,
+    "Hod": 14,
+    "Moh": 56,
+    "Som": 56,
+    "Mos": 876
+  },
+  "Status": 1,
+  "ArchivedFilePath": "F:\\Mobilengine\\s41\\DataStore\\CompanyRoot\\109\\REPORT_SOURCES\\v0cinrn1.012_export.sqlite"
+}

@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+	options { 
+		skipDefaultCheckout() 
+		buildDiscarder(logRotator(daysToKeepStr: '10', numToKeepStr: '10'))
+	}
+	environment {
+		VER0 = "4.0.${env.BUILD_NUMBER}"
+		VER = ""
+	}
+    stages {
+        stage('Copy and unzip artifacts') {
+            steps {
+				powershell '''Remove-Item -Recurse Mebt'''
+				powershell '''Remove-Item Mebt_*_Debug.zip'''
+				powershell '''Remove-Item Bauapp-*'''
+                copyArtifacts filter: 'MobileServer\\artifacts\\Mebt_*_Debug.zip', fingerprintArtifacts: true, flatten: true, 
+                    projectName: 'mebo/s53', selector: latestSavedBuild()
+                powershell '''# hide progress bar, makes extract run faster
+                                $ProgressPreference="SilentlyContinue"
+                                Expand-Archive Mebt_*_Debug.zip Mebt -force'''
+            }
+        }
+        stage('Checkout') {
+			steps {
+				dir('repo') {
+					script {
+						result = checkout(scm)
+						COMMITID = "${result.GIT_COMMIT.take(7)}"
+					}
+				}
+			}
+		}
+        stage('Build') {
+            steps {
+				dir('repo') {
+					script {
+						version = powershell(returnStdout: true, script: '.\\getversion.ps1')
+						version = "${version.trim()}"
+						VER = "${version}.${COMMITID}"
+						currentBuild.description = "Hemir: $VER"
+					}
+                    powershell """.\\solution\\sql\\create_minimaldata.ps1 """
+					bat """
+						rem -- compile --
+						del *.dpkg /q
+						del *.mes /q
+						..\\mebt\\mebt compile .\\solution Hemir-${VER}.mes
+						if %errorlevel% neq 0 exit /b %errorlevel%
+						rem -- copy --
+						copy Hemir-${VER}.mes Hemir-${VER}-w-minimaldata.mes
+						rem -- package --
+						..\\mebt\\mebt package Hemir-${VER}.mes
+						if %errorlevel% neq 0 exit /b %errorlevel%
+						..\\mebt\\mebt package Hemir-${VER}-w-minimaldata.mes .\\minimal_data.sqlite
+						rem if %errorlevel% neq 0 exit /b %errorlevel%
+						"""
+				}
+			}
+		}
+	}
+	post {
+		success {
+			step(onlyIfSuccessful: true, $class: 'ArtifactArchiver', artifacts: 'repo/Hemir-*.dpkg')
+			step(onlyIfSuccessful: true, $class: 'ArtifactArchiver', artifacts: 'repo/*.sqlite')
+		}
+
+		unstable {
+			mail(to: "botond.bakai@mobilengine.com", subject: "${env.JOB_NAME} unstable", body: "${env.JOB_NAME} is unstable: ${env.BUILD_URL}")
+		}
+		failure {
+			mail to: "botond.bakai@mobilengine.com", subject: "${env.JOB_NAME} failed", body: "${env.JOB_NAME} is failed: ${env.BUILD_URL}";
+		}
+	}
+}

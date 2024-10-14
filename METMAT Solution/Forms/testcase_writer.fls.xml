@@ -1,0 +1,554 @@
+<form id="testcase_writer" platforms="web" menuName="Test Case Writer"
+    xmlns="http://schemas.mobilengine.com/fls/v2">
+    <declarations>
+        <let id='stLoggedUserRole' shape='scalar'
+            value='{
+        SELECT
+            U.tester_role
+        FROM
+            tester U
+        WHERE
+            U.tester_email = sysp.user
+        }' />
+        <let id="iFinishedStatusEdit" shape="scalar" value="{0}" />
+        <let id="bNewTestCaseAdded" shape="scalar" value="{false}" />
+        <let id="iNewTestCaseAdded" shape="scalar" value="{0}" />
+        <let id="bNewLabelAdded" shape="scalar" value="{false}" />
+        <let id="iLabelEditedRows" shape="scalar" value="{0}" />
+        <let id="adnlb" shape="scalar" value="{false}" />
+        <let id="unfinishedCategoryCount" shape="scalar" value="{loadNewerFromServer:SELECT COUNT(tcc.category) FROM test_to_be_write_category tcc WHERE NOT(tcc.finished = 1)}" />
+        <let id="saveEdit" shape="scalar" value="{false}" />
+    </declarations>
+    <if id="adminPanel" cond='{stLoggedUserRole == "Admin"}'>
+        <hbox style="{styles.hbox100w}">
+            <combinedbutton text="Add new category">
+                <addbutton
+                    records='{SELECT "" category, 0 planned_count , 0 finished, 0 closedByTesters, "" testerWhoClosed, true new}'
+                    table='tcCat' />
+                <actionbutton>
+                    <set value="{true}" target="bNewTestCaseAdded" />
+                    <set value="{iNewTestCaseAdded+1}" target="iNewTestCaseAdded" />
+                </actionbutton>
+            </combinedbutton>
+            <if cond="{bNewTestCaseAdded and iNewTestCaseAdded > 0}">
+                <combinedbutton text="Save created category">
+                    <submitbutton closeForm="{false}"/>
+                    <actionbutton>
+                        <set value="{false}" target="bNewTestCaseAdded" />
+                        <set value="{0}" target="iNewTestCaseAdded" />
+                    </actionbutton>
+                </combinedbutton>
+            </if>
+            <if cond="{iFinishedStatusEdit>0}">
+                <combinedbutton text="Save changes">
+                    <submitbutton closeForm="{false}"></submitbutton>
+                    <actionbutton>
+                        <set value="{0}" target="iFinishedStatusEdit" />
+                    </actionbutton>
+                </combinedbutton>
+            </if>
+            <if cond="{unfinishedCategoryCount=0}">
+                <submitbutton text="Save created tests to database" id="sbSaveToDb"></submitbutton>
+            </if>
+        </hbox>
+        <table id="tcCat" record="tcCat" style="{styles.fullPageTable}"
+            recordset="{loadNewerFromServer:SELECT tcc.category, tcc.planned_count, tcc.finished, tcc.closedByTesters, tcc.testerWhoClosed, false new FROM test_to_be_write_category tcc}">
+            <header>
+                <row>
+                    <cell>
+                        <textview text="Category" />
+                    </cell>
+                    <cell>
+                        <textview text="Planned Test Count" />
+                    </cell>
+                    <cell>
+                        <textview text="Current Test Count" />
+                    </cell>
+                    <cell>
+                        <textview text="Finished" />
+                    </cell>
+                    <cell>
+                        <textview text="InProgress" />
+                    </cell>
+                    <cell>
+                        <textview text="Edit" />
+                    </cell>
+                </row>
+            </header>
+            <row>
+                <declarations>
+                    <let id="testCount" shape="scalar"
+                        value="{loadNewerFromServer:SELECT Count(tcd.id) FROM test_to_be_write_done tcd WHERE tcd.category = tcCat.category}" />
+                    <let id="progress" shape="scalar" value='{tcCat.finished}' />
+                    <let id="isNew" shape="scalar" value='{tcCat.new}' />
+                    <let id="edited" shape="scalar" value="{false}" />
+                    <let id="editedptc" shape="scalar" value="{false}" />
+                    <let id="toDelete" shape="scalar" value="{false}" />
+                    <let id="toReopen" shape="scalar" value="{false}" />
+                    <let id="inProgressTcCount" shape="scalar" value='{SELECT Count(tcd.id) FROM test_to_be_write_done tcd WHERE tcd.category = tcCat.category AND NOT (tcd.status = "Done")}' />
+                </declarations>
+                <cell>
+                    <if cond="{tcCat.new}">
+                        <textbox id="categoryNew">
+                            <validation>
+                                <validator cond='{text != ""}'
+                                    message='This field is required.' />
+                            </validation>
+                        </textbox>
+                    </if>
+                    <if cond="{not tcCat.new}">
+                        <textview id="category" text="{tcCat.category}" />
+                    </if>
+
+                </cell>
+                <cell>
+                    <if cond="{tcCat.new}">
+                        <numberbox id="plannedNew" number="{0}">
+                            <validation>
+                                <validator cond='{number > 0}'
+                                    message='This field is required.' />
+                            </validation>
+                        </numberbox>
+                    </if>
+                    <if cond="{not tcCat.new}">
+                        <if cond="{editedptc}">
+                            <numberbox id="editedptcount" number="{tcCat.planned_count}" />         
+                        </if>
+                        <if cond="{not editedptc}">
+                            <textview text="{toString(tcCat.planned_count)}" />      
+                        </if>
+                    </if>
+                </cell>
+                <cell>
+                    <textview text="{toString(testCount)}" />
+                </cell>
+                <cell>
+                    <if cond="{tcCat.finished == 0 AND tcCat.closedByTesters == 0}">
+                        <textview text="Not yet" />
+                    </if>
+                    <if cond="{tcCat.finished == 0 AND tcCat.closedByTesters == 1}">
+                        <textview text='{"Closed by " || tcCat.testerWhoClosed}' />
+                    </if>
+                    <if cond="{tcCat.finished == 1}">
+                        <textview text="Finished" />
+                    </if>
+                </cell>
+                <cell>
+                    <textview text="{tostring(inProgressTcCount)}" />
+                </cell>
+                <cell>
+                    <if cond="{tcCat.new}">
+                        <combinedbutton text="Undo">
+                            <actionbutton>
+                                <set value="{iNewTestCaseAdded-1}" target="iNewTestCaseAdded" />
+                            </actionbutton>
+                            <removebutton />
+                        </combinedbutton>
+                    </if>
+                    <if cond="{not tcCat.new}">
+                        <hbox style="{styles.hbox100w}">
+                            <if cond="{progress = 0}">
+                                <hbox style="{styles.hbox100w}">
+                                    <if cond="{not editedptc}">
+                                        <combinedbutton text="Edit planned test count">
+                                            <actionbutton>
+                                                <set value="{true}" target="editedptc" />
+                                                <set value="{iFinishedStatusEdit+1}" target="iFinishedStatusEdit" />
+                                            </actionbutton>
+                                        </combinedbutton>
+                                    </if>
+                                    <combinedbutton text="Finish">
+                                        <actionbutton>
+                                            <set value="{iFinishedStatusEdit+1}" target="iFinishedStatusEdit" />
+                                            <set value="{1}" target="progress" />
+                                            <set value="{true}" target="edited" />
+                                        </actionbutton>
+                                    </combinedbutton>
+                                    <if cond="{tcCat.closedByTesters == 1}">
+                                        <if cond="{not toReopen}">
+                                            <combinedbutton text="Reopen category ">
+                                                <actionbutton>
+                                                    <set value="{iFinishedStatusEdit+1}" target="iFinishedStatusEdit" />
+                                                    <set value="{true}" target="edited" />
+                                                    <set value="{true}" target="toReopen" />
+                                                </actionbutton>
+                                            </combinedbutton>
+                                        </if>
+                                        <if cond="{toReopen}">
+                                            <combinedbutton text="Undo reopen">
+                                                <actionbutton>
+                                                    <set value="{iFinishedStatusEdit-1}" target="iFinishedStatusEdit" />
+                                                    <set value="{false}" target="edited" />
+                                                    <set value="{false}" target="toReopen" />
+                                                </actionbutton>
+                                            </combinedbutton>
+                                        </if>
+                                    </if>
+                                </hbox>
+                            </if>
+
+                            <if cond="{progress = 1}">
+                                <combinedbutton text="Resume in progess">
+                                    <actionbutton>
+                                        <set value="{iFinishedStatusEdit+1}" target="iFinishedStatusEdit" />
+                                        <set value="{0}" target="progress" />
+                                        <set value="{true}" target="edited" />
+                                    </actionbutton>
+                                </combinedbutton>
+                            </if>
+                            <if cond="{not toDelete}">
+                                <combinedbutton text="Delete">
+                                    <actionbutton>
+                                        <set value="{iFinishedStatusEdit+1}" target="iFinishedStatusEdit" />
+                                        <set value="{true}" target="edited" />
+                                        <set value="{true}" target="toDelete" />
+                                        <set value="{false}" target="toReopen" />
+                                    </actionbutton>
+                                </combinedbutton>
+                            </if>
+                            <if cond="{toDelete}">
+                                <combinedbutton text="Undo delete">
+                                    <actionbutton>
+                                        <set value="{iFinishedStatusEdit-1}" target="iFinishedStatusEdit" />
+                                        <set value="{false}" target="edited" />
+                                        <set value="{false}" target="toDelete" />
+                                    </actionbutton>
+                                </combinedbutton>
+                            </if>
+                        </hbox>
+                    </if>
+                </cell>
+            </row>
+        </table>
+    </if>
+    <!-- New Label add to Category-->
+    <hbox style="{styles.hbox100w}">
+        <dropdown
+            style="{styles.dropdownNoraml}"
+            label="Please select a category"
+            id='drDoneTests'
+            keyMap="{category}"
+            textMap="{category}"
+            selectedKey="{loadNewerFromServer:SELECT tcc.category FROM test_to_be_write_category tcc LIMIT 1}"
+            choices='{loadNewerFromServer:SELECT tcc.category FROM test_to_be_write_category tcc}'>
+            <validation>
+                <validator
+                    cond='{selectedKey IS NOT NULL OR ((SELECT COUNT(tcc.category) FROM test_to_be_write_category tcc) == 0)}'
+                    message="You have to choose a category"></validator>
+            </validation>
+        </dropdown>
+    </hbox>
+
+    <if cond='{not adnlb}'>
+        <declarations>
+            <let id="categoryClosedStatusTester" shape="scalar"
+                value='{loadNewerFromServer:SELECT tcd.closedByTesters FROM test_to_be_write_category tcd WHERE tcd.category = drDoneTests.selectedKey}' />
+            <let id="categoryClosedStatusFinished" shape="scalar"
+                value='{loadNewerFromServer:SELECT tcd.finished FROM test_to_be_write_category tcd WHERE tcd.category = drDoneTests.selectedKey}' />
+        </declarations>
+        <if cond="{categoryClosedStatusFinished == 1 OR categoryClosedStatusTester == 1}">
+            <textview text="This category was closed" />
+        </if>
+        <if cond="{categoryClosedStatusFinished == 0 AND categoryClosedStatusTester == 0}">
+            <hbox style="{styles.hbox100w}">
+                <combinedbutton id='assignBtn' text='Add new Label'>
+                    <actionbutton>
+                        <set value='{true}' target='adnlb' />
+                        <set value="{true}" target="bNewLabelAdded" />
+                        <set
+                            value='{SELECT "" id, "" label, "" type, "" location,"Not yet started" status WHERE false}'
+                            target='tbNewLb.recordset' />
+                    </actionbutton>
+                </combinedbutton>
+                <submitbutton id="sbCloseCategory" text="Close this category, it's done"
+                    closeForm="{false}">
+                </submitbutton>
+                <if cond="{iLabelEditedRows>0}">
+                    <combinedbutton 
+                    text="Save edited rows"
+                    id="sbSaveEditedLabels">
+                        <submitbutton closeForm="{false}"/>
+                        <actionbutton>
+                            <set value="{0}" target="iLabelEditedRows" />
+                            <set value="{true}" target="saveEdit" />
+                        </actionbutton>
+                    </combinedbutton>
+                    
+                </if>
+            </hbox>
+        </if>
+    </if>
+    <if cond='{adnlb}'>
+        <combinedbutton id="addTcBtn" text="Save created label">
+            <submitbutton closeForm="{false}"></submitbutton>
+            <actionbutton>
+                <set value='{false}' target='adnlb' />
+                <set value="{false}" target="bNewLabelAdded" />
+            </actionbutton>
+        </combinedbutton>
+        <!-- Add test to Tests list-->
+        <table id='tbNewLb' record='nl' style="{styles.fullPageTable}" recordset='{select "" id, "" label, "" type, "" location, "Not yet started" status}'>
+            <header>
+                <row>
+                    <cell>
+                        <textview text='ID' />
+                    </cell>
+                    <cell>
+                        <textview text='Label' />
+                    </cell>
+                    <cell>
+                        <textview text="Status" />
+                    </cell>
+                    <cell>
+                        <textview text="Type" />
+                    </cell>
+                    <cell>
+                        <textview text="Platform" />
+                    </cell>
+                    <cell>
+                        <textview text="Location" />
+                    </cell>
+                    <cell>
+                        <textview text="Tags" />
+                    </cell>
+                    <cell>
+                        <textview text="Note" />
+                    </cell>
+                    <cell>
+                        <textview />
+                    </cell>
+                </row>
+            </header>
+            <row>
+                <cell>
+                    <textbox id='add_tcs_id' />
+                </cell>
+                <cell>
+                    <textbox id='add_tcs_lb' />
+                </cell>
+                <cell>
+                    <dropdown id='add_tcs_status'
+                        keyMap="{v}"
+                        textMap="{v}"
+                        selectedKey="{nl.status}"
+                        choices='{["InProgress", "Done", "Not yet started"]}'>
+                    </dropdown>
+                </cell>
+                <cell>
+                    <dropdown id="add_tcs_ty" keyMap="{v}" textMap="{v}"
+                        choices='{["Automated","Manual"]}'>
+                        <validation>
+                            <validator cond="{selectedKey IS NOT NULL}"
+                                message="You have to choose type"></validator>
+                        </validation>
+                    </dropdown>
+                </cell>
+                <cell>
+                    <dropdown id="add_tcs_platform" keyMap="{v}" textMap="{v}"
+                        choices='{["Android", "IOS", "BO", "Wef"]}'>
+                        <validation>
+                            <validator cond="{selectedKey IS NOT NULL}"
+                                message="You have to choose type"></validator>
+                        </validation>
+                    </dropdown>
+                </cell>
+                <cell>
+                    <textbox id='add_tcs_lc' />
+                </cell>
+                <cell>
+                    <tags id="add_tcs_tags" selectedTags="{SELECT t.tag v FROM test_to_be_write_tags t Where false}" allowNewTag="{true}" availableTags="{SELECT DISTINCT v.tag v FROM test_case_tag v UNION SELECT DISTINCT t.tag v FROM test_to_be_write_tags t}"/>
+                </cell>
+                <cell>
+                    <textbox id='add_tcs_note' />
+                </cell>
+                <cell>
+                    <removebutton text='Undo' />
+                </cell>
+            </row>
+        </table>
+        <addbutton records='{select "" id, "" label, "" type, "" location, "Not yet started" status}'
+            table='tbNewLb'
+            text="Add" />
+        <block></block>
+    </if>
+    <!-- Created Tests List-->
+    
+    <table id="tcDone" record="tcDone" style="{styles.fullPageTable}"
+        recordset="{loadNewerFromServer:SELECT tcwd.category, tcwd.id, tcwd.label, tcwd.type, tcwd.status, tcwd.creator, tcwd.location, tcwd.note, tcwd.platform FROM test_to_be_write_done tcwd WHERE tcwd.category = drDoneTests.selectedKey}"
+        recordLocal="{SELECT tcDone.category, tcDone.id, editedLabel.text label, editedType.selectedKey type, editedStatus.selectedKey status, tcDone.creator, editedLocation.text location, editedNote.text note, editedPlatform.selectedKey platform}"
+        >
+        <header>
+            <row>
+                <cell>
+                    <textview text="ID" />
+                </cell>
+                <cell>
+                    <textview text="Label" />
+                </cell>
+                <cell>
+                    <textview text="Status" />
+                </cell>
+                <cell>
+                    <textview text="Type" />
+                </cell>
+                <cell>
+                    <textview text="Platform" />
+                </cell>
+                <cell>
+                    <textview text="Creator" />
+                </cell>
+                <cell>
+                    <textview text="Location" />
+                </cell>
+                <cell>
+                    <textview text="Tags" />
+                </cell>
+                <cell>
+                    <textview text="Ticket" />
+                </cell>
+                <cell>
+                    <textview text="Note" />
+                </cell>
+                <cell>
+                    <textview text="Edit" />
+                </cell>
+            </row>
+        </header>
+        <row>
+            <declarations>
+                <let id="edit" shape="scalar" value="{false}"  />
+                <let id="edited" shape="scalar" value="{false}"/>
+                <let id="delete" shape="scalar" value="{false}"/>
+                <let id="tags" shape="table" value="{loadNewerFromServer:Select t.tag FROM test_to_be_write_tags t WHERE tcDone.id = t.id}" />
+            </declarations>
+            <cell>
+                <if cond="{edited}">
+                    <textbox id="editedId" text="{tcDone.id}"/>
+                </if>
+                <if cond="{not edited}">
+                    <textview id='tcDoneId' text="{tcDone.id}" />
+                </if>
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <textbox id="editedLabel" text="{tcDone.label}"/>
+                </if>
+                <if cond="{not edited}">
+                    <textview text="{tcDone.label}" />
+                </if>
+                
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <dropdown id='editedStatus'
+                        keyMap="{v}"
+                        textMap="{v}"
+                        selectedKey="{tcDone.status}"
+                        choices='{["InProgress", "Done", "Not yet started"]}'>
+                    </dropdown>
+                </if>
+                <if cond="{not edited}">
+                    <textview text="{tcDone.status}" />
+                </if>
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <dropdown id="editedType" keyMap="{v}" textMap="{v}"
+                        choices='{["Automated","Manual"]}'
+                        selectedKey="{tcDone.type}">
+                        <validation>
+                            <validator cond="{selectedKey IS NOT NULL}"
+                                message="You have to choose type"></validator>
+                        </validation>
+                    </dropdown>
+                </if>
+                <if cond="{not edited}">
+                    <textview text="{tcDone.type}" />
+                </if>
+                
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <dropdown id="editedPlatform" keyMap="{v}" textMap="{v}"
+                        choices='{["Android", "IOS", "BO", "Wef"]}'
+                        selectedKey="{tcDone.platform}">
+                        <validation>
+                            <validator cond="{selectedKey IS NOT NULL}"
+                                message="You have to choose type"></validator>
+                        </validation>
+                    </dropdown>
+                </if>
+                <if cond="{not edited}">
+                    <textview text="{tcDone.platform}" />
+                </if>
+            </cell>
+            <cell>
+                <textview text="{tcDone.creator}" />
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <textbox id="editedLocation" text="{tcDone.location}"/>
+                </if>
+                <if cond="{not edited}">
+                    <textview text="{tcDone.location}" />
+                </if>
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <tags id="editedTags" selectedTags="{SELECT t.tag v FROM tags t}" allowNewTag="{true}"  availableTags="{loadNewerFromServer:SELECT DISTINCT v.tag v FROM test_case_tag v UNION SELECT DISTINCT t.tag v FROM test_to_be_write_tags t}"/>
+                </if>
+                <if cond="{not edited}">
+                    <tags selectedTags="{SELECT t.tag v FROM tags t}" availableTags="{SELECT t.tag v FROM tags t}" readonly="{true}"/>
+                </if>
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <repeater id="editTickets" record="t" recordset="{loadNewerFromServer:SELECT t.ticket FROM test_to_be_write_tickets t WHERE t.id = tcDone.id}">
+                        <hbox style="{styles.hbox100w}">
+                            <textbox id="editedTicket" text="{t.ticket}" />
+                            <removebutton text="Remove"/>
+                        </hbox>
+                    </repeater>
+                    <addbutton records='{SELECT "" ticket}' table="editTickets" text="Add new ticket"/>
+                </if>
+                <if cond="{not edited}">
+                    <repeater record="t" recordset="{SELECT t.ticket FROM test_to_be_write_tickets t WHERE t.id = tcDone.id}">
+                        <linkview url="{t.ticket}" text="{t.ticket}" />
+                    </repeater>
+                </if>
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <textbox id="editedNote" text="{tcDone.note}"/>
+                </if>
+                <if cond="{delete}">
+                    <textview text="DELETE" />
+                </if>
+                <if cond="{(not edited) and (not delete)}">
+                    <textview text="{tcDone.note}" />
+                </if>
+            </cell>
+            <cell>
+                <if cond="{(not edited) and (not delete)}">
+                    <actionbutton text="Edit">
+                        <set value="{true}" target="edited" />
+                        <set value="{iLabelEditedRows+1}" target="iLabelEditedRows" />
+                        <set value="{false}" target="saveEdit" />
+                    </actionbutton>
+                    <actionbutton text="Delete">
+                        <set value="{true}" target="delete" />
+                        <set value="{iLabelEditedRows+1}" target="iLabelEditedRows" />
+                    </actionbutton>
+                </if>
+                <if cond="{edited or delete}">
+                    <actionbutton text="Undo">
+                        <set value="{false}" target="edited" />
+                        <set value="{false}" target="delete" />
+                        <set value="{iLabelEditedRows-1}" target="iLabelEditedRows" />
+                    </actionbutton>
+                </if>
+            </cell>
+        </row>
+    </table>
+
+</form>

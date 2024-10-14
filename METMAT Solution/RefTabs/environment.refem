@@ -1,0 +1,9 @@
+<Reftab Name="environment" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>		
+		<Column Name="env_name" Type="Text" PrimaryKey="true" NotNull="true"/>
+		<Column Name="tester_email" Type="Text"/>
+		<Column Name="tester_name" Type="Text"/>
+		<Column Name="env_detail" Type="Text"/>
+		<Column Name="default_workingday" Type="Float"/>
+	</Columns>
+</Reftab>

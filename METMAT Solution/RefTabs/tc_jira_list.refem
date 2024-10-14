@@ -1,0 +1,9 @@
+<Reftab Name="tc_jira_list" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>
+		<Column Name="jira_id" Type="Text"/>
+		<Column Name="task_id" Type="Text"/>		
+		<Column Name="env_name" Type="Text"/>
+		<Column Name="platform" Type="Text"/>
+		<Column Name="tested_version" Type="Text"/>
+	</Columns>
+</Reftab>

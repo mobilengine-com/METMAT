@@ -1,0 +1,6 @@
+<Reftab Name="environmentValues" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>
+		<Column Name="name" Type="Text" PrimaryKey='true' NotNull='true'/>
+		<Column Name="value" Type="Text" />
+	</Columns>
+</Reftab>

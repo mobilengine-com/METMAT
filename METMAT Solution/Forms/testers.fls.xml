@@ -1,0 +1,83 @@
+<form id='testers' menuName='Testers' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
+    <declarations>
+        <let id='stLoggedUserRole' shape='scalar' value='{
+            SELECT
+                U.tester_role
+            FROM
+                tester U
+            WHERE
+                U.tester_email = sysp.user
+            }'/>
+    </declarations>
+    <chapter title='Testers'>
+        <table id='tester_table' record='r' recordset='{select t.tester_name, t.tester_email, t.tester_role from tester t}'>
+            <header>
+                <row>
+                    <cell>
+                        <textview text='Name'/>
+                    </cell>
+                    <cell>
+                        <textview text='Mail'/>
+                    </cell>
+                    <cell>
+                        <textview text='Role'/>
+                    </cell>
+                    <cell>
+                        <textview text=''/>
+                    </cell>
+                </row>
+            </header>
+            <row>
+            <declarations>
+                <let id="bDelete" shape="scalar" value="{false}" />
+            </declarations>
+                <cell>
+                    <if cond='{not(r.tester_name = "")}'>
+                        <textview text='{r.tester_name}'/>
+                    </if>
+                    <if cond='{r.tester_name = ""}'>
+                        <textbox id='tb_tester_name' text='{r.tester_name}'/>
+                    </if>
+                </cell>
+                <cell>
+                    <if cond='{stLoggedUserRole == "Admin"}'>
+                        <textbox id='tb_tester_email' text='{r.tester_email}'/>
+                    </if>
+                    <if cond='{not (stLoggedUserRole == "Admin")}'>
+                        <textview text="{r.tester_email}"/>
+                    </if>
+                </cell>
+                <cell>
+                    <if cond='{stLoggedUserRole == "Admin"}'>
+                        <dropdown id='drRole' 
+                        keyMap="{v}" 
+                        textMap="{v}"
+                        selectedKey="{r.tester_role}"
+                        choices='{["Tester", "Admin"]}'>
+                        </dropdown>
+                    </if>
+                    <if cond='{not (stLoggedUserRole == "Admin")}'>
+                        <textview text="{r.tester_role}"/>
+                    </if>
+                </cell>
+                <cell>
+                    <if cond='{stLoggedUserRole == "Admin"}'>
+                        <if cond="{bDelete}">
+                            <actionbutton text="Undo">
+                                <set value="{false}" target="bDelete" />
+                            </actionbutton>
+                        </if>
+                        <if cond="{not bDelete}">
+                            <actionbutton text="Delete">
+                                <set value="{true}" target="bDelete" />
+                            </actionbutton>
+                        </if>
+                    </if>
+                </cell>
+            </row>
+        </table>
+        <if cond='{stLoggedUserRole == "Admin"}'>
+            <addbutton records='{select "" tester_name, "" tester_email, "" tester_role}' table='tester_table' text='Add tester'></addbutton>
+        </if>
+    </chapter>
+</form>

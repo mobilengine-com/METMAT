@@ -1,0 +1,6 @@
+server program assignEnvTester for form envtesterassign
+using reftab environment;
+
+{			
+	db.environment.Insert({env_name: form.addenv.env_name.text, tester_email: form.addenv.env_tester.selectedKey, tester_name: form.addenv.env_tester.selectedText, env_detail: form.addenv.env_detail.text});
+}

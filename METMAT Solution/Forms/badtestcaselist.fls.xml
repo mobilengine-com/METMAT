@@ -1,0 +1,35 @@
+<form id='badtestcaselist' menuName='Bad test cases' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
+
+	<table id='badtclist' record='badtc' recordset='{select tsk.task_id, tsk.result, tsk.version, tsk.note from task tsk where tsk.result="bad test case" group by tsk.task_id}'>
+			<header>
+				<row>
+					<cell>
+						<textview text='Task Id'/>
+					</cell>
+					<cell>
+						<textview text='Result'/>
+					</cell>
+					<cell>
+						<textview text='Tested version'/>
+					</cell>
+					<cell>
+						<textview text='Note'/>
+					</cell>					
+				</row>           
+			</header>
+			<row>				
+				<cell>
+					<textview id='task_id' text='{badtc.task_id}'/>
+				</cell>
+				<cell>
+					<textview id='result' text='{badtc.result}'/>
+				</cell>
+				<cell>
+					<textview id='testedVersion' text='{badtc.version}'/>
+				</cell>
+				<cell>
+					<textview id='note' text='{badtc.note}'/>
+				</cell>								
+			</row>
+		</table>
+</form>

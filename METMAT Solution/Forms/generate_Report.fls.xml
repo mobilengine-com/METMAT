@@ -1,0 +1,14 @@
+<form id="generate_Report"  menuName="Generate Report"  title='Generate Report'  platforms="ios web" xmlns="http://schemas.mobilengine.com/fls/v2">
+	  <textbox id="name" label="Name" >
+		<validation>
+			<validator cond='{length(name.text) > 0}' message='Give a name'/>
+		  </validation>
+	  </textbox>
+	  
+	  <datepicker id="filterdate" label="Date setting in report" dateFormat='(dtf yyyy "-" MM "-" dd)' >
+		<validation>
+			<validator cond='{filterdate.date is not NULL}' message='Give a date'/>
+		  </validation>
+		</datepicker>
+	  
+</form>

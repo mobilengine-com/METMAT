@@ -1,0 +1,10 @@
+<Reftab Name="test_to_be_write_category" Push="true" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>
+        <Column Name="category" Type="Text" />
+        <Column Name="planned_count" Type="Integer" />
+        <Column Name="finished" Type="Integer" />
+        <Column Name="closedByTesters" Type="Integer" InitialValue= "0"/>
+        <Column Name="testerWhoClosed" Type="Text" />
+        <Column Name="result_count" Type="Integer" />
+	</Columns>
+</Reftab>

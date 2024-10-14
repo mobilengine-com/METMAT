@@ -1,0 +1,233 @@
+<form id="testcase_monitor" platforms="web" menuName="Test case monitor"
+    showHeader="false"
+    xmlns="http://schemas.mobilengine.com/fls/v2">
+    <declarations>
+        <let id="iLabelEditedRows" shape="scalar" value="{0}" />
+        <let id="letpage" shape="scalar" value='{0}'/>
+        <let id="tcCount" shape="scalar" value='{loadNewerFromServer:SELECT COUNT(DISTINCT tc.id) FROM test_case tc LEFT JOIN test_case_tag tct ON tc.id = tct.tc_id 
+            WHERE COALESCE(platSc.selectedKey,tc.platform) = tc.platform 
+            AND  tc.id LIKE "%" || COALESCE(idSc.text,"") || "%" 
+            AND tc.desc LIKE "%" || COALESCE(descSc.text,"") || "%" 
+            AND CASE WHEN COALESCE(tagSc.text,"") = "" THEN true ELSE tct.tag LIKE "%" || tagSc.text || "%" END
+            }' />
+       <!-- <let id="searchResult" shape="table" value='{SELECT tc.id, t.tag FROM test_case tc LEFT JOIN test_case_tag t ON tc.id = t.tc_id WHERE 
+            COALESCE(platSc.selectedKey,tc.platform) = tc.platform 
+            AND  tc.id LIKE "%" || COALESCE(idSc.text,"") || "%" 
+            AND tc.desc LIKE "%" || COALESCE(descSc.text,"") || "%"
+        }' />
+         <let id="scTags" shape="table" access="private" value="{SELECT tags.v tag FROM tagsSc.selectedTags tags}" /> --> 
+        
+    </declarations>
+    <hbox style="{styles.SearchBar}">
+        <popup id="addtest" title="Add missing tests" >
+            <hbox style="{styles.SearchBar}">
+                <backbutton/>
+                <submitbutton id="saveMissingTests" text="Save added tests" nextForm="{forms.testcase_monitor}" />
+            </hbox>
+            <table id='tbNewLb' record='nl' style="{styles.fullPageTable}" recordset='{select "" id, "" desc, "" platform, 0 time, "" link}'>
+                <header>
+                    <row>
+                        <cell>
+                            <textview text='ID' />
+                        </cell>
+                        <cell>
+                            <textview text='Description' />
+                        </cell>
+                        <cell>
+                            <textview text="Platform" />
+                        </cell>
+                        <cell>
+                            <textview text="Time" />
+                        </cell>
+                        <cell>
+                            <textview text="Tags" />
+                        </cell>
+                        <cell>
+                            <textview text="Link" />
+                        </cell>
+                    </row>
+                </header>
+                <row>
+                    <cell>
+                        <textbox id='add_tcs_id' />
+                    </cell>
+                    <cell>
+                        <textbox id='add_tcs_dc' />
+                    </cell>
+                    <cell>
+                        <dropdown id='add_tcs_platform'
+                            keyMap="{v}"
+                            textMap="{v}"
+                            choices='{["Android", "IOS", "BO", "Wef", "Android Release", "IOS Release", "BO Release", "Wef Release" ]}'/>
+                    </cell>
+                    <cell>
+                        <numberbox id="add_tcs_time" />
+                    </cell>
+                    <cell>
+                        <tags id="add_tcs_tags" allowNewTag="{true}" availableTags="{SELECT DISTINCT v.tag v FROM test_case_tag v UNION SELECT DISTINCT t.tag v FROM test_to_be_write_tags t}"/>
+                    </cell>
+                    <cell>
+                        <textbox id='add_tcs_link' />
+                    </cell>
+                    <cell> <removebutton text="Undo"/></cell>
+                </row>
+            </table>
+            <addbutton records='{select "" id, "" desc, "" platform, 0 time, "" link}'
+                table='tbNewLb'
+                text="Add" />
+        </popup>
+    </hbox>
+    <hbox style="{styles.SearchBar}">
+        <textview text="ID" />
+        <textview text="Description"/>
+        <textview text="Platform" />
+        <textview text="Tags" />
+    </hbox>
+    <hbox style="{styles.SearchBar}">
+        <textbox id="idSc"/>
+        <textbox id="descSc"/>
+        <dropdown id="platSc" choices='{["Android", "IOS", "BO", "Wef", "Android Release", "IOS Release", "BO Release", "Wef Release" ]}' keyMap="{v}" textMap="{v}"/>
+        <textbox id="tagSc"/>
+        <tags id="tagsSc" availableTags="{SELECT DISTINCT t.tag v FROM test_case_tag t}"/>
+        <if cond="{iLabelEditedRows>0}">
+            <combinedbutton text="Save changes" id="sbsave">
+                <submitbutton closeForm="{false}"/>
+                <actionbutton>
+                    <set value="{0}" target="iLabelEditedRows" />
+                </actionbutton>
+            </combinedbutton>
+        </if>
+    </hbox>
+    <table id="tcTable" record="tcTable" style="{styles.fullPageTable}"
+        recordset='{loadNewerFromServer:SELECT DISTINCT TR.id, TR.desc, TR.platform, TR.time, TR.link, TR.addedDate FROM test_case TR LEFT JOIN test_case_tag tct ON TR.id = tct.tc_id 
+            WHERE   COALESCE(platSc.selectedKey,TR.platform) = TR.platform 
+                    AND  TR.id LIKE "%" || COALESCE(idSc.text,"") || "%" 
+                    AND TR.desc LIKE "%" || COALESCE(descSc.text,"") || "%"
+                    AND CASE WHEN COALESCE(tagSc.text,"") = "" THEN true ELSE tct.tag LIKE "%" || tagSc.text || "%" END
+                    ORDER BY id LIMIT 20 OFFSET letpage*20}'>
+        <header>
+            <row>
+                <cell>
+                    <textview text="ID" />
+                </cell>
+                <cell>
+                    <textview text="Description" />
+                </cell>
+                <cell>
+                    <textview text="Platform" />
+                </cell>
+                <cell>
+                    <textview text="Time" />
+                </cell>
+                <cell>
+                    <textview text="Tags" />
+                </cell>
+                <cell>
+                    <textview text="Link" />
+                </cell>
+                <cell>
+                    <textview text="Added date" />
+                </cell>
+                <cell>
+                    <textview text="Edit" />
+                </cell>
+            </row>
+        </header>
+        <row>
+            <declarations>
+                <let id="edited" shape="scalar" value="{false}" />
+                <let id="tags" shape="table" value="{loadNewerFromServer:Select t.tag FROM test_case_tag t WHERE tcTable.id = t.tc_id}" />
+                <let id="delete" shape="scalar" value="{false}" />
+            </declarations>
+            <cell>
+                <textview id='tcId' text="{tcTable.id}" />
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <textbox id='tcEditedDesc' text="{tcTable.desc}" />
+                </if>
+                <if cond="{not edited}">
+                    <textview id='tcDesc' text="{tcTable.desc}" />
+                </if>
+            </cell>
+            <cell>
+                <textview id='tcPlatform' text="{tcTable.platform}" />
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <numberbox id='nbEditedTime' number="{toInt(tcTable.time)}" />
+                </if>
+                <if cond="{not edited}">
+                    <textview id='tcTime' text="{toString(tcTable.time)}" />
+                </if>
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <tags id="editedTags" selectedTags="{SELECT t.tag v FROM tags t}" allowNewTag="{true}"  availableTags="{SELECT DISTINCT t.tag v FROM test_case_tag t}"/>
+                </if>
+                <if cond="{not edited}">
+                    <tags selectedTags="{SELECT t.tag v FROM tags t}" availableTags="{SELECT t.tag v FROM tags t}" readonly="{true}"/>
+                </if>
+            </cell>
+            <cell>
+                <if cond="{edited}">
+                    <textbox id='tcEditedLink' text="{tcTable.link}" />
+                </if>
+                <if cond="{not edited}">
+                    <linkview id='tcLink' url="{tcTable.link}" text=" Go to test case"/>
+                </if>
+            </cell>
+            <cell>
+                <textview id='tcAdded' text='{formatdtl(tcTable.addedDate,(dtf yyyy"."MM"."dd))}'/>
+            </cell>
+            <cell>
+                <if cond="{not edited}">
+                    <actionbutton text="Edit status">
+                        <set value="{true}" target="edited" />
+                        <set value="{iLabelEditedRows+1}" target="iLabelEditedRows" />
+                    </actionbutton>
+                </if>
+                <if cond="{edited}">
+                    <hbox style="{styles.SearchBar}">
+                        <actionbutton text="Undo">
+                            <set value="{false}" target="edited" />
+                            <set value="{iLabelEditedRows-1}" target="iLabelEditedRows" />
+                            <set value="{false}" target="delete" />
+                        </actionbutton>
+                        <if cond="{not delete}">
+                            <actionbutton text="Delete">
+                                <set value="{true}" target="delete" />
+                            </actionbutton>
+                        </if>
+                        <if cond="{delete}">
+                            <actionbutton text="Undo Delete">
+                                <set value="{false}" target="delete" />
+                            </actionbutton>
+                        </if>
+                    </hbox>
+                </if>
+            </cell>
+        </row>
+    </table>
+    <table record="pageing" recordset='{select "" prev, "" next}'>
+        <row>
+            <cell>
+                <if cond="{letpage>0}">
+                    <actionbutton text="Previous">
+                        <set value="{letpage-1}" target="letpage"/>
+                    </actionbutton>
+                </if>
+            </cell>
+            <cell>
+                <textview text='{toString(letpage)||" / "||toString(tcCount/20)}'/>
+            </cell>
+            <cell>
+                <if cond="{letpage &lt; tcCount/20 }">
+                    <actionbutton text="Next">
+                        <set value="{letpage+1}" target="letpage"/>
+                    </actionbutton>
+                </if>
+            </cell>
+        </row>
+    </table>
+</form>

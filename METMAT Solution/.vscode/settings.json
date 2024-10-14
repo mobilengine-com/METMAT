@@ -1,0 +1,9 @@
+{
+    "mebt.companyId": 109,
+    "mebt.developerPassword": "q1w2e3r4",
+    "mebt.developerUser": "joco",
+    "mebt.rtab.sqlite.path": "s48_sprintRun.xlsx",
+    "mebt.serverUrl": "https://s47-outdoor.mobilengine.com/",
+    "microsoft-sovereign-cloud.customEnvironment": {},
+    "npm.exclude": ""
+}
