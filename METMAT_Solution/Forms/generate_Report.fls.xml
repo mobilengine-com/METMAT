@@ -4,6 +4,12 @@
 			<validator cond='{length(name.text) > 0}' message='Give a name'/>
 		  </validation>
 	  </textbox>
+
+	  <textbox id="to" label="Target email address" >
+		<validation>
+			<validator cond='{length(name.text) > 0}' message='Give a name'/>
+		  </validation>
+	  </textbox>
 	  
 	  <datepicker id="filterdate" label="Date setting in report" dateFormat='(dtf yyyy "-" MM "-" dd)' >
 		<validation>
