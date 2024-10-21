@@ -25,6 +25,10 @@
 		}
 	}
 
+	if(form.wipe_assignement.submitter) {
+		db.task.DeleteMany({saved: 1})
+	}
+
 	if(form.save_tags.submitter) {
 		//var act_env_name = form.selected_tester.CHOICE!!!!!!!!
 		//delete all selected tags from reftable

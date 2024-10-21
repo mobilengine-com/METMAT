@@ -14,8 +14,8 @@
 		<let id="testersCount" shape="scalar" value='{SELECT COUNT(ts.tester_email) FROM tester ts WHERE ts.tester_role = "Tester"}' />
 		<let id='today' shape='scalar' value='{sysp.dtlFormOpen}' />
 		
-		<let id="left_from_today_hour" shape='scalar' value='{SELECT case when toint(gethour(today)) >= 9 THEN 17-(toint(gethour(today))+1) ELSE 8 END}' />
-		<let id="left_from_today_minut" shape="scalar" value='{SELECT case WHEN toint(gethour(today)) >= 9 THEN 60-toint(getminute(today))ELSE 0 END}' />
+		<let id="left_from_today_hour" shape='scalar' value='{SELECT case when toint(gethour(today)) >= 9 THEN (case when toint(gethour(today)) >= 17 THEN 0 ELSE 17-(toint(gethour(today))+1) END) ELSE 8 END}' />
+		<let id="left_from_today_minut" shape="scalar" value='{SELECT case WHEN toint(gethour(today)) >= 9 THEN (case when toint(gethour(today)) >= 17 THEN 0 ELSE 60-toint(getminute(today)) END)ELSE 0 END}' />
 		<let id="remains_from_today_hour" shape="scalar" value='{tofloat(left_from_today_hour)+tofloat(left_from_today_minut)/60}' />
 		
 		<let id='finishYearOfTestRunning' shape='scalar' value='{Select envVal.value From environmentValues envVal Where envVal.name = "finishYear"}'/>
@@ -34,7 +34,7 @@
 		<let id='testCount' shape='scalar' value='{Select COUNT(tk.result) From task tk}'/>
 
 		<let id="finalTesterForTesting" shape="scalar" value="{SELECT COALESCE(dbTesterForTesting, testersCount)}" />
-		<let id='requiredWorkingHours' shape='scalar' value='{SELECT ((remainingTests) * hrAvgTestRuntime)/finalTesterForTesting}'/>
+		<let id='requiredWorkingHours' shape='scalar' value='{SELECT case when remainingTests = 0 THEN tofloat(0) ELSE ((remainingTests) * hrAvgTestRuntime)/finalTesterForTesting END}'/>
 		<let id="corrigated_req_hour" shape="scalar" value='{Select case when requiredWorkingHours-remains_from_today_hour > 0 THEN requiredWorkingHours-remains_from_today_hour ELSE 0 END}' />
 		<let id='roundDay' shape='scalar' value='{Select case when toint((corrigated_req_hour/8)*100)%100 = 0 then corrigated_req_hour/8 else toint(corrigated_req_hour/8)+1 end}'/>
 		<let id='endDate' shape='scalar' value='{Select ADDDAY(sysp.dtlFormOpen, toint(roundDay+holiday+roundDay/5*2))}'/>

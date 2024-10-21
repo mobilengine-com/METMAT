@@ -23,6 +23,7 @@
 			<submitbutton closeForm="{false}"/>
 		</combinedbutton> 
 		<submitbutton id="save_tags" text="Save Tags" closeForm="{false}"></submitbutton>
+		<submitbutton id="wipe_assignement" text="Wipe all assignement" closeForm="{false}"></submitbutton>
 	</hbox>
 	<!--Testcase List-->
 	<if cond='{not (selected_environment.selectedKey = "none")}'>
