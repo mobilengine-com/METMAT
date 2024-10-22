@@ -43,4 +43,47 @@ styles {
 			}
         }
     }
+
+    style sylPopupContentCenter{
+		hbox {
+            sizes = 1, 1
+            borderWidth{ left = 40% right = 50%}
+		}
+        
+	}
+
+    style sylButtonToRight{
+        submitbutton{
+        }
+       
+    }
+
+    style sylOutputRedoPopup{
+		popup{
+			content = sylOutputRedoPopup
+			button {
+				fontColor = FFFFFF
+				fontSize = 12px
+				bold = true
+				backgroundColor = f9360c
+				width = 300px
+				underline = false
+				textAlign = center
+				padding {
+					left = 6px
+					right = 6px
+					top = 8px
+					bottom = 8px
+				}
+			}
+		}
+		
+		frame{ 
+            frameWidth = 720px
+            frameHeight = 250px
+			borderWidth{left = 2px right = 2px top = 2px bottom = 2px}
+            borderColor = 505050		
+        }
+		
+	}
 }

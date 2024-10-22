@@ -23,7 +23,14 @@
 			<submitbutton closeForm="{false}"/>
 		</combinedbutton> 
 		<submitbutton id="save_tags" text="Save Tags" closeForm="{false}"></submitbutton>
-		<submitbutton id="wipe_assignement" text="Wipe all assignement" closeForm="{false}"></submitbutton>
+		<popup title="Wipe all assignement" openMode="dialog" deferred="true" style='{styles.sylOutputRedoPopup}'>
+			<textview text="You sure want to wipe all assignement"/>
+			<hbox style="{styles.sylPopupContentCenter}">
+				<submitbutton id="wipe_assignement" text="Yes" closeForm="{false}" style="{styles.sylButtonToRight}"></submitbutton>
+				<backbutton text="No" ></backbutton>
+			</hbox>
+		</popup>
+		
 	</hbox>
 	<!--Testcase List-->
 	<if cond='{not (selected_environment.selectedKey = "none")}'>

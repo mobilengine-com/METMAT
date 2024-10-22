@@ -8,8 +8,8 @@
 												platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2"
 												dashboard='true'>
 	<declarations>
-		<let id='dbTesterForTesting' shape='scalar' value='{Select toint(envVal.value) From environmentValues envVal Where envVal.name = "CustomTesterCountForTesting"}'/>
-		<let id='dbTesterForWriting' shape='scalar' value='{Select toint(envVal.value) From environmentValues envVal Where envVal.name = "CustomTesterCountForTestWriting"}'/>
+		<let id='dbTesterForTesting' shape='scalar' value='{Select tofloat(envVal.value) From environmentValues envVal Where envVal.name = "CustomTesterCountForTesting"}'/>
+		<let id='dbTesterForWriting' shape='scalar' value='{Select tofloat(envVal.value) From environmentValues envVal Where envVal.name = "CustomTesterCountForTestWriting"}'/>
 
 		<let id="testersCount" shape="scalar" value='{SELECT COUNT(ts.tester_email) FROM tester ts WHERE ts.tester_role = "Tester"}' />
 		<let id='today' shape='scalar' value='{sysp.dtlFormOpen}' />

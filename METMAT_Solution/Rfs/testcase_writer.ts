@@ -151,6 +151,9 @@
            
         }
         Log(counter+" Manual test added to database")
+        db.test_to_be_write_category.DeleteMany({})
+        db.test_to_be_write_done.DeleteMany({})
+        Log("Delete all temporally test data")
     }
     
 }
