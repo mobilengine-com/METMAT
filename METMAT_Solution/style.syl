@@ -42,6 +42,11 @@ styles {
 				width = 150px
 			}
         }
+        datepicker{
+            control{
+				width = 150px
+			}
+        }
     }
 
     style sylPopupContentCenter{

@@ -1,0 +1,64 @@
+<form id='holidaysDayOff' menuName='Holidays and day off' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
+	<declarations>
+        <let id='stLoggedUserRole' shape='scalar'
+        value='{
+    SELECT
+        U.tester_role
+    FROM
+        tester U
+    WHERE
+        U.tester_email = sysp.user
+    }' />
+    <let id="eventsAll" shape="table" value='{loadNewerFromServer:SELECT h.id, h.categoryId, h.dateFrom, h.dateTo, h.user label from holidays h WHERE CASE
+    WHEN stLoggedUserRole == "Admin" THEN true
+    WHEN h.user == sysp.user THEN true
+    WHEN h.user == "ALL" THEN true
+    ELSE false END}' />
+    </declarations>
+    
+    <table id="holitable" record="holi" recordset="{SELECT h.dateFrom, h.dateTo, h.label from eventsAll h}">
+		<header>
+			<row>
+				<cell> <textview text="Date from" /> </cell>
+				<cell> <textview text="Date to" /> </cell>
+				<cell> <textview text="User" /> </cell>
+			</row>
+		</header>
+		<row>
+			<cell> <textview text="{toString(holi.dateFrom)}" /> </cell>
+			<cell> <textview text="{toString(holi.dateTo)}" /> </cell>
+			<cell> <textview text="{holi.label}" /> </cell>
+		</row>
+	</table>
+	<datepicker label="Select date" id='calPage1' style="{styles.dropdownNoraml}" />
+	<calendar id="cal" showDate="{calPage1.date}" allowNew="{true}" allowSelection="{true}" mode="month" 
+    events='{loadNewerFromServer:SELECT h.id, h.categoryId, h.dateFrom, h.dateTo, h.label from eventsAll h}'
+	categories='{TABLE id, backgroundColor, borderColor, textColor, selectedBackgroundColor, selectedBorderColor, selectedTextColor(
+			"basic", "001eff", "ff0000", "fff200", "fff200", "00f2ff", "5900ff")}'
+	/>
+	<hbox style="{styles.hbox100w}">
+        <declarations>
+            <let id="newEvent" shape="table" value='{SELECT ToStringN(NEWGUID()) id, "basic" categoryId, cal.newEvent.dateFrom , cal.newEvent.dateTo, userName user}' />
+            <let id="selectedEvent" shape="scalar" value='{SELECT cal.selectedEvent.id}' />
+            <let id="userName" shape="scalar" value='{SELECT CASE WHEN stLoggedUserRole == "Admin" THEN (CASE WHEN adminPanel.UserType.selectedKey == "Custom" THEN adminPanel.CustomUser.CustomUserName.selectedKey ELSE "ALL" END) ELSE sysp.user END}' />
+        </declarations>
+        <submitbutton id="Delete" closeForm="{false}" text="Delete selected"/>
+		<submitbutton id="Add" closeForm="{false}" text="Add selected date"/>
+        <if id="adminPanel" cond='{stLoggedUserRole == "Admin"}'>
+            <hbox>
+                <dropdown id="UserType" keyMap="{v}" textMap="{v}"
+                choices='{["Custom","All"]}'
+                selectedKey='{"All"}'>
+                <validation>
+                    <validator cond="{selectedKey IS NOT NULL}"
+                        message="You have to choose type"></validator>
+                </validation>
+            </dropdown>
+                <if id="CustomUser" cond='{UserType.selectedKey == "Custom"}'>
+                    <dropdown id="CustomUserName" keyMap="{tester_email}" textMap="{tester_email}" choices='{SELECT U.tester_email FROM tester U}'/>
+                </if>
+            </hbox>
+        </if>
+	</hbox>
+	
+</form>

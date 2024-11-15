@@ -10,7 +10,7 @@
             }'/>
     </declarations>
     <chapter title='Testers'>
-        <table id='tester_table' record='r' recordset='{select t.tester_name, t.tester_email, t.tester_role from tester t}'>
+        <table id='tester_table' record='r' recordset='{select t.tester_name, t.tester_email, t.tester_role, t.work_type, t.tester_active, t.participation from tester t}'>
             <header>
                 <row>
                     <cell>
@@ -21,6 +21,15 @@
                     </cell>
                     <cell>
                         <textview text='Role'/>
+                    </cell>
+                    <cell>
+                        <textview text='Work type'/>
+                    </cell>
+                    <cell>
+                        <textview text='State'/>
+                    </cell>
+                    <cell>
+                        <textview text='Participation'/>
                     </cell>
                     <cell>
                         <textview text=''/>
@@ -62,6 +71,40 @@
                 </cell>
                 <cell>
                     <if cond='{stLoggedUserRole == "Admin"}'>
+                        <dropdown id='drWork' 
+                        keyMap="{v}" 
+                        textMap="{v}"
+                        selectedKey="{r.work_type}"
+                        choices='{["Test writing", "Testing", "Spectator"]}'>
+                        </dropdown>
+                    </if>
+                    <if cond='{not (stLoggedUserRole == "Admin")}'>
+                        <textview text="{r.work_type}"/>
+                    </if>
+                </cell>
+                <cell>
+                    <if cond='{stLoggedUserRole == "Admin"}'>
+                        <dropdown id='drActive' 
+                        keyMap="{v}" 
+                        textMap="{v}"
+                        selectedKey="{r.tester_active}"
+                        choices='{["Active", "Inactive"]}'>
+                        </dropdown>
+                    </if>
+                    <if cond='{not (stLoggedUserRole == "Admin")}'>
+                        <textview text="{r.work_type}"/>
+                    </if>
+                </cell>
+                <cell>
+                    <if cond='{stLoggedUserRole == "Admin"}'>
+                        <numberbox id="part" float="true" number="{tofloat(r.participation)}" />
+                    </if>
+                    <if cond='{not (stLoggedUserRole == "Admin")}'>
+                        <textview text="{toString(r.participation)}"/>
+                    </if>
+                </cell>
+                <cell>
+                    <if cond='{stLoggedUserRole == "Admin"}'>
                         <if cond="{bDelete}">
                             <actionbutton text="Undo">
                                 <set value="{false}" target="bDelete" />
@@ -77,7 +120,7 @@
             </row>
         </table>
         <if cond='{stLoggedUserRole == "Admin"}'>
-            <addbutton records='{select "" tester_name, "" tester_email, "" tester_role}' table='tester_table' text='Add tester'></addbutton>
+            <addbutton records='{select "" tester_name, "" tester_email, "" tester_role, "Testing" work_type, "Inactive" tester_active, 1 participation}' table='tester_table' text='Add tester'></addbutton>
         </if>
     </chapter>
 </form>

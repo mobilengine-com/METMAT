@@ -3,7 +3,8 @@
                 "inlineSourceMap": true,
                 "downlevelIteration": true,
                 "module": "amd",
-                "target": "es5",    
+                "target": "es5",
+                "removeComments": true,
                 "lib": [
                     "es2022"
                 ]

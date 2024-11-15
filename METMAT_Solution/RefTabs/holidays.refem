@@ -1,0 +1,9 @@
+<Reftab Name="holidays" xmlns="http://schemas.mobilengine.com/reftab/v1" Push="true" >
+	<Columns>		
+		<Column Name="id" Type="Text"/>
+		<Column Name="dateFrom" Type="Date"/>
+		<Column Name="dateTo" Type="Date"/>
+		<Column Name="user" Type="Text"/>
+		<Column Name="categoryId" Type="Text"/>
+	</Columns>
+</Reftab>

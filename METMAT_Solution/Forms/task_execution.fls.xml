@@ -43,10 +43,9 @@
 	<!-- <if cond='{params.platformID is NULL or params.platformID=""}'> -->
 	<chapter title="Select platform">
 		<segmentedbutton id='platformID' 
-			keyMap="{v}" 
-			textMap="{v}"
-			selectedKey='{params.platformID}' 
-			choices='{["Android", "Android Release" , "IOS","IOS Release", "BO", "BO Release", "Wef", "Wef Release"]}'>
+		choices='{SELECT DISTINCT tsk.platformID from task tsk left join environment env ON tsk.env_name = env.env_name where env.tester_email = sysp.user }'
+			keyMap="{platformID}" 
+			textMap="{platformID}">
 		</segmentedbutton>
 		<!-- <textview text="{platformID.selectedKey}" /> -->
 		<!-- <textview text="{params.platformID}" /> -->
@@ -215,7 +214,7 @@
 							
 						<numberbox id="tcTimeNeed" float="true"> 
 							<validation>
-								<validator cond='{tcTimeNeed.number is not NULL AND tcTimeNeed.number > 0}' message='Give the time needed for run the TC'/>
+								<validator cond='{case when (dd_result.selectedKey = "success") then tcTimeNeed.number is not NULL AND tcTimeNeed.number > 0 else true END}' message='Give the time needed for run the TC'/>
 							</validation>
 							<!--<declarations><let id="fChanged" shape="scalar" value="{number IS NOT env_table_t_r.note}"/></declarations>-->
 						</numberbox>

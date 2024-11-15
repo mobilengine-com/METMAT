@@ -130,23 +130,26 @@
         for(var testCase of newTestCases){
             counter=counter+1;
             Log(testCase.id)
-
-            db.test_case.Insert({
-                id: testCase.id,
-                desc: testCase.label,
-                platform: testCase.platform,
-                link: testCase.location,
-                time: 0,
-                addedDate: dtl.Now().DtlToDtdb()
-            })
-            var tcTags = db.test_to_be_write_tags.Read({id:testCase.id})
-            for(var tag of tcTags){
-               
-                db.test_case_tag.Insert({
-                    tc_id: testCase.id,
-                    tag: tag.tag,
-                    platform: testCase.platform
+            try{
+                db.test_case.Insert({
+                    id: testCase.id,
+                    desc: testCase.label,
+                    platform: testCase.platform,
+                    link: testCase.location,
+                    time: 0,
+                    addedDate: dtl.Now().DtlToDtdb()
                 })
+                var tcTags = db.test_to_be_write_tags.Read({id:testCase.id})
+                for(var tag of tcTags){
+                   
+                    db.test_case_tag.Insert({
+                        tc_id: testCase.id,
+                        tag: tag.tag,
+                        platform: testCase.platform
+                    })
+                }
+            }catch{
+                Log("Failed to add: "+ testCase.id)
             }
            
         }

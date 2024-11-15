@@ -8,8 +8,8 @@
 												platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2"
 												dashboard='true'>
 	<declarations>
-		<let id='dbTesterForTesting' shape='scalar' value='{Select tofloat(envVal.value) From environmentValues envVal Where envVal.name = "CustomTesterCountForTesting"}'/>
-		<let id='dbTesterForWriting' shape='scalar' value='{Select tofloat(envVal.value) From environmentValues envVal Where envVal.name = "CustomTesterCountForTestWriting"}'/>
+		<let id='dbTesterForTesting' shape='scalar' value='{Select Sum(t.participation) From tester t Where t.work_type = "Testing" AND t.tester_active = "Active"}'/>
+		<let id='dbTesterForWriting' shape='scalar' value='{Select Sum(t.participation) From tester t Where t.work_type = "Test writing" AND t.tester_active = "Active"}'/>
 
 		<let id="testersCount" shape="scalar" value='{SELECT COUNT(ts.tester_email) FROM tester ts WHERE ts.tester_role = "Tester"}' />
 		<let id='today' shape='scalar' value='{sysp.dtlFormOpen}' />
@@ -26,14 +26,16 @@
 		<let id='finishMonthOfTestWriting' shape='scalar' value='{Select envVal.value From environmentValues envVal Where envVal.name = "finishMonthOfTestWriting"}'/>
 		<let id='finishDayOfTestWriting' shape='scalar' value='{Select envVal.value From environmentValues envVal Where envVal.name = "finishDayOfTestWriting"}'/>
 
-		<let id='holiday' shape='scalar' value='{Select toint(envVal.value) From environmentValues envVal Where envVal.name = "holidays"}'/>
+		<let id='holidayAdvancedInPrediod' shape='table' value='{Select h.id, h.dateFrom, h.user From holidays h Where ADDDAY(sysp.dtlFormOpen, toint(weekendsToWrite+daysToWrite)) >= h.dateFrom AND h.dateFrom >= sysp.dtlFormOpen}'/>
+		
+		<let id='holiday' shape='scalar' value='{Select Count(adHoli.id) From holidayAdvancedInPrediod adHoli Where adHoli.user = "ALL"}'/>
 		<let id='hrAvgTestRuntime' shape='scalar' value='{Select tofloat(envVal.value) From environmentValues envVal Where envVal.name = "hrAvgTestRuntime"}'/>
 
 		<let id='DoneTests' shape='scalar' value='{Select COUNT(tk.result) From task tk Where tk.result = "success" OR tk.result = "failed"}'/>
 		<let id='remainingTests' shape='scalar' value='{Select COUNT(tk.result) From task tk Where tk.result = "not yet started"}'/>
 		<let id='testCount' shape='scalar' value='{Select COUNT(tk.result) From task tk}'/>
 
-		<let id="finalTesterForTesting" shape="scalar" value="{SELECT COALESCE(dbTesterForTesting, testersCount)}" />
+		<let id="finalTesterForTesting" shape="scalar" value="{SELECT tofloat(COALESCE(dbTesterForTesting, testersCount))}" />
 		<let id='requiredWorkingHours' shape='scalar' value='{SELECT case when remainingTests = 0 THEN tofloat(0) ELSE ((remainingTests) * hrAvgTestRuntime)/finalTesterForTesting END}'/>
 		<let id="corrigated_req_hour" shape="scalar" value='{Select case when requiredWorkingHours-remains_from_today_hour > 0 THEN requiredWorkingHours-remains_from_today_hour ELSE 0 END}' />
 		<let id='roundDay' shape='scalar' value='{Select case when toint((corrigated_req_hour/8)*100)%100 = 0 then corrigated_req_hour/8 else toint(corrigated_req_hour/8)+1 end}'/>
@@ -46,9 +48,9 @@
 		<let id="finalTesterForWriting" shape="scalar" value="{SELECT COALESCE(dbTesterForWriting, testersCount)}" />
 		<let id='requiredWorkingHoursToWrite' shape='scalar' value='{SELECT ((totalTestToWriteCount - totalTestWriteDone) * hrAvgTestRuntime)/finalTesterForWriting+1/2}'/>
 		<let id='roundDayToWrite' shape='scalar' value='{Select case when toint((requiredWorkingHoursToWrite)*100)%100 = 0 then requiredWorkingHoursToWrite else toint(requiredWorkingHoursToWrite)+1 end}'/>
-		<let id="daysToWrite" shape="scalar" value="{SELECT toint(roundDayToWrite+holiday)}" />
+		<let id="daysToWrite" shape="scalar" value="{SELECT toint(roundDayToWrite)}" />
 		<let id="weekendsToWrite" shape="scalar" value="{SELECT (daysToWrite/5*2)+1}" />
-		<let id='endDateOfTestWriting' shape='scalar' value='{Select ADDDAY(sysp.dtlFormOpen, weekendsToWrite+daysToWrite)}'/>
+		<let id='endDateOfTestWriting' shape='scalar' value='{Select ADDDAY(sysp.dtlFormOpen, weekendsToWrite+daysToWrite+holiday)}'/>
 		<let id='endDateOfTestWritingCalculatedWeekend' shape='scalar' value='{Select case when dayofweek(endDateOfTestWriting) = 0 then ADDDAY(endDateOfTestWriting, 1) when dayofweek(endDateOfTestWriting) = 6 then ADDDAY(endDateOfTestWriting, 2) else endDateOfTestWriting End}'/>
 
 		<let id='endDateOfTestWritingPlusExtraTime' shape='scalar' value='{Select ADDDAY(endDateOfTestWriting, 14)}'/>
@@ -83,8 +85,20 @@
 		}'/>
 		<let id='count_rows_ph' shape='scalar' value='{select count(pht.date) from progress_history_table pht}'/>
 	</declarations>
-	
+	<chapter title="Test">
+		<textview text="{toString(holiday)}" />
+		<table record="debug" recordset="{SELECT c.id, c.dateFrom, c.user FROM holidayAdvancedInPrediod c}">
+			<row>
+				<cell><textview text="{debug.id}"/></cell>
+				<cell><textview text="{debug.user}"/></cell>
+				<cell><textview text="{toString(debug.dateFrom)}"/></cell>
+			</row>
+		</table>
+	</chapter>
+
+
 	<chapter title='Test run finish date'>
+		<textview text='{"Tester count who is testing: " || tostring(finalTesterForTesting)}'/>
 		<textview text='{"Planned finish date: " || tostring(finishYearOfTestRunning)||"-"|| tostring(finishMonthOfTestRunning)||"-"||tostring(finishDayOfTestRunning)}'/>
 		<textview text='{"Remaining test count: " || tostring(remainingTests)}'/>
 		<textview text='{"Required working hours: " || tostring(requiredWorkingHours)}'/>
@@ -94,41 +108,22 @@
 	</chapter>
 
 	<chapter title="Testcase write finish date">
+		
+		<textview text='{tostring(hrAvgTestRuntime)}'/>
+		<textview text='{"Tester count who is writeing tests: " || tostring(dbTesterForWriting)}'/>
 		<textview text='{"Planned finish date: " || tostring(finishYearOfTestWriting)||"-"|| tostring(finishMonthOfTestWriting)||"-"||tostring(finishDayOfTestWriting)}'/>
-		<textview text='{"Remaining to write test count: "||toString(totalTestToWriteCount-totalTestWriteDone)}'/>
+		<textview text='{"Remaining to write test count: "||toString(totalTestToWriteCount - totalTestWriteDone)}'/>
 		<textview text='{"Required working days to write tests: " || tostring(requiredWorkingHoursToWrite)}'/>
 		<textview text='{"Required rounded working days to write tests: " || tostring(roundDayToWrite)}'/>
 		<textview text='{"Actual finish date with test writing: " || tostring(FORMATDTL( endDateOfTestWritingCalculatedWeekend,(dtf yyyy "-" MM "-" dd)))}'/>
 		<textview text='{"Actual finish date with test writing and 2 week of late preparation: " || tostring(FORMATDTL( endDateOfTestWritingPlusCalculatedWeekend,(dtf yyyy "-" MM "-" dd)))}'/>
 		<textview text='{"Progress: %"|| tostring(toint((tofloat(totalTestWriteDone)/tofloat(totalTestToWriteCount))*100))}'/>
 	</chapter>
-
-	<chapter title='Action'>
-			<dropdown id="executeTarget"
-				label="Select a target test type:"
-				choices='{TABLE valueBoo
-            				( "Android";
-            				"Android Release";
-            				"iOS";
-            				"iOS Release";
-							"BO";
-							"BO Release";
-							"Wef";
-							"Wef Release"
-							)}'
-				keyMap='{valueBoo}'
-				textMap='{valueBoo}'
-				selectedKey='{SELECT null}'/>
-			<discardbutton id='dabtnDashboard' text='Check' confirm='{false}' nextForm='{forms.task_execution}' testId='dabtnDashboard'>
-				<params>
-					<param id='platformID' value='{executeTarget.selectedKey}' />
-				</params>
-			</discardbutton>
-	</chapter>
 	<chapter title='Progress history'>
 			<table id='progress' record='progress_r' recordset='{
 					select ph.date, ph.imp_done, ph.imp_total, ph.tc_exec_done, ph.tc_exec_total, ph.sum_done, ph.tester_number, ph.exp_end_of_testing
-					from progress_history ph}'>
+					from progress_history ph 
+					order by date DESC LIMIT 7}'>
 				<header>
 					<row>
 						<cell>
@@ -265,7 +260,15 @@
 	</chapter>
 	<chapter title='Progress by tester'>
 		<!--<popup title='Check'-->
-			<table id='progress_by_tester' record='progress_by_tester_r' recordset='{select pbu.date, pbu.tester_name, pbu.working_day, pbu.daily_work_done, pbu.sum_work_done, pbu.sum_work from progress_by_user pbu}'>
+			<dropdown id="sTestUserHistroy" style="{styles.dropdownNoraml}" keyMap='{tester_name}' textMap='{tester_name}' choices='{SELECT DISTINCT  pbu.tester_name 
+				FROM progress_by_user pbu 
+				INNER JOIN tester U
+				ON pbu.tester_name = U.tester_name
+				WHERE U.tester_role = "Tester" }'/>
+			<table id='progress_by_tester' record='progress_by_tester_r' recordset='{select pbu.date, pbu.tester_name, pbu.working_day, pbu.daily_work_done, pbu.sum_work_done, pbu.sum_work
+			 from progress_by_user pbu
+			WHERE pbu.tester_name = sTestUserHistroy.selectedKey
+			 order by date DESC LIMIT 7}'>
 				<header>
 					<row>
 						<cell>
@@ -361,62 +364,75 @@
 			</table>
 		<!--</popup>-->
 	</chapter>
-	<chapter title='Status of testcases'>
-		<popup title='Check'>
-		</popup>
-	</chapter>
-	<chapter title='Status of Jira tickets'>
-		<popup title='Check'>
-			<chapter title='Jira tickets'>
-				<checkbox id= 'ch_closed' text='closed'/>
-				<checkbox id= 'ch_j_not_yet_started' text='not yet started' checked='{true}'/>
-
+	<chapter title='Jira tickets'>
+		<popup title='Jira tickets' openMode="dialog">
+			<backbutton linkIcon="{icons.delete}" text="{Null}" />
 				<table id='task_list_table_j' record='task_list_table_j_r' recordset='{
-											select tsk.task_id, tsk.env_name, tsk.task_type, e.tester_name, j.Summary, tsk.result 
+											select tsk.task_id, tsk.env_name, tsk.task_type, e.tester_name, tsk.result, j.jira_id, j.jira_state
 											from task tsk 
-											left join jira_list j on tsk.task_id = j.Key
+											left join tc_jira_list j on tsk.task_id = j.task_id
 											left join environment e on tsk.env_name = e.env_name
-											where ((tsk.task_type is "j" and
-												(ch_closed.checked or not (tsk.result is "closed")) and
-												(ch_j_not_yet_started.checked or not (tsk.result is "not yet started")) and
-												UPPER(tsk.task_id) LIKE "%" || UPPER(filter_taskid.text) || "%"))
-											group by tsk.task_id}'>
+											WHERE j.jira_id is not null and tsk.task_id LIKE "%" || UPPER( filter_taskid.text) || "%" }'>
 					<header>
 						<row>
 							<cell>
-								<if cond='{true}'>
-									<textview text='Task ID'/>
-									<textbox id='filter_taskid'/>
-								</if>
+								<textview text='Task ID'/>
+								<textbox id='filter_taskid'/>
 							</cell>
 							<cell>
-								<textview text='Summary'/>
+								<textview text='Reporter'/>
 							</cell>
 							<cell>
-								<textview text='results'/>
+								<textview text='Jira'/>
+							</cell>
+							<cell>
+								<textview text='Edit state'/>
+							</cell>
+							<cell>
+								<textview text='Link'/>
 							</cell>
 						</row>           
 					</header>
 					<row>		
 						<cell>		
 							<textview text='{task_list_table_j_r.task_id}'/>
-						</cell>				
+						</cell>		
+						<cell>		
+							<textview text='{task_list_table_j_r.tester_name}'/>
+						</cell>			
 						<cell>
-							<textview text='{task_list_table_j_r.Summary}'/> 
+							<linkview url="{task_list_table_j_r.jira_id}" linkIcon='{icons.link}'/> 
 						</cell>
 						<cell>
-							<textview id='tc_allres' text='{task_list_table_j_r.result}'/> 
+							<dropdown id='add_tcs_status'
+                        	keyMap="{v}"
+                        	textMap="{v}"
+                        	selectedKey="{task_list_table_j_r.jira_state}"
+                        	choices='{["InProgress", "Done", "Reopen"]}'>
+                    </dropdown>
+						</cell>
+						<cell>
+							<popup title="{NULL}" openMode="dialog" linkIcon="{icons.eye}">
+								<hbox>
+									<backbutton/>
+									<textview text='{task_list_table_j_r.jira_id}'/> 
+								</hbox>
+							</popup>
 						</cell>
 					</row>
 				</table>
-			</chapter>
 		</popup>
 	</chapter>
-	<chapter title='Statistics'>
-		<chapter title='Testcase executions by environments'>
+	<chapter title='Testcase executions by environments'>
+		<dropdown id="sTestUserEnvironment" style="{styles.dropdownNoraml}" keyMap='{tester_name}' textMap='{tester_name}' choices='{SELECT DISTINCT  e.tester_name 
+		FROM environment e 
+		INNER JOIN tester U
+		ON e.tester_name = U.tester_name
+		WHERE U.tester_role = "Tester" }'/>
 			<table id='env_by_result' record='env_by_result_r' recordset='{
 					select e.env_name, e.tester_name
-					from environment e}'>
+					from environment e
+					WHERE sTestUserEnvironment.selectedKey = e.tester_name}'>
 				<header>
 					<row>
 						<cell>
@@ -510,12 +526,6 @@
 							<textview id='bad_testcase_sum_t' text='{select tostring(SUM(toint(ebr.bad_testcase_t.text))) from env_by_result.rows ebr}'/>
 						</cell>
 						<cell>
-							<!--textview id='all_tc_exec_sum' text='{tostring(unassigned_t+toint(not_yet_started_sum_t.text) 
-																	+ toint(success_sum_t.text) 
-																	+ toint(failed_sum_t.text) 
-																	+ toint(not_tested_sum_t.text) 
-																	+ toint(bad_testcase_sum_t.text))}'/-->
-							<!--kivettem a not_testeted a sum-ból,hiszen az nem érdekel minket-->
 							<textview id='all_tc_exec_sum' text='{tostring(unassigned_t+toint(not_yet_started_sum_t.text) 
 																	+ toint(success_sum_t.text) 
 																	+ toint(failed_sum_t.text) 
@@ -524,64 +534,63 @@
 					</row>
 				</footer>
 			</table>
-		</chapter>
-			<chapter title='Jira ticket verification by testers'>
-				<table id='tester_by_result' record='tester_by_result_r' recordset='{
-						select distinct e.tester_name
-						from environment e group by e.tester_name}'>
-					<header>
-						<row>
-							<declarations>
-							<let id='unassigned_j' shape='scalar' value='{select count(tet.result) from task_env_table tet 
-								where tet.result="not yet started" and 
-									tet.env_name is null and
-									tet.task_type="j"}'/>
-							</declarations>
-							<cell>
-								<textview text='Tester name'/>
-							</cell>
-							<cell>
-								<textview text='Not yet started'/>
-							</cell>
-							<cell>
-								<textview text='Closed'/>
-							</cell>
-						</row>
-					</header>
+	</chapter>
+	<chapter title='Jira ticket verification by testers'>
+			<table id='tester_by_result' record='tester_by_result_r' recordset='{
+					select distinct e.tester_name
+					from environment e group by e.tester_name}'>
+				<header>
 					<row>
+						<declarations>
+						<let id='unassigned_j' shape='scalar' value='{select count(tet.result) from task_env_table tet 
+							where tet.result="not yet started" and 
+								tet.env_name is null and
+								tet.task_type="j"}'/>
+						</declarations>
 						<cell>
-							<textview text='{tester_by_result_r.tester_name}'/>
+							<textview text='Tester name'/>
 						</cell>
 						<cell>
-							<textview id='not_yet_started_j' text='{select tostring(count(tet.result)) from task_env_table tet 
-												where tet.result="not yet started" and 
-													tet.tester_name=tester_by_result_r.tester_name and
-													tet.task_type="j"}'/>
+							<textview text='Not yet started'/>
 						</cell>
 						<cell>
-							<textview id='closed_j' text='{select tostring(count(tet.result)) from task_env_table tet 
-												where tet.result="closed" and 
-													tet.tester_name=tester_by_result_r.tester_name and
-													tet.task_type="j"}'/>
+							<textview text='Closed'/>
 						</cell>
 					</row>
-					<footer>
-						<row>
-							<cell>
-								<textview text='{"unassigned: " || tostring(unassigned_j)}'/>
-							</cell>
-							<cell>
-								<textview id="not_yet_started_sum_j" text='{select tostring(SUM(toint(tbr.not_yet_started_j.text))) from tester_by_result.rows tbr}'/>
-							</cell>
-							<cell>
-								<textview id="closed_sum_j" text='{select tostring(SUM(toint(tbr.closed_j.text))) from tester_by_result.rows tbr}'/>
-							</cell>
-							<cell>
-								<textview id='all_jira_ver_sum' text='{tostring(unassigned_j+toint(not_yet_started_sum_j.text)+toint(closed_sum_j.text))}'/>
-							</cell>
-						</row>
-					</footer>
-				</table>
-			</chapter>
+				</header>
+				<row>
+					<cell>
+						<textview text='{tester_by_result_r.tester_name}'/>
+					</cell>
+					<cell>
+						<textview id='not_yet_started_j' text='{select tostring(count(tet.result)) from task_env_table tet 
+											where tet.result="not yet started" and 
+												tet.tester_name=tester_by_result_r.tester_name and
+												tet.task_type="j"}'/>
+					</cell>
+					<cell>
+						<textview id='closed_j' text='{select tostring(count(tet.result)) from task_env_table tet 
+											where tet.result="closed" and 
+												tet.tester_name=tester_by_result_r.tester_name and
+												tet.task_type="j"}'/>
+					</cell>
+				</row>
+				<footer>
+					<row>
+						<cell>
+							<textview text='{"unassigned: " || tostring(unassigned_j)}'/>
+						</cell>
+						<cell>
+							<textview id="not_yet_started_sum_j" text='{select tostring(SUM(toint(tbr.not_yet_started_j.text))) from tester_by_result.rows tbr}'/>
+						</cell>
+						<cell>
+							<textview id="closed_sum_j" text='{select tostring(SUM(toint(tbr.closed_j.text))) from tester_by_result.rows tbr}'/>
+						</cell>
+						<cell>
+							<textview id='all_jira_ver_sum' text='{tostring(unassigned_j+toint(not_yet_started_sum_j.text)+toint(closed_sum_j.text))}'/>
+						</cell>
+					</row>
+				</footer>
+			</table>
 	</chapter>
 </form>

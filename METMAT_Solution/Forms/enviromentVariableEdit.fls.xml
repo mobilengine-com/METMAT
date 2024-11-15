@@ -4,7 +4,6 @@
         <submitbutton text="Submit" closeForm="{false}"/>
         <discardbutton text="Back to dashboard" confirm="{false}"/>
     </header>
-
 	<table id='envVariableTb' record='evt' recordset='{select ev.name, ev.value from environmentValues ev}'>
 			<header>
 				<row>

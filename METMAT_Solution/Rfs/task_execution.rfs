@@ -23,7 +23,9 @@ using reftab tc_jira_list;
 			act_tc_id = act_task_id;
 			var act_env_name = envTableTRow.env_name.text;
 			var guid_tsk = envTableTRow.guid_tsk;
-			avarage_tc_timeneed = avarage_tc_timeneed + envTableTRow.tcTimeNeed.number;
+			if(envTableTRow.tcTimeNeed.number != null){
+				avarage_tc_timeneed = avarage_tc_timeneed + envTableTRow.tcTimeNeed.number;
+			}
 			numOfSelectedTcRows = numOfSelectedTcRows + 1.0;
 			//trace avarage_tc_timeneed;
 			//trace act_tc_id;
@@ -32,7 +34,12 @@ using reftab tc_jira_list;
 			//update tc result if changed in task list and in tc_list with sent in date
 			if (envTableTRow.dd_result.fChanged) {
 				trace "updating result for ", act_env_name, act_task_id, " to ", envTableTRow.dd_result.selectedText;
-				db.task.Update({guid: guid_tsk}, {result: envTableTRow.dd_result.selectedText, start_tc_date: act_start_tc_date, end_tc_date: act_end_tc_date, time_need: envTableTRow.tcTimeNeed.number.ToString()});
+				if(envTableTRow.tcTimeNeed.number != null){
+					db.task.Update({guid: guid_tsk}, {result: envTableTRow.dd_result.selectedText, start_tc_date: act_start_tc_date, end_tc_date: act_end_tc_date, time_need: envTableTRow.tcTimeNeed.number.ToString()});
+				}else{
+					db.task.Update({guid: guid_tsk}, {result: envTableTRow.dd_result.selectedText, start_tc_date: act_start_tc_date, end_tc_date: act_end_tc_date });
+				}
+				
 				db.tc_list.Update({tc_id: act_task_id}, {last_status: envTableTRow.dd_result.selectedText});
 				db.tc_list.Update({tc_id: act_task_id}, {last_sent_in: act_end_tc_date});
 			}
