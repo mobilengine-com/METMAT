@@ -8,6 +8,8 @@
 												platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2"
 												dashboard='true'>
 	<declarations>
+		<let id='stLoggedUserRole' shape='scalar' value='{SELECT U.tester_role FROM tester U WHERE U.tester_email = sysp.user}' />
+
 		<let id='dbTesterForTesting' shape='scalar' value='{Select Sum(t.participation) From tester t Where t.work_type = "Testing" AND t.tester_active = "Active"}'/>
 		<let id='dbTesterForWriting' shape='scalar' value='{Select Sum(t.participation) From tester t Where t.work_type = "Test writing" AND t.tester_active = "Active"}'/>
 
@@ -49,7 +51,7 @@
 		<let id='requiredWorkingHoursToWrite' shape='scalar' value='{SELECT ((totalTestToWriteCount - totalTestWriteDone) * hrAvgTestRuntime)/finalTesterForWriting+1/2}'/>
 		<let id='roundDayToWrite' shape='scalar' value='{Select case when toint((requiredWorkingHoursToWrite)*100)%100 = 0 then requiredWorkingHoursToWrite else toint(requiredWorkingHoursToWrite)+1 end}'/>
 		<let id="daysToWrite" shape="scalar" value="{SELECT toint(roundDayToWrite)}" />
-		<let id="weekendsToWrite" shape="scalar" value="{SELECT (daysToWrite/5*2)+1}" />
+		<let id="weekendsToWrite" shape="scalar" value="{SELECT CASE WHEN daysToWrite/5*2 = 0 THEN 0 ELSE (daysToWrite/5*2)+1 END}" />
 		<let id='endDateOfTestWriting' shape='scalar' value='{Select ADDDAY(sysp.dtlFormOpen, weekendsToWrite+daysToWrite+holiday)}'/>
 		<let id='endDateOfTestWritingCalculatedWeekend' shape='scalar' value='{Select case when dayofweek(endDateOfTestWriting) = 0 then ADDDAY(endDateOfTestWriting, 1) when dayofweek(endDateOfTestWriting) = 6 then ADDDAY(endDateOfTestWriting, 2) else endDateOfTestWriting End}'/>
 
@@ -85,7 +87,18 @@
 		}'/>
 		<let id='count_rows_ph' shape='scalar' value='{select count(pht.date) from progress_history_table pht}'/>
 	</declarations>
-	<chapter title="Test">
+	<if id='debug_hide' cond='{stLoggedUserRole == "Admin"}'>
+		<checkbox label="Debug tool" id="debug"/>
+	</if>
+	<if cond="{debug_hide.debug.checked}">
+		<chapter title="Test">
+		<textview text='{"endDateOfTestWriting: "||toString(endDateOfTestWriting)}' />
+		<textview text='{"endDateOfTestWritingCalculatedWeekend: "||toString(endDateOfTestWritingCalculatedWeekend)}' />
+		<textview text='{"weekendsToWrite: "||toString(weekendsToWrite)}' />
+		<textview text='{"holiday: "||toString(holiday)}' />
+		<textview text='{"daysToWrite: "||toString(daysToWrite)}' />
+		<textview text='{"roundDayToWrite: "||toString(roundDayToWrite)}' />
+
 		<textview text="{toString(holiday)}" />
 		<table record="debug" recordset="{SELECT c.id, c.dateFrom, c.user FROM holidayAdvancedInPrediod c}">
 			<row>
@@ -95,8 +108,8 @@
 			</row>
 		</table>
 	</chapter>
-
-
+	</if>
+	
 	<chapter title='Test run finish date'>
 		<textview text='{"Tester count who is testing: " || tostring(finalTesterForTesting)}'/>
 		<textview text='{"Planned finish date: " || tostring(finishYearOfTestRunning)||"-"|| tostring(finishMonthOfTestRunning)||"-"||tostring(finishDayOfTestRunning)}'/>
