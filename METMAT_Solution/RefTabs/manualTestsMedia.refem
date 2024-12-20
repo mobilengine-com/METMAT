@@ -1,0 +1,7 @@
+<Reftab Name="manualTestsMedia" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>
+		<Column Name="TestId" Type="Text"/>
+		<Column Name="mediaId" Type="Text"/>
+        <Column Name="Step" Type="Integer"/>
+	</Columns>
+</Reftab>

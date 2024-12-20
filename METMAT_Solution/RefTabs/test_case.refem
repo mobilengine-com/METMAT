@@ -7,5 +7,6 @@
 		<Column Name="time" Type="Float" />
 		<Column Name="addedDate" Type="Date" />
 		<Column Name="lastAssigned" Type="Date" />
+		<Column Name="PreCond" Type="Text" InitialValue="" />
 	</Columns>
 </Reftab>

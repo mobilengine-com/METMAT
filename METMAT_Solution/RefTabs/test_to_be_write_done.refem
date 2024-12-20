@@ -9,5 +9,6 @@
 		<Column Name="location" Type="Text" />
 		<Column Name="creator" Type="Text" />
 		<Column Name="note" Type="Text" />
+		<Column Name="PreCond" Type="Text" InitialValue="" />
 	</Columns>
 </Reftab>

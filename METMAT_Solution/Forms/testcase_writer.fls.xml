@@ -336,7 +336,7 @@
                 </cell>
                 <cell>
                     <dropdown id="add_tcs_ty" keyMap="{v}" textMap="{v}"
-                        choices='{["Automated","Manual"]}'>
+                        choices='{["Automated","Manual", "Update"]}'>
                         <validation>
                             <validator cond="{selectedKey IS NOT NULL}"
                                 message="You have to choose type"></validator>
@@ -412,6 +412,9 @@
                 <cell>
                     <textview text="Edit" />
                 </cell>
+                <cell>
+                    <textview text="Write manual test" />
+                </cell>
             </row>
         </header>
         <row>
@@ -422,18 +425,18 @@
                 <let id="tags" shape="table" value="{loadNewerFromServer:Select t.tag FROM test_to_be_write_tags t WHERE tcDone.id = t.id}" />
             </declarations>
             <cell>
-                <if cond="{edited}">
+                <if cond='{(SELECT CASE WHEN edited AND NOT (editedType.selectedKey = "Manual") THEN 1 ELSE 0 END) = 1}'>
                     <textbox id="editedId" text="{tcDone.id}"/>
                 </if>
-                <if cond="{not edited}">
+                <if cond='{(SELECT CASE WHEN edited AND editedType.selectedKey = "Manual" OR NOT edited THEN 1 ELSE 0 END) = 1}'>
                     <textview id='tcDoneId' text="{tcDone.id}" />
                 </if>
             </cell>
             <cell>
-                <if cond="{edited}">
+                <if cond='{(SELECT CASE WHEN edited AND NOT (editedType.selectedKey = "Manual") THEN 1 ELSE 0 END) = 1}'>
                     <textbox id="editedLabel" text="{tcDone.label}"/>
                 </if>
-                <if cond="{not edited}">
+                <if cond='{(SELECT CASE WHEN edited AND editedType.selectedKey = "Manual" OR NOT edited THEN 1 ELSE 0 END) = 1}'>
                     <textview text="{tcDone.label}" />
                 </if>
                 
@@ -454,7 +457,7 @@
             <cell>
                 <if cond="{edited}">
                     <dropdown id="editedType" keyMap="{v}" textMap="{v}"
-                        choices='{["Automated","Manual"]}'
+                        choices='{["Automated", "Manual", "Update"]}'
                         selectedKey="{tcDone.type}">
                         <validation>
                             <validator cond="{selectedKey IS NOT NULL}"
@@ -546,6 +549,20 @@
                         <set value="{false}" target="delete" />
                         <set value="{iLabelEditedRows-1}" target="iLabelEditedRows" />
                     </actionbutton>
+                </if>
+            </cell>
+            <cell>
+                <if cond='{editedType.selectedKey == "Manual"}'>
+                    <discardbutton linkIcon="{SELECT CASE WHEN ((SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = tcDone.id) > 0) 
+                                                THEN icons.qa_accept_x
+                                                ELSE icons.qa_edit_x END}" text='Write test' id="totestWrite" nextForm='{forms.manualTestWriter}'> 
+                        <params>
+                            <param id='editTestId' value='{SELECT CASE WHEN edited THEN editedId.text ELSE tcDone.id END}'/>
+                            <param id='currentLastStep' value='{"2"}'/>
+                            <param id='fromForm' value='{"testcase_writer"}'/>
+                        </params>
+                    </discardbutton>
+                    
                 </if>
             </cell>
         </row>

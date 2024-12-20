@@ -1,0 +1,137 @@
+<form id='manualTestWriter' menuName='Manual test Writer' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
+    <declarations>
+        <let id="currentStep" shape="scalar" value="{SELECT COALESCE(toint(params.currentLastStep) , 2)}" />
+        <let id="edit" shape="scalar" value="{SELECT CASE WHEN params.editTestId IS NULL THEN 0 ELSE 1 END}" />
+        <let id="deletedStep" shape="scalar" value="{0}" />
+        <let id="stfromForm" shape="scalar" value="{params.fromForm}" />
+        <let id="originalTestId" shape="scalar" value="{params.editTestId}" />
+    </declarations>
+    <header>
+        <submitbutton text="Save" nextForm='{parseFormn(stfromForm)}' />
+        <discardbutton text="Discard" nextForm='{parseFormn(stfromForm)}'/>
+    </header>
+    <params>
+		<param id="editTestId" />
+        <param id="currentLastStep" />
+        <param id="fromForm" />
+	</params>
+    <if cond='{stfromForm = "testcase_monitor"}'>
+        <textview id="TcId" style='{styles.tcWriteId}' label="Test id" text='{Select COALESCE(params.editTestId, "")}' />
+    </if>
+    <if cond='{not (stfromForm = "testcase_monitor")}'>
+        <textbox id="newTcId" style='{styles.tcWriteId}' label="Test id" text='{Select COALESCE(params.editTestId, "")}' />
+    </if>
+    <if cond='{SELECT stfromForm IS NULL}'>
+        <textbox id="createTcId" style='{styles.tcWriteId}' label="Test id" text='{""}' />
+    </if>
+    <textarea id="newTcDesc" style='{styles.tcWriteId}' lines="3" label="Description" text='{Select COALESCE((SELECT tc.desc FROM test_case tc WHERE tc.id = params.editTestId), (SELECT tc.label FROM test_to_be_write_done tc WHERE tc.id = params.editTestId), "")}'/>
+    <textarea id="newTcPrecond" style='{styles.tcWriteId}' lines="5" label="Pre-Conditions" text='{Select COALESCE((SELECT tc.PreCond FROM test_case tc WHERE tc.id = params.editTestId), (SELECT tc.PreCond FROM test_to_be_write_done tc WHERE tc.id = params.editTestId), "")}'/>
+    <if cond='{edit = 0}'>
+    <table id="newTC" style="{styles.fullPageTableForTestCase}" record="test" recordset='{SELECT "" TestId, "" Expected, "" Task, 1 Step}'>
+        <row>
+        <declarations>
+            <let id="hasPhoto" shape="scalar" value="{0}" />
+            <let id="stepCount" shape="scalar" value="{testIndex}" />
+        </declarations>
+            <cell>
+            <hbox style='{styles.mtCountTask}'>
+                <textview  id="stepTask" text="{tostring(stepCount)}" />
+                <dropdown id="newTcPlatform" keyMap="{v}" textMap="{v}"
+                        choices='{["Android", "IOS", "BO", "Wef"]}'>
+                        <validation>
+                            <validator cond="{selectedKey IS NOT NULL}"
+                                message="You have to choose type"></validator>
+                        </validation>
+                    </dropdown>
+                <vbox>
+                    <textview style='{styles.centerText}' text="Task"/>
+                    <textarea id="task" style='{styles.centerText}' text="{test.Task}" lines="10" />
+                </vbox>
+            </hbox>
+            </cell>
+            <cell>
+            <hbox style='{styles.mtCountExp}'>
+                <textview  text="{tostring(stepCount)}" />
+                <vbox>
+                    <textview style='{styles.centerText}' text="Expected"/>
+                    <textarea id="expect" style='{styles.centerText}' text="{test.Expected}" lines="10"/>
+                </vbox>
+                 <photo id="photoUpload" singlePhoto="true" style="{styles.phototest}"/>
+                 <combinedbutton text="Delete step">
+                    <actionbutton  >
+                        <set value="{1}" target="deletedStep" />
+                    </actionbutton>
+                    <removebutton />
+                </combinedbutton>
+            </hbox>
+            </cell>
+        </row>
+    </table>
+    <combinedbutton text="Add new step">
+        <addbutton records='{SELECT "" TestId, "" Expected, "" Task, currentStep Step}' table="newTC"></addbutton>
+        <actionbutton>
+            <set value="{currentStep+1}" target="currentStep" />
+
+        </actionbutton>
+    </combinedbutton>
+    </if>
+    <if cond="{edit = 1}">
+    <table id="editTC" style="{styles.fullPageTableForTestCase}" record="editTest" recordset='{SELECT tc.TestId, tc.Expected, tc.Task, tc.Step, tc.Platform FROM manualTests tc WHERE tc.TestId = params.editTestId}'>
+        <row>
+        <declarations>
+            <let id="hasPhoto" shape="scalar" value="{0}" />
+            <let id="mediaIdPhoto" shape="scalar" value="{SELECT p.mediaId FROM manualTestsMedia p WHERE p.TestId = editTest.TestId AND p.Step = editTest.Step}" />
+            <let id="stepCount" shape="scalar" value="{editTestIndex}" />
+        </declarations>
+            <cell>
+            <hbox style='{styles.mtCountTask}'>
+                <textview  id="stepTask" text="{tostring(stepCount)}" />
+                <dropdown id="newTcPlatform" keyMap="{v}" textMap="{v}"
+                        choices='{["Android", "IOS", "BO", "Wef"]}'
+                        selectedKey="{editTest.Platform}">
+                        <validation>
+                            <validator cond="{selectedKey IS NOT NULL}"
+                                message="You have to choose type"></validator>
+                        </validation>
+                    </dropdown>
+                <vbox>
+                    <textview style='{styles.centerText}' text="Task"/>
+                    <textarea id="task" style='{styles.centerText}' text="{editTest.Task}" lines="10" />
+                </vbox>
+            </hbox>
+            </cell>
+            <cell>
+            <hbox style='{styles.mtCountExp}'>
+                <textview  text="{tostring(stepCount)}" />
+                <vbox>
+                    <textview style='{styles.centerText}' text="Expected"/>
+                    <textarea id="expect" style='{styles.centerText}' text="{editTest.Expected}" lines="10"/>
+                </vbox>
+                <if cond="{SELECT mediaIdPhoto IS NULL}">
+                 <photo id="photoUpload" singlePhoto="true" style="{styles.phototest}" photoData="{TABLE mediaId (mediaIdPhoto)}"/>
+                </if>
+                <if cond="{SELECT mediaIdPhoto IS NOT NULL}">
+                    <photoview photos='{TABLE mediaId (mediaIdPhoto)}'/>
+                    <actionbutton text="Delete">
+                        <set value="{NULL}" target="mediaIdPhoto" />
+                    </actionbutton>
+                </if>
+                <combinedbutton text="Delete step">
+                    <actionbutton  >
+                        <set value="{1}" target="deletedStep" />
+                    </actionbutton>
+                    <removebutton />
+                </combinedbutton>
+                
+            </hbox>
+            </cell>
+        </row>
+    </table>
+    <combinedbutton text="Add new step">
+        <addbutton records='{SELECT "" TestId, "" Expected, "" Task, currentStep Step, "" Platform}' table="editTC"></addbutton>
+        <actionbutton>
+            <set value="{currentStep+1}" target="currentStep" />
+        </actionbutton>
+    </combinedbutton>
+    </if>
+</form>

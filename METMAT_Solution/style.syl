@@ -12,7 +12,7 @@ styles {
 	}
     style SearchBar{
 		hbox {
-			sizes = 200px
+			sizes = 300px
 		}
 	}
 
@@ -24,13 +24,146 @@ styles {
     style fullPageTable {
         table {
             width = fill
-            columnWidth = 400px, 200px, 200px, 100px, 100px, 200px
+            columnWidth = 300px, 300px, 300px, 300px, 300px, 300px, 300px
             
         }
         cell{
             content = allignContent
         }
+        
     }
+    style centerText{
+        textview{
+                textAlign = center
+            }
+        textarea{
+            textAlign = left
+        }
+    }
+    style mtCountTask{
+        hbox{
+            sizes = 30px, 90px, 470px
+        }
+    }
+    style mtCountExpWithPhoto{
+        hbox{
+            sizes = 30px, 470px, 300px 
+        }
+    }
+    style mtCountExp{
+        hbox{
+            sizes = 30px, 470px, 300px 
+        }
+    }
+    style fullPageTableForTestCase {
+        table {
+            width = content
+            columnWidth = 590px, 800px
+            margin { right=200px left=310px }
+            borderWidth {
+				top=5px
+				right=5px
+				bottom=5px
+				left=5px
+			}
+
+        }
+        cell{
+            content = allignContent
+        }
+        row{
+            margin {
+                left = 5px
+                right = 5px
+                top = 0px
+                bottom = 0px
+            }
+			borderWidth {
+				top=0px
+				right=0px
+				bottom=5px
+				left=0px
+			}
+        }
+        
+    }
+
+    style fullPageTableForTestView {
+        table {
+            width = content
+            columnWidth = 590px, 600px
+            margin { right=200px left=310px }
+            borderWidth {
+				top=5px
+				right=5px
+				bottom=5px
+				left=5px
+			}
+
+        }
+        row{
+            margin {
+                left = 5px
+                right = 5px
+                top = 0px
+                bottom = 0px
+            }
+			borderWidth {
+				top=0px
+				right=0px
+				bottom=5px
+				left=0px
+			}
+        }
+        
+    }
+
+    style phototest{
+        photo{
+            button{
+                width = 100px
+                padding { top=5px right=5px bottom=5px left=5px }
+				margin { top=5px right=5px bottom=5px left=5px }
+            }
+            
+        }
+    }
+
+    style tcWriteId{
+        textbox{
+            margin { left=470px right=530px }
+            label{
+                margin { left=300px  }
+                textAlign = center
+                position = top
+                bold = true
+                fontSize = 20px
+            }
+        }
+        textarea{
+            margin { left=470px right=530px }
+            label{
+                margin { left=300px  }
+                textAlign = center
+                position = top
+                bold = true
+                fontSize = 16px
+            }
+        }
+        textview{
+            margin { left=470px right=530px }
+            label{
+                margin { left=300px  }
+                textAlign = center
+                position = top
+                bold = true
+                fontSize = 20px
+            }
+            borderWidth{left = 2px right = 2px top = 2px bottom = 2px}
+            borderColor = 000000
+        }
+    }
+
     style allignContent{
         all{
             verticalAlign  = middle

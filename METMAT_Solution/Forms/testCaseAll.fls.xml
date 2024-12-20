@@ -4,18 +4,15 @@
     <declarations>
         <let id="iLabelEditedRows" shape="scalar" value="{0}" />
         <let id="letpage" shape="scalar" value='{0}'/>
+        <let id="stscTags" shape="scalar" value="{SELECT GROUP_CONCAT(st.v) FROM tcTable.tagsSc.selectedTags st}" />
+        <let id="stavailableTags" shape="scalar" value='{SELECT GROUP_CONCAT(tct.tc_id) FROM test_case_tag tct WHERE INSTR(stscTags, tct.tag )!= 0}' />
+
         <let id="tcCount" shape="scalar" value='{loadNewerFromServer:SELECT COUNT(DISTINCT tc.id) FROM test_case tc LEFT JOIN test_case_tag tct ON tc.id = tct.tc_id 
-            WHERE COALESCE(platSc.selectedKey,tc.platform) = tc.platform 
-            AND  tc.id LIKE "%" || COALESCE(idSc.text,"") || "%" 
-            AND tc.desc LIKE "%" || COALESCE(descSc.text,"") || "%" 
-            AND CASE WHEN COALESCE(tagSc.text,"") = "" THEN true ELSE tct.tag LIKE "%" || tagSc.text || "%" END
+            WHERE COALESCE(tcTable.platSc.selectedKey,tc.platform) = tc.platform 
+            AND  tc.id LIKE "%" || COALESCE(tcTable.idSc.text,"") || "%" 
+            AND tc.desc LIKE "%" || COALESCE(tcTable.descSc.text,"") || "%" 
+            AND CASE WHEN LENGTH(stscTags)>0 THEN INSTR(stavailableTags, tc.id) != 0 ELSE true END
             }' />
-       <!-- <let id="searchResult" shape="table" value='{SELECT tc.id, t.tag FROM test_case tc LEFT JOIN test_case_tag t ON tc.id = t.tc_id WHERE 
-            COALESCE(platSc.selectedKey,tc.platform) = tc.platform 
-            AND  tc.id LIKE "%" || COALESCE(idSc.text,"") || "%" 
-            AND tc.desc LIKE "%" || COALESCE(descSc.text,"") || "%"
-        }' />
-         <let id="scTags" shape="table" access="private" value="{SELECT tags.v tag FROM tagsSc.selectedTags tags}" /> --> 
         
     </declarations>
     <hbox style="{styles.SearchBar}">
@@ -78,17 +75,6 @@
         </popup>
     </hbox>
     <hbox style="{styles.SearchBar}">
-        <textview text="ID" />
-        <textview text="Description"/>
-        <textview text="Platform" />
-        <textview text="Tags" />
-    </hbox>
-    <hbox style="{styles.SearchBar}">
-        <textbox id="idSc"/>
-        <textbox id="descSc"/>
-        <dropdown id="platSc" choices='{["Android", "IOS", "BO", "Wef", "Android Release", "IOS Release", "BO Release", "Wef Release" ]}' keyMap="{v}" textMap="{v}"/>
-        <textbox id="tagSc"/>
-        <tags id="tagsSc" availableTags="{SELECT DISTINCT t.tag v FROM test_case_tag t}"/>
         <if cond="{iLabelEditedRows>0}">
             <combinedbutton text="Save changes" id="sbsave">
                 <submitbutton closeForm="{false}"/>
@@ -99,37 +85,45 @@
         </if>
     </hbox>
     <table id="tcTable" record="tcTable" style="{styles.fullPageTable}"
-        recordset='{loadNewerFromServer:SELECT DISTINCT TR.id, TR.desc, TR.platform, TR.time, TR.link, TR.addedDate FROM test_case TR LEFT JOIN test_case_tag tct ON TR.id = tct.tc_id 
+        recordset='{loadNewerFromServer:SELECT DISTINCT TR.id, TR.desc, TR.platform, TR.time, TR.link, TR.addedDate, TR.PreCond FROM test_case TR
             WHERE   COALESCE(platSc.selectedKey,TR.platform) = TR.platform 
                     AND  TR.id LIKE "%" || COALESCE(idSc.text,"") || "%" 
                     AND TR.desc LIKE "%" || COALESCE(descSc.text,"") || "%"
-                    AND CASE WHEN COALESCE(tagSc.text,"") = "" THEN true ELSE tct.tag LIKE "%" || tagSc.text || "%" END
+                    AND CASE WHEN LENGTH(stscTags)>0 THEN INSTR(stavailableTags, TR.id) != 0 ELSE true END
                     ORDER BY id LIMIT 20 OFFSET letpage*20}'>
         <header>
             <row>
                 <cell>
                     <textview text="ID" />
+                    <textbox id="idSc"/>
                 </cell>
                 <cell>
                     <textview text="Description" />
+                     <textbox id="descSc"/>
                 </cell>
                 <cell>
                     <textview text="Platform" />
-                </cell>
-                <cell>
-                    <textview text="Time" />
+                    <dropdown id="platSc" choices='{["Android", "IOS", "BO", "Wef", "Android Release", "IOS Release", "BO Release", "Wef Release" ]}' keyMap="{v}" textMap="{v}"/>
                 </cell>
                 <cell>
                     <textview text="Tags" />
+                    <tags id="tagsSc" availableTags="{SELECT DISTINCT t.tag v FROM test_case_tag t}" selectedTags='{SELECT NULL}'/>
                 </cell>
                 <cell>
-                    <textview text="Link" />
+                    <textview text="Time" />
+                    <textview text="" />
+                </cell>
+                <cell>
+                    <textview text="Open" />
+                    <textview text="" />
                 </cell>
                 <cell>
                     <textview text="Added date" />
+                    <textview text="" />
                 </cell>
                 <cell>
                     <textview text="Edit" />
+                    <textview text="" />
                 </cell>
             </row>
         </header>
@@ -155,14 +149,6 @@
             </cell>
             <cell>
                 <if cond="{edited}">
-                    <numberbox id='nbEditedTime' number="{toInt(tcTable.time)}" />
-                </if>
-                <if cond="{not edited}">
-                    <textview id='tcTime' text="{toString(tcTable.time)}" />
-                </if>
-            </cell>
-            <cell>
-                <if cond="{edited}">
                     <tags id="editedTags" selectedTags="{SELECT t.tag v FROM tags t}" allowNewTag="{true}"  availableTags="{SELECT DISTINCT t.tag v FROM test_case_tag t}"/>
                 </if>
                 <if cond="{not edited}">
@@ -171,10 +157,63 @@
             </cell>
             <cell>
                 <if cond="{edited}">
+                    <numberbox id='nbEditedTime' number="{toInt(tcTable.time)}" />
+                </if>
+                <if cond="{not edited}">
+                    <textview id='tcTime' text="{toString(tcTable.time)}" />
+                </if>
+                
+            </cell>
+            <cell>
+                <if cond="{edited}">
                     <textbox id='tcEditedLink' text="{tcTable.link}" />
                 </if>
                 <if cond="{not edited}">
+                <if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = tcTable.id) > 0}'>
+                    <popup title="Show test" openMode="fullscreen">
+                    <declarations>
+                        <let id="maxStep" shape="scalar" value="{Select max(tc.Step) FROM manualTests tc WHERE tc.TestId = tcTable.id}" />
+                    </declarations>
+                    <backbutton text="Back"/>
+                    <discardbutton text='Edit' id="Edit" nextForm='{forms.manualTestWriter}'> 
+                        <params>
+                            <param id='editTestId' value='{tcTable.id}'/>
+                            <param id='currentLastStep' value='{toString(maxStep)}'/>
+                            <param id='fromForm' value='{"testcase_monitor"}'/>
+                        </params>
+                    </discardbutton>
+                        <textview id="newTcId" style='{styles.tcWriteId}' label="Test id" text='{tcTable.id}' />
+                        <textview id="newTcDesc" style='{styles.tcWriteId}' label="Description" text='{tcTable.desc}'/>
+                        <textview id="newTcPrecond" style='{styles.tcWriteId}'  label="Pre-Conditions" text='{tcTable.PreCond}'/>
+                        <table style="{styles.fullPageTableForTestView}" record="test" recordset="{SELECT tc.TestId, tc.Expected, tc.Task, tc.Step, tc.Platform FROM manualTests tc WHERE tc.TestId = tcTable.id}">
+                            <header>
+                                <row>
+                                    <cell><textview style='{styles.centerText}' text="Task"/></cell>
+                                    <cell><textview style='{styles.centerText}' text="Expected"/></cell>
+                                </row>
+                            </header>
+                            <row>
+                                <cell>
+                                <hbox style='{styles.mtCountTask}'>
+                                    <textview  text="{tostring(test.Step)}" />
+                                    <textview  text="{test.Platform}" />
+                                    <textarea style='{styles.centerText}' text="{test.Task}" lines="10"/>
+                                </hbox>
+                                </cell>
+                                <cell>
+                                <hbox style='{styles.mtCountExp}'>
+                                    <textview  text="{tostring(test.Step)}" />
+                                    <textarea style='{styles.centerText}' text="{test.Expected}" lines="10"/>
+                                    <photoview photos='{SELECT p.mediaId FROM manualTestsMedia p WHERE p.TestId = test.TestId AND p.Step = test.Step}'/>
+                                </hbox>
+                                </cell>
+                            </row>
+                        </table>
+                    </popup>
+                </if>
+                <if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = tcTable.id) = 0}'>
                     <linkview id='tcLink' url="{tcTable.link}" text=" Go to test case"/>
+                </if>
                 </if>
             </cell>
             <cell>
