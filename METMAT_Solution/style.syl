@@ -164,6 +164,36 @@ styles {
         }
     }
 
+    style textboxInHbox{
+        hbox{
+            sizes = 300px ,300px, 300px
+        }
+        textbox{
+            margin { left=20px right=20px }
+            label{
+                margin { left=0px  }
+                textAlign = center
+                position = top
+                width = 200px
+            }
+            control{
+                width = 200px
+                
+            }
+        }
+        dropdown{
+			button{
+				width = 200px
+			}
+            label{
+                margin { left=0px  }
+                textAlign = center
+                position = top
+                width = 200px
+            }
+        }
+    }
+
     style allignContent{
         all{
             verticalAlign  = middle

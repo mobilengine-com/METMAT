@@ -1,4 +1,4 @@
-<Reftab Name="environment" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+<Reftab Name="environment" Push="true" xmlns="http://schemas.mobilengine.com/reftab/v1" >
 	<Columns>		
 		<Column Name="env_name" Type="Text" PrimaryKey="true" NotNull="true"/>
 		<Column Name="tester_email" Type="Text"/>

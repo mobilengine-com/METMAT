@@ -10,26 +10,38 @@
     if (int.Parse(form.edit) == 0) {
         for (let step of form.newTC.rows) {
             let mediaid = null;
+            let exp = step.expect.text.Trim(" ")
+            let task = step.task.text.Trim(" ")
+            let cId = form.createTcId.text.Trim(" ")
+            let nTd = form.newTcDesc.text.Trim(" ")
+            let nTp = form.newTcPrecond.text.Trim(" ")
+            let stepT = step.stepTask.text.Trim(" ")
             if (step.photoUpload.photos.Count() > 0) {
                 Log(step.photoUpload.photos.Single().photoId)
                 mediaid = step.photoUpload.photos.Single().photoId;
             }
-            Log(step.expect.text)
-            Log(step.task.text)
-            db.manualTests.Insert({TestId: form.createTcId.text, Expected: step.expect.text, Task: step.task.text, Step: int.Parse(step.stepTask.text), Photo: mediaid==null?0:1, Platform: step.newTcPlatform.selectedKey})
-            db.test_case.Update({id: form.createTcId.text},{desc: form.newTcDesc.text, PreCond: form.newTcPrecond.text})
+            db.manualTests.Insert({TestId: cId, Expected: exp, Task: task, Step: int.Parse(stepT), Photo: mediaid==null?0:1, Platform: step.newTcPlatform.selectedKey})
+            db.test_case.Update({id: cId},{desc: nTd, PreCond: nTp})
 
             if (mediaid!=null) {
-                db.manualTestsMedia.Insert({TestId: form.createTcId.text, mediaId: mediaid, Step:int.Parse(step.stepTask.text)})
+                db.manualTestsMedia.Insert({TestId: cId, mediaId: mediaid, Step:int.Parse(stepT)})
             }
         }
     }else{
+        let nId = form.newTcId.text.Trim(" ")
+        let nTd = form.newTcDesc.text.Trim(" ")
+        let nTp = form.newTcPrecond.text.Trim(" ")
         if (form.deletedStep == 1) {
-            db.manualTests.DeleteMany({TestId: form.newTcId.text})
-            db.manualTestsMedia.DeleteMany({TestId: form.newTcId.text})
+            db.manualTests.DeleteMany({TestId: nId})
+            db.manualTestsMedia.DeleteMany({TestId: nId})
         }
         for (let step of form.editTC.rows) {
             let mediaid = null;
+            let exp = step.expect.text.Trim(" ")
+            let task = step.task.text.Trim(" ")
+            
+            let stepT = step.stepTask.text.Trim(" ")
+
             if (step.photoUpload.photos.Count() > 0) {
                 Log(step.photoUpload.photos.Single().photoId)
                 mediaid = step.photoUpload.photos.Single().photoId;
@@ -37,23 +49,21 @@
                 Log(step.mediaIdPhoto)
                 mediaid = step.mediaIdPhoto;
             }
-            Log(step.expect.text)
-            Log(step.task.text)
 
-            db.manualTests.InsertOrUpdate({TestId: form.originalTestId, Step: int.Parse(step.stepTask.text)},{TestId: form.newTcId.text, Expected: step.expect.text, Task: step.task.text, Step: int.Parse(step.stepTask.text), Photo: mediaid==null?0:1, Platform: step.newTcPlatform.selectedKey})
+            db.manualTests.InsertOrUpdate({TestId: form.originalTestId, Step: int.Parse(stepT)},{TestId: nId, Expected: exp, Task: task, Step: int.Parse(stepT), Photo: mediaid==null?0:1, Platform: step.newTcPlatform.selectedKey})
 
             if (mediaid!=null) {
-                db.manualTestsMedia.InsertOrUpdate({TestId: form.newTcId.text, Step:int.Parse(step.stepTask.text)},{TestId: form.newTcId.text, mediaId: mediaid, Step:int.Parse(step.stepTask.text)})
+                db.manualTestsMedia.InsertOrUpdate({TestId: nId, Step:int.Parse(stepT)},{TestId: nId, mediaId: mediaid, Step:int.Parse(stepT)})
             }else{
-                db.manualTestsMedia.DeleteMany({TestId: form.newTcId.text, Step:int.Parse(step.stepTask.text)})
+                db.manualTestsMedia.DeleteMany({TestId: nId, Step:int.Parse(stepT)})
             }
         }
         if (form.stfromForm == "testcase_monitor") {
-            db.test_case.Update({id: form.TcId.text},{desc: form.newTcDesc.text, PreCond: form.newTcPrecond.text})
+            db.test_case.Update({id: form.TcId.text},{desc: nTd, PreCond: nTp})
         } else if (form.stfromForm == "testcase_writer"){
-            db.test_to_be_write_done.Update({id: form.originalTestId},{id: form.newTcId.text, label: form.newTcDesc.text, PreCond: form.newTcPrecond.text})
-            db.test_to_be_write_tags.Update({id: form.originalTestId},{id: form.newTcId.text})
-            db.test_to_be_write_tickets.Update({id: form.originalTestId},{id: form.newTcId.text})
+            db.test_to_be_write_done.Update({id: form.originalTestId},{id: nId, label: nTd, PreCond: nTp})
+            db.test_to_be_write_tags.UpdateMany({id: form.originalTestId},{id: nId})
+            db.test_to_be_write_tickets.UpdateMany({id: form.originalTestId},{id: nId})
         }
     }
     }

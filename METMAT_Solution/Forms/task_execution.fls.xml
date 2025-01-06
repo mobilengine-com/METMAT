@@ -3,8 +3,6 @@
 	<declarations>
 		<let id='act_tester' shape='scalar' value='{sysp.user}'/>
 		<let id='open_form' shape='scalar' value='{sysp.dtlFormOpen}'/>
-		<let id='fTestcase' shape='scalar' value='{dd_task_type.selectedKey="t"}'/>
-		<let id='fJira' shape='scalar' value='{dd_task_type.selectedKey="j"}'/>
 		<let id='task_env_table' shape='table' value='{
 			select tsk.guid, tsk.note, tsk.result, tsk.version, tsk.task_id, tsk.env_name, e.env_detail , j.Summary
 				from task tsk 
@@ -43,7 +41,9 @@
 	<!-- <if cond='{params.platformID is NULL or params.platformID=""}'> -->
 	<chapter title="Select platform">
 		<segmentedbutton id='platformID' 
-		choices='{SELECT DISTINCT tsk.platformID from task tsk left join environment env ON tsk.env_name = env.env_name where env.tester_email = sysp.user }'
+		choices='{SELECT DISTINCT tsk.platformID from task tsk left join environment env ON tsk.env_name = env.env_name WHERE CASE
+    	WHEN ch_all_user.checked THEN true
+    	ELSE env.tester_email = sysp.user END }'
 			keyMap="{platformID}" 
 			textMap="{platformID}">
 		</segmentedbutton>
@@ -55,33 +55,18 @@
 
 	<chapter title='Select tested version (default is latest)'>
 		<dropdown id='dd_versionGlobal' 
-			choices='{select tv.version from testedVersion tv where tv.platformID = platformID.selectedKey}' 
+			choices='{select tv.version, tv.addedDate from testedVersion tv where tv.platformID = platformID.selectedKey order by addedDate desc}' 
 			keyMap='{version}' 
 			textMap='{version}'
 			selectedKey='{select tv.version from testedVersion tv where tv.platformID = platformID.selectedKey order by version desc limit 1}' >
 		</dropdown>
 	</chapter>
-	<chapter title='Select task type'>
-		<dropdown id='dd_task_type' 
-			choices='{table key, text ("t", "test case"; "j", "jira ticket")}' 
-			keyMap='{key}' 
-			textMap='{text}'
-			selectedKey='{"t"}' >
-		</dropdown>
-	</chapter>
 	<chapter title='Filter by status'>
-		<if id='if_filter_t' cond='{dd_task_type.selectedKey="t"}'>
-			<checkbox id= 'ch_not_yet_started' text='not yet started' checked='{true}'/>
-			<checkbox id= 'ch_success' text='success' />
-			<checkbox id= 'ch_failed' text='failed'/>
-			<checkbox id= 'ch_not_tested' text='not tested' />
-			<checkbox id= 'ch_bad_testcase' text='bad test case'/>
-			
-		</if>
-		<if id='if_filter_j' cond='{dd_task_type.selectedKey="j"}'>
-			<checkbox id= 'ch_closed' text='closed'/>
-			<checkbox id= 'ch_not_yet_started' text='not yet started' checked='{true}'/>
-		</if>
+		<checkbox id= 'ch_not_yet_started' text='not yet started' checked='{true}'/>
+		<checkbox id= 'ch_success' text='success' />
+		<checkbox id= 'ch_failed' text='failed'/>
+		<checkbox id= 'ch_not_tested' text='not tested' />
+		<checkbox id= 'ch_bad_testcase' text='bad test case'/>
 	</chapter>
 	<chapter title='Filter by user(s)'>
 		<checkbox id='ch_all_user' text='all user'/>
@@ -216,60 +201,9 @@
 							<validation>
 								<validator cond='{case when (dd_result.selectedKey = "success") then tcTimeNeed.number is not NULL AND tcTimeNeed.number > 0 else true END}' message='Give the time needed for run the TC'/>
 							</validation>
-							<!--<declarations><let id="fChanged" shape="scalar" value="{number IS NOT env_table_t_r.note}"/></declarations>-->
 						</numberbox>
 					</cell>
-					
-					<!--<cell>
-						<popup id="edit_popup" title='Edit TC'>
-							<chapter title='TC Info'>
-								<textview id='id_edit_tc' text='{env_table_t_r.task_id}'/>
-								<textbox id='link_edit_tc' text='{select tc.link from test_case tc where tc.id = env_table_t_r.task_id}' >
-									
-								</textbox>  
-								
-
-							</chapter>
-							<submitbutton id="editTcBtn" text="Update TC" closeForm="{false}"></submitbutton>
-						</popup>
-					</cell>-->
-					<!--<cell>
-						<textview text='Tags: '/>
-						<textbox id='tb_tags' hint='Ide kellene tags' >
-							
-						</textbox>
-					</cell>
-					<cell>
-						<linkview id='tb_link' text='{select tc.link from test_case tc where tc.id = selected_tc.text}' url='{select tc.link from test_case tc where tc.id = selected_tc.text}'/>
-							
-						
-					</cell>
-					<cell>
-						<discardbutton text='{"Edit TC"}' nextForm='{forms.tclinks}' confirm='{false}'>
-							<params>
-								<param id='TcId' value='{selected_tc.text}' />
-							</params>
-						</discardbutton>
-					</cell>-->
 				</row>
-				<!--<footer>
-					<row>
-						<cell>
-							<textview text='TC Time Need [min]:'> </textview>
-							
-						</cell>
-						<cell>
-							
-							<numberbox id="tcTimeNeed"> 
-								<declarations><let id="fChanged" shape="scalar" value="{number IS NOT env_table_t_r.note}"/></declarations>
-							</numberbox>
-						</cell>
-						
-					</row>
-				</footer>-->
-			
-				
-
 			</table>
 		</chapter>
 	</if>
@@ -335,19 +269,15 @@
 		where (e.tester_email = act_tester or ch_all_user.checked) and 
 			tsk.platformID = platformID.selectedKey and 
 			((tsk.task_type is "t" and
-			dd_task_type.selectedKey="t" and
-			(if_filter_t.ch_not_yet_started.checked or not (tsk.result is "not yet started")) and
-			(if_filter_t.ch_success.checked or not (tsk.result is "success")) and
-			(if_filter_t.ch_failed.checked or not (tsk.result is "failed")) and
-			(if_filter_t.ch_not_tested.checked or not (tsk.result is "not tested")) and
-			(if_filter_t.ch_bad_testcase.checked or not (tsk.result is "bad test case")) and 
+			(ch_not_yet_started.checked or not (tsk.result is "not yet started")) and
+			(ch_success.checked or not (tsk.result is "success")) and
+			(ch_failed.checked or not (tsk.result is "failed")) and
+			(ch_not_tested.checked or not (tsk.result is "not tested")) and
+			(ch_bad_testcase.checked or not (tsk.result is "bad test case")) and 
 			UPPER(tsk.task_id) LIKE "%" || UPPER(filter_taskid.text) || "%" and 
 			UPPER(tcl.tc_prio) LIKE "%" || UPPER(filter_priority.text) || "%" and
 			UPPER(tcl.tc_impreg) LIKE "%" || UPPER(filter_impreg.text) || "%") or
 			(tsk.task_type is "j" and
-			dd_task_type.selectedKey="j" and
-			(if_filter_j.ch_closed.checked or not (tsk.result is "closed")) and
-			(if_filter_j.ch_not_yet_started.checked or not (tsk.result is "not yet started")) and
 			UPPER(tsk.task_id) LIKE "%" || UPPER(filter_taskid.text) || "%"))
 		}'> <!-- group by tsk.task_id --> <!-- group_concat(tsk.result, ", ") -->
 		<header>
@@ -362,26 +292,15 @@
 					</if>
 				</cell>
 				<cell>
-					<if cond='{dd_task_type.selectedKey is "t"}'>
-						<textview text='priority'/>
-						<textbox id='filter_priority' />
-					</if>
+					<textview text='priority'/>
+					<textbox id='filter_priority' />
 				</cell>  
 				<cell>
-					<if cond='{dd_task_type.selectedKey is "t"}'>
-						<textview text='imp/reg'/>
-						<textbox id='filter_impreg' />
-					</if>
+					<textview text='imp/reg'/>
+					<textbox id='filter_impreg' />
 				</cell>					
 				<cell>
-					<if cond='{true}'>
-						<if cond='{dd_task_type.selectedKey is "t"}'>
-							<textview text='description'/>
-						</if>
-						<if cond='{dd_task_type.selectedKey is "j"}'>
-							<textview text='Summary'/>
-						</if>
-					</if>
+					<textview text='description'/>
 				</cell>
 				<cell>
 					<textview text='results'/>
@@ -400,46 +319,25 @@
 		<row>		
 			<cell>
 			<if cond='{NOT fSelectedTestcase AND NOT fSelectedJira}'>
-				<if cond='{fTestcase = true}'>
 					<addbutton table='env_table_t' text='Select' linkIcon="{NULL}" records='{
 						select tsk.guid, tsk.note, tsk.result, tsk.version, tsk.task_id, tsk.env_name, tsk.env_detail 
 							from task_env_table tsk 
 							where 
 							tsk.task_id = task_list_table_r.task_id and tsk.result = task_list_table_r.allResult
 					}'/>
-				</if>
-				<if cond='{fJira = true}'>
-					<addbutton table='env_table_j' text='Select' records='{
-						select tsk.guid, tsk.note, tsk.result, tsk.task_id  
-							from task_env_table tsk 
-							where 
-							tsk.guid = task_list_table_r.guid
-					}'/>
-				</if>
 			</if>
 			</cell>
 			<cell>		
 				<textview text='{task_list_table_r.task_id}'/>
 			</cell>				
 			<cell>
-				<if cond='{dd_task_type.selectedKey is "t"}'>
-					<textview id='tc_prio' text='{task_list_table_r.tc_prio}'/> 
-				</if>
+				<textview id='tc_prio' text='{task_list_table_r.tc_prio}'/> 
 			</cell>
 			<cell>
-				<if cond='{dd_task_type.selectedKey is "t"}'>
-					<textview id='tc_impreg' text='{task_list_table_r.tc_impreg}'/> 
-				</if>
+				<textview id='tc_impreg' text='{task_list_table_r.tc_impreg}'/> 
 			</cell>
 			<cell>
-				<if cond='{true}'>
-					<if cond='{dd_task_type.selectedKey is "t"}'>
-						<textview text='{task_list_table_r.tc_desc}' /> 
-					</if>
-					<if cond='{dd_task_type.selectedKey is "j"}'>
-						<textview text='{task_list_table_r.Summary}' /> 
-					</if>
-				</if>
+				<textview text='{task_list_table_r.tc_desc}' /> 
 			</cell>
 			<cell>
 				<textview id='tc_allres' text='{task_list_table_r.allResult}'/> 

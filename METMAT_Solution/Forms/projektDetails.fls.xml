@@ -1,0 +1,132 @@
+<form id='projektDetails' menuName='Projekt details' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2" >
+	<header>
+		<submitbutton text="Save" closeForm="{false}"/>
+	</header>
+	<chapter title='Environments'>
+	<hbox style="{styles.textboxInHbox}">
+		<textbox id='env_name'  label='Environment name:' style="{styles.textboxInHbox}"/>
+		<textbox id='env_detail' label='Environment details:' style="{styles.textboxInHbox}"/>
+		<dropdown id='env_tester' 
+			label="Selected user"
+			style="{styles.textboxInHbox}"
+			keyMap='{tester_email}' 
+			textMap='{tester_name}' 
+			choices='{select t.tester_name, t.tester_email from tester t}'>
+		</dropdown>
+		<combinedbutton text="Add new enviromnent">
+			<addbutton records="{SELECT env_name.text env_name, env_tester.selectedKey tester_email, env_tester.selectedText tester_name, env_detail.text env_detail, 1 new}" table="tbEnviromnents"/>
+			<actionbutton>
+				<set value='{""}' target="env_name.text" />
+				<set value='{""}' target="env_detail.text" />
+				<set value='{"None"}' target="env_tester.selectedKey" />
+			</actionbutton>
+		</combinedbutton>
+	</hbox>
+		
+	
+	<table id="tbEnviromnents" record='env' recordset='{loadnewerfromserver:select e.env_name, e.tester_email, e.tester_name, e.env_detail, 0 new from environment e}'>
+		<header>
+			<row>
+				<cell>
+					<textview text='Environment name'/>
+				</cell>
+				<cell>
+					<textview text='Tester name'/>
+				</cell>
+				<cell>
+					<textview text='Tester email'/>
+				</cell>
+				<cell>
+					<textview text='Details'/>
+				</cell>
+			</row>
+		</header>
+		<row>
+			<declarations>
+				<let id="new" shape="scalar" value="{env.new}" />
+				<let id="deleted" shape="scalar" value="{0}" />
+			</declarations>
+			<cell>
+				<textview id="envName" text='{env.env_name}'/>
+			</cell>
+			<cell>
+				<textview id="envTestername" text='{env.tester_name}'/>
+			</cell>
+			<cell>
+				<textview id="envTesterMail" text='{env.tester_email}'/>
+			</cell>
+			<cell>
+				<textview id="envDetail" text='{env.env_detail}'/>
+			</cell>	
+			<cell>
+				<if cond="{deleted = 0}">
+					<actionbutton text="Delete">
+						<set value="{1}" target="deleted" />
+					</actionbutton>
+				</if>
+				<if cond="{deleted = 1}">
+					<actionbutton text="Undo">
+						<set value="{0}" target="deleted" />
+					</actionbutton>
+				</if>
+			</cell>	
+		</row>
+	</table>
+	</chapter>
+	<chapter title="Versions">
+		<hbox style="{styles.textboxInHbox}">
+			<textbox id='ver_name'  label='Version name:' style="{styles.textboxInHbox}"/>
+			<dropdown id='ver_platform' 
+				label="Selected platform"
+				style="{styles.textboxInHbox}"
+				keyMap="{v}"
+				textMap="{v}"
+        	    choices='{["Android", "IOS", "BO", "Wef"]}'/>
+			<combinedbutton text="Add new version">
+				<addbutton records="{SELECT ver_name.text version, ver_platform.selectedKey platformID, 1 new}" table="tbVersions"/>
+				<actionbutton>
+					<set value='{""}' target="ver_name.text" />
+					<set value='{"None"}' target="ver_platform.selectedKey" />
+				</actionbutton>
+			</combinedbutton>
+		</hbox>
+		
+	
+	<table id="tbVersions" record='ver' recordset='{loadnewerfromserver:select e.version, e.platformID, 0 new from testedVersion e}'>
+		<header>
+			<row>
+				<cell>
+					<textview text='Version name'/>
+				</cell>
+				<cell>
+					<textview text='Platform'/>
+				</cell>
+			</row>
+		</header>
+		<row>
+			<declarations>
+				<let id="new" shape="scalar" value="{ver.new}" />
+				<let id="deleted" shape="scalar" value="{0}" />
+			</declarations>
+			<cell>
+				<textview id="verName" text='{ver.version}'/>
+			</cell>
+			<cell>
+				<textview id="verPlatform" text='{ver.platformID}'/>
+			</cell>
+			<cell>
+				<if cond="{deleted = 0}">
+					<actionbutton text="Delete">
+						<set value="{1}" target="deleted" />
+					</actionbutton>
+				</if>
+				<if cond="{deleted = 1}">
+					<actionbutton text="Undo">
+						<set value="{0}" target="deleted" />
+					</actionbutton>
+				</if>
+			</cell>			
+		</row>
+	</table>
+	</chapter>
+</form>
