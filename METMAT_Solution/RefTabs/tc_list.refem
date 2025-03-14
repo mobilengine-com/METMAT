@@ -1,4 +1,4 @@
-<Reftab Name="tc_list" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+<Reftab Name="tc_list" xmlns="http://schemas.mobilengine.com/reftab/v1" Push="true" >
 	<Columns>
 		<Column Name="tc_id" Type="Text" />
 		<Column Name="tc_prio" Type="Text" />
@@ -6,5 +6,6 @@
 		<Column Name="tc_desc" Type="Text" />
 		<Column Name="last_status" Type="Text" />
 		<Column Name="last_sent_in" Type="Date" />
+		<Column Name="note" Type="Text" />
 	</Columns>
 </Reftab>

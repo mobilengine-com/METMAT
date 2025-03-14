@@ -1,6 +1,11 @@
 <form id='task_executionNew' menuName='Execute task New' title='{"Task list"}' platforms="web"
     xmlns="http://schemas.mobilengine.com/fls/v2">
-
+    <declarations>
+        <let id='open_form' shape='scalar' value='{sysp.dtlFormOpen}'/>
+    </declarations>
+    <header>
+    <submitbutton text="Save" nextForm="{forms.task_executionNew}"></submitbutton>
+    </header>
     <chapter title="Select platform">
         <segmentedbutton id='platformID'
             choices='{SELECT DISTINCT tsk.platformID from task tsk left join environment env ON tsk.env_name = env.env_name WHERE CASE
@@ -29,7 +34,7 @@
         <let id="selected" shape="scalar" value="{0}"/>
     </declarations>
         <if cond="{selected = 1}">
-            <table id="selectedTasks" record="task" recordset='{SELECT "" guid, "" TestId, "" description,"" result, "" version, "" envName, 0 time WHERE false}'>
+            <table id="selectedTasks" record="task" recordset='{SELECT "" guid, "" TestId, "" description,"" result, "" version, "" envName, 0 time, "" note,  "" link WHERE false}'>
                 <header>
                     <row>
                         <cell>
@@ -42,6 +47,9 @@
                             <textview text="Description"/>
                         </cell>
                         <cell>
+                            <textview text="To test case"/>
+                        </cell>
+                        <cell>
                             <textview text="Result"/>
                         </cell>
                         <cell>
@@ -52,6 +60,9 @@
                         </cell>
                         <cell>
                             <textview text="Time needed"/>
+                        </cell>
+                        <cell>
+                            <textview text="Note"/>
                         </cell>
                         <cell>
                             <textview text=""/>
@@ -72,22 +83,41 @@
 
                     </cell>
                     <cell>
-                        <textview text="{task.TestId}"/>
+                        <textview id="id" text="{task.TestId}"/>
                     </cell>
                     <cell>
-                        <textview text="{task.description}"/>
+                        <textview id="description" text="{task.description}"/>
                     </cell>
                     <cell>
-                        <dropdown selectedKey="{task.result}" keyMap='{v}' textMap='{v}' choices='{["not yet started", "success", "failed", "not tested", "bad test case"]}'></dropdown>
+                        <linkview url="{task.link}" text="Go to test"/>
+                        <textbox id="linkText" text="{task.link}"> 
+                        <declarations><let id="fChanged" shape="scalar" value="{text IS NOT task.link}"/></declarations>
+                        </textbox>
                     </cell>
                     <cell>
-                        <textview text="{task.version}"/>
+                        <dropdown id="result" selectedKey="{task.result}" keyMap='{v}' textMap='{v}' choices='{["not yet started", "success", "failed", "not tested", "bad test case"]}'>
+                        <declarations><let id="fChanged" shape="scalar" value="{selectedKey IS NOT task.result}"/></declarations>
+                        </dropdown>
                     </cell>
                     <cell>
-                        <textview text="{task.envName}"/>
+                        <textview id="testedVer" text="{task.version}"/>
                     </cell>
                     <cell>
-                        <numberbox number="{task.time}"/>
+                        <textview id="envName" text="{task.envName}"/>
+                    </cell>
+                    <cell>
+                        <numberbox id="runTime" number="{task.time}"> 
+                            <validation>
+                                <validator cond='{runTime.number is not NULL}' message="Required"></validator>
+                            </validation>
+                        </numberbox>
+                    </cell>
+                    <cell>
+                        <textbox id="note" text="{task.note}"> 
+                            <validation>
+                                <validator cond='{(note.text is not NULL ) OR (result.selectedKey IS NOT "bad test case")}' message="Required"></validator>
+                            </validation>
+                        </textbox>
                     </cell>
                 </row>
             </table>
@@ -101,8 +131,10 @@
                             tsk.note, 
                             tsk.time_need,
                             tsk.result,
-                            tsk.version
-		                from task tsk
+                            tsk.version,
+                            tc.link,
+                            tc.desc
+		                from task tsk INNER JOIN test_case tc  ON tc.id = tsk.task_id
                         WHERE   tsk.result = ddstatus.selectedKey AND
                                 tsk.platformID = platformID.selectedKey AND
                                 tsk.env_name IN (SELECT env.env_name FROM environment env WHERE CASE WHEN ch_all_user.checked THEN true ELSE env.tester_email = sysp.user END)
@@ -119,6 +151,9 @@
                             <textview text="Description"/>
                         </cell>
                         <cell>
+                            <textview text="To test case"/>
+                        </cell>
+                        <cell>
                             <textview text="Result"/>
                         </cell>
                         <cell>
@@ -131,6 +166,9 @@
                             <textview text="Time needed"/>
                         </cell>
                         <cell>
+                            <textview text="Note"/>
+                        </cell>
+                        <cell>
                             <textview text=""/>
                         </cell>
                     </row>
@@ -141,11 +179,13 @@
                             <combinedbutton text="Select">
                                 <addbutton records='{SELECT task.guid guid, 
                                                             task.task_id TestId, 
-                                                            task.note description, 
+                                                            task.desc description, 
                                                             task.result , 
                                                             dd_versionGlobal.selectedKey version, 
                                                             task.env_name envName, 
-                                                            toint(task.time_need) time
+                                                            toint(task.time_need) time,
+                                                            task.note,
+                                                            task.link
                                                     }' table="selectedTasks" />
                                 <actionbutton>
                                     <set value="{1}" target="selected" />
@@ -157,7 +197,20 @@
                         <textview text="{task.task_id}"/>
                     </cell>
                     <cell>
-                        <textview text="{task.note}"/>
+                        <textview text="{task.desc}"/>
+                    </cell>
+                    <cell>
+                        <if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task.task_id) > 0}'>
+						    <discardbutton text='Go to manual test' id="totestWrite" nextForm='{forms.manualTestWriter}'> 
+                            <params>
+                                <param id='editTestId' value='{task.task_id}'/>
+                                <param id='fromForm' value='{"task_executionNew"}'/>
+                            </params>
+                            </discardbutton>
+					    </if>
+					    <if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task.task_id) = 0}'>
+                    	    <linkview id='tcLink' url="task.link" text=" Go to test"/>
+                	    </if>
                     </cell>
                     <cell>
                         <textview text="{task.result}"/>
@@ -171,8 +224,11 @@
                     <cell>
                         <textview text="{task.time_need}"/>
                     </cell>
+                    <cell>
+                        <textview text="{task.note}"/>
+                    </cell>
                 </row>
             </table>
         </if>
-    </chapter>
+    </chapter> 
 </form>

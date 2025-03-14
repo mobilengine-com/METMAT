@@ -4,8 +4,13 @@
 		<let id="letpage" shape="scalar" value='{0}'/>
 		<let id="adntc" shape="scalar" value= '{false}'/>
 		<let id='defaultCheckboxState' shape='scalar' access='private' value='{false}'/>
-		<let id="testCount" shape="scalar" value='{SELECT Count(tcs.id) FROM test_case tcs}' />
+		<let id="testCount" shape="scalar" value='{SELECT Count(tcs.id) FROM selectedTestsTable tcs }' />
 		<let id="iLabelEditedRows" shape="scalar" value="{0}" />
+		<let id="iLabelDeletedRows" shape="scalar" value="{0}" />
+		<let id="selectedTestsTable" shape="table" value='{loadNewerFromServer:SELECT tcst.id, tcst.desc, tcst.platform, tcst.link, tcst.time, formatDtl(tcst.lastAssigned, (dtf yyyy"-"MM"-"dd" "HH":"mm":"ss)) lastAssigned FROM test_case tcst where UPPER(tcst.id) LIKE "%" || UPPER(tcs.filter_taskid.text) || "%" and 
+	UPPER(tcst.desc) LIKE "%" || UPPER(tcs.filter_desc.text) || "%" and
+	(tcst.platform = tcs.filter_platform.selectedKey OR tcs.filter_platform.selectedKey IS NULL) and
+	(exists (select t.tag from test_case_tag t where t.tag = tcs.tag_filter.text and t.tc_id = tcst.id) OR tcs.tag_filter.text="") order by id}' />
 	</declarations>
 	<header>
 		<discardbutton text="X"/>
@@ -37,6 +42,9 @@
 		<if cond="{iLabelEditedRows>0}">
 			<submitbutton id="prMove" text="Process move" closeForm="{false}"></submitbutton>
 		</if>
+		<if cond="{iLabelDeletedRows>0}">
+			<submitbutton id="prDelete" text="Process delete" closeForm="{false}"></submitbutton>
+		</if>
 		<table id="assignedTb" label="Assigned tests" record="at" recordset="{loadNewerFromServer:SELECT ta.guid, ta.task_id, ta.result, ta.platformID FROM task ta where ta.env_name = selected_environment.selectedKey order by task_id}">
 			
 			<header>
@@ -45,6 +53,7 @@
 					<cell><textview text='Result'/></cell>
 					<cell><textview text='Platform'/></cell>
 					<cell><textview text='Move task'/></cell>
+					<cell><textview text='Delete task'/></cell>
 				</row>
 			</header>
 			 <row>
@@ -74,14 +83,27 @@
 						</hbox>
 					</if>
 				</cell>
+				<cell>
+				<if cond="{not delete}">
+						<actionbutton text="Delete test">
+							<set value="{true}" target="delete" />
+							<set value="{iLabelDeletedRows+1}" target="iLabelDeletedRows" />
+						</actionbutton>
+					</if>
+					<if cond="{delete}">
+						<hbox style="{styles.hbox100w}">
+						<actionbutton text="Undo">
+							<set value="{false}" target="delete" />
+							<set value="{iLabelDeletedRows-1}" target="iLabelDeletedRows" />
+						</actionbutton>
+						</hbox>
+					</if>
+				</cell>
 			 </row>
 		</table>
 	</if>
-	<table id='tcs' label='TCs' record='tcs' recordset='{loadNewerFromServer:SELECT tcs.id, tcs.desc, tcs.platform, tcs.link, tcs.time, formatDtl(tcs.lastAssigned, (dtf yyyy"-"MM"-"dd" "HH":"mm":"ss)) lastAssigned FROM test_case tcs where UPPER(tcs.id) LIKE "%" || UPPER(filter_taskid.text) || "%" and 
-	UPPER(tcs.desc) LIKE "%" || UPPER(filter_desc.text) || "%" and
-	(tcs.platform = filter_platform.selectedKey OR filter_platform.selectedKey IS NULL) and
-	(exists (select t.tag from test_case_tag t where t.tag = tag_filter.text and t.tc_id = tcs.id) OR tag_filter.text="") 
-	order by id limit 20 offset letpage*20}'>
+	
+	<table id='tcs' label='TCs' record='tcs' recordset='{ SELECT stt.id, stt.desc, stt.platform, stt.link, stt.time, stt.lastAssigned FROM selectedTestsTable stt  limit 20 offset letpage*20}'>
 		<header>
 			<row>
 				<cell>

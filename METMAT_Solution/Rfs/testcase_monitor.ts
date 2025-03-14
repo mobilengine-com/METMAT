@@ -37,8 +37,8 @@
         for(var row of form.tcTable.rows){
             if (row.edited && row.delete) {
                 Log("Delete "+row.tcId.text)
-                db.test_case_tag.DeleteMany({tc_id:row.tcId.text})
-                db.test_case.Delete({id:row.tcId.text})
+                db.test_case_tag.DeleteMany({tc_id:row.tcId.text, platform: row.tcPlatform.text})
+                db.test_case.Delete({id:row.tcId.text, platform: row.tcPlatform.text})
             }else if (row.edited) {
                 Log("Edited "+row.tcId.text)
                 db.test_case.Update({id:row.tcId.text},{

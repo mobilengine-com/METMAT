@@ -15,10 +15,10 @@
         <param id="currentLastStep" />
         <param id="fromForm" />
 	</params>
-    <if cond='{stfromForm = "testcase_monitor"}'>
+    <if cond='{(stfromForm = "testcase_monitor") or (stfromForm = "badtestcaselist") or (stfromForm = "task_executionNew")}'>
         <textview id="TcId" style='{styles.tcWriteId}' label="Test id" text='{Select COALESCE(params.editTestId, "")}' />
     </if>
-    <if cond='{not (stfromForm = "testcase_monitor")}'>
+    <if cond='{not (stfromForm = "testcase_monitor") or not (stfromForm = "badtestcaselist") or not (stfromForm = "task_executionNew")}'>
         <textbox id="newTcId" style='{styles.tcWriteId}' label="Test id" text='{Select COALESCE(params.editTestId, "")}' />
     </if>
     <if cond='{SELECT stfromForm IS NULL}'>

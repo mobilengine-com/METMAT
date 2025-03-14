@@ -33,7 +33,7 @@
 		<let id='holiday' shape='scalar' value='{Select Count(adHoli.id) From holidayAdvancedInPrediod adHoli Where adHoli.user = "ALL"}'/>
 		<let id='hrAvgTestRuntime' shape='scalar' value='{Select tofloat(envVal.value) From environmentValues envVal Where envVal.name = "hrAvgTestRuntime"}'/>
 
-		<let id='DoneTests' shape='scalar' value='{Select COUNT(tk.result) From task tk Where tk.result = "success" OR tk.result = "failed"}'/>
+		<let id='DoneTests' shape='scalar' value='{Select COUNT(tk.result) From task tk Where tk.result = "success" OR tk.result = "failed" OR tk.result = "bad test case"}'/>
 		<let id='remainingTests' shape='scalar' value='{Select COUNT(tk.result) From task tk Where tk.result = "not yet started"}'/>
 		<let id='testCount' shape='scalar' value='{Select COUNT(tk.result) From task tk}'/>
 
@@ -49,7 +49,7 @@
 
 		<let id="finalTesterForWriting" shape="scalar" value="{SELECT COALESCE(dbTesterForWriting, testersCount)}" />
 		<let id='requiredWorkingHoursToWrite' shape='scalar' value='{SELECT ((totalTestToWriteCount - totalTestWriteDone) * hrAvgTestRuntime)/finalTesterForWriting+1/2}'/>
-		<let id='roundDayToWrite' shape='scalar' value='{Select case when toint((requiredWorkingHoursToWrite)*100)%100 = 0 then requiredWorkingHoursToWrite else toint(requiredWorkingHoursToWrite)+1 end}'/>
+		<let id='roundDayToWrite' shape='scalar' value='{Select case when toint((requiredWorkingHoursToWrite/8)*100)%100 = 0 then requiredWorkingHoursToWrite/8 else toint(requiredWorkingHoursToWrite/8)+1 end}'/>
 		<let id="daysToWrite" shape="scalar" value="{SELECT toint(roundDayToWrite)}" />
 		<let id="weekendsToWrite" shape="scalar" value="{SELECT CASE WHEN daysToWrite/5*2 = 0 THEN 0 ELSE (daysToWrite/5*2)+1 END}" />
 		<let id='endDateOfTestWriting' shape='scalar' value='{Select ADDDAY(sysp.dtlFormOpen, weekendsToWrite+daysToWrite+holiday)}'/>
@@ -111,6 +111,7 @@
 	</if>
 	
 	<chapter title='Test run finish date'>
+		<textview text='{"All selected test count: " || tostring(testCount)}'/>
 		<textview text='{"Tester count who is testing: " || tostring(finalTesterForTesting)}'/>
 		<textview text='{"Planned finish date: " || tostring(finishYearOfTestRunning)||"-"|| tostring(finishMonthOfTestRunning)||"-"||tostring(finishDayOfTestRunning)}'/>
 		<textview text='{"Remaining test count: " || tostring(remainingTests)}'/>
@@ -126,7 +127,7 @@
 		<textview text='{"Tester count who is writeing tests: " || tostring(dbTesterForWriting)}'/>
 		<textview text='{"Planned finish date: " || tostring(finishYearOfTestWriting)||"-"|| tostring(finishMonthOfTestWriting)||"-"||tostring(finishDayOfTestWriting)}'/>
 		<textview text='{"Remaining to write test count: "||toString(totalTestToWriteCount - totalTestWriteDone)}'/>
-		<textview text='{"Required working days to write tests: " || tostring(requiredWorkingHoursToWrite)}'/>
+		<textview text='{"Required working hours to write tests: " || tostring(requiredWorkingHoursToWrite)}'/>
 		<textview text='{"Required rounded working days to write tests: " || tostring(roundDayToWrite)}'/>
 		<textview text='{"Actual finish date with test writing: " || tostring(FORMATDTL( endDateOfTestWritingCalculatedWeekend,(dtf yyyy "-" MM "-" dd)))}'/>
 		<textview text='{"Actual finish date with test writing and 2 week of late preparation: " || tostring(FORMATDTL( endDateOfTestWritingPlusCalculatedWeekend,(dtf yyyy "-" MM "-" dd)))}'/>

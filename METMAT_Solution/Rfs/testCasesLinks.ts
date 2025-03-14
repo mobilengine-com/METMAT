@@ -59,4 +59,13 @@
 			}
 		}
 	}
+	if(form.prDelete.submitter) {
+		Log("DELETE")
+		for(var ob of form.assignedTb.rows){
+			if (ob.delete) {
+				Log("Deleted "+ob.move_task.text)
+				db.task.Delete({guid: ob.move_task_guid.text});
+			}
+		}
+	}
 }

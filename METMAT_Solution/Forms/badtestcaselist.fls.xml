@@ -1,6 +1,6 @@
 <form id='badtestcaselist' menuName='Bad test cases' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
 
-	<table id='badtclist' record='badtc' recordset='{select tsk.task_id, tsk.result, tsk.version, tsk.note from task tsk where tsk.result="bad test case" group by tsk.task_id}'>
+	<table id='badtclist' record='badtc' recordset='{loadNewerFromServer:select tl.tc_id, tl.last_status, tl.note from tc_list tl where tl.last_status="bad test case" group by tl.tc_id}'>
 			<header>
 				<row>
 					<cell>
@@ -10,26 +10,39 @@
 						<textview text='Result'/>
 					</cell>
 					<cell>
-						<textview text='Tested version'/>
+						<textview text='Note'/>
 					</cell>
 					<cell>
-						<textview text='Note'/>
-					</cell>					
+						<textview text=''/>
+					</cell>				
 				</row>           
 			</header>
 			<row>				
 				<cell>
-					<textview id='task_id' text='{badtc.task_id}'/>
+					<textview id='task_id' text='{badtc.tc_id}'/>
 				</cell>
 				<cell>
-					<textview id='result' text='{badtc.result}'/>
-				</cell>
-				<cell>
-					<textview id='testedVersion' text='{badtc.version}'/>
+					<textview id='result' text='{badtc.last_status}'/>
 				</cell>
 				<cell>
 					<textview id='note' text='{badtc.note}'/>
-				</cell>								
+				</cell>
+				<cell>
+					<submitbutton id="fixSubmit" text="Fixed" closeForm="{false}"></submitbutton>
+				</cell>
+				<cell>
+					<if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task_id.text) > 0}'>
+						<discardbutton text='Go to manual test' id="totestWrite" nextForm='{forms.manualTestWriter}'> 
+                        <params>
+                            <param id='editTestId' value='{task_id.text}'/>
+                            <param id='fromForm' value='{"badtestcaselist"}'/>
+                        </params>
+                    </discardbutton>
+					</if>
+					<if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task_id.text) = 0}'>
+                    	<linkview id='tcLink' url="{SELECT tc.link FROM test_case tc WHERE tc.id = task_id.text Limit 1}" text=" Go to link"/>
+                	</if>
+				</cell>						
 			</row>
 		</table>
 </form>

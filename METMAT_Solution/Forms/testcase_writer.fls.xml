@@ -1,5 +1,6 @@
 <form id="testcase_writer" platforms="web" menuName="Test Case Writer"
     xmlns="http://schemas.mobilengine.com/fls/v2">
+    
     <declarations>
         <let id='stLoggedUserRole' shape='scalar'
             value='{
@@ -19,6 +20,7 @@
         <let id="unfinishedCategoryCount" shape="scalar" value="{loadNewerFromServer:SELECT COUNT(tcc.category) FROM test_to_be_write_category tcc WHERE NOT(tcc.finished = 1)}" />
         <let id="saveEdit" shape="scalar" value="{false}" />
     </declarations>
+    <header></header>
     <if id="adminPanel" cond='{stLoggedUserRole == "Admin"}'>
         <hbox style="{styles.hbox100w}">
             <combinedbutton text="Add new category">

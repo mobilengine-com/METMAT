@@ -92,7 +92,7 @@
 		</hbox>
 		
 	
-	<table id="tbVersions" record='ver' recordset='{loadnewerfromserver:select e.version, e.platformID, 0 new from testedVersion e}'>
+	<table id="tbVersions" record='ver' recordset='{loadnewerfromserver:select e.version, e.platformID, 0 new from testedVersion e ORDER BY version}'>
 		<header>
 			<row>
 				<cell>
