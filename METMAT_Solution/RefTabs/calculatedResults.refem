@@ -1,0 +1,14 @@
+<Reftab Name="calculatedResults" Push="true" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>		
+		<Column Name="Type" Type="Text"/>
+		<Column Name="participate" Type="Float"/>
+		<Column Name="totalCount" Type="Integer"/>
+		<Column Name="doneCount" Type="Integer"/>
+		<Column Name="leftCount" Type="Integer"/>
+        <Column Name="requiredHours" Type="Float"/>
+        <Column Name="requiredDays" Type="Integer" />
+		<Column Name="finishDate" Type="Date" />
+        <Column Name="finishDateExtended" Type="Date" />
+		<Column Name="plannedFinish" Type="Date" />
+	</Columns>
+</Reftab>

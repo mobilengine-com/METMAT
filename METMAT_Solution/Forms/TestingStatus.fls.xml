@@ -11,8 +11,11 @@
         }' />
         <let id="editOrder" shape="scalar" value="{false}" />
     </declarations>
-   
+    
     <if id="adminPanel" cond='{stLoggedUserRole == "Admin"}'>
+        <chapter title="">
+            <submitbutton text="Start new test stage" id="startNew"/>
+        </chapter>
         <hbox style="{styles.hbox100w}">
             <submitbutton text="Save changes" id="saveChange"/>
             <if cond="{ not editOrder}">

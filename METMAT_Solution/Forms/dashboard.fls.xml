@@ -27,37 +27,7 @@
 		<let id='finishYearOfTestWriting' shape='scalar' value='{Select envVal.value From environmentValues envVal Where envVal.name = "finishYearOfTestWriting"}'/>
 		<let id='finishMonthOfTestWriting' shape='scalar' value='{Select envVal.value From environmentValues envVal Where envVal.name = "finishMonthOfTestWriting"}'/>
 		<let id='finishDayOfTestWriting' shape='scalar' value='{Select envVal.value From environmentValues envVal Where envVal.name = "finishDayOfTestWriting"}'/>
-
-		<let id='holidayAdvancedInPrediod' shape='table' value='{Select h.id, h.dateFrom, h.user From holidays h Where ADDDAY(sysp.dtlFormOpen, toint(weekendsToWrite+daysToWrite)) >= h.dateFrom AND h.dateFrom >= sysp.dtlFormOpen}'/>
 		
-		<let id='holiday' shape='scalar' value='{Select Count(adHoli.id) From holidayAdvancedInPrediod adHoli Where adHoli.user = "ALL"}'/>
-		<let id='hrAvgTestRuntime' shape='scalar' value='{Select tofloat(envVal.value) From environmentValues envVal Where envVal.name = "hrAvgTestRuntime"}'/>
-
-		<let id='DoneTests' shape='scalar' value='{Select COUNT(tk.result) From task tk Where tk.result = "success" OR tk.result = "failed" OR tk.result = "bad test case"}'/>
-		<let id='remainingTests' shape='scalar' value='{Select COUNT(tk.result) From task tk Where tk.result = "not yet started"}'/>
-		<let id='testCount' shape='scalar' value='{Select COUNT(tk.result) From task tk}'/>
-
-		<let id="finalTesterForTesting" shape="scalar" value="{SELECT tofloat(COALESCE(dbTesterForTesting, testersCount))}" />
-		<let id='requiredWorkingHours' shape='scalar' value='{SELECT case when remainingTests = 0 THEN tofloat(0) ELSE ((remainingTests) * hrAvgTestRuntime)/finalTesterForTesting END}'/>
-		<let id="corrigated_req_hour" shape="scalar" value='{Select case when requiredWorkingHours-remains_from_today_hour > 0 THEN requiredWorkingHours-remains_from_today_hour ELSE 0 END}' />
-		<let id='roundDay' shape='scalar' value='{Select case when toint((corrigated_req_hour/8)*100)%100 = 0 then corrigated_req_hour/8 else toint(corrigated_req_hour/8)+1 end}'/>
-		<let id='endDate' shape='scalar' value='{Select ADDDAY(sysp.dtlFormOpen, toint(roundDay+holiday+roundDay/5*2))}'/>
-		<let id='endDateCalculatedWeekend' shape='scalar' value='{Select case when dayofweek(endDate) = 0 then ADDDAY(endDate, 1) when dayofweek(endDate) = 6 then ADDDAY(endDate, 2) else endDate End}'/>
-
-		<let id="totalTestToWriteCount" shape="scalar" value="{Select SUM(tw.planned_count) From test_to_be_write_category tw}"/>
-		<let id="totalTestWriteDone" shape="scalar" value='{Select COUNT(td.id) From test_to_be_write_done td WHERE td.status = "Done"}' />
-
-		<let id="finalTesterForWriting" shape="scalar" value="{SELECT COALESCE(dbTesterForWriting, testersCount)}" />
-		<let id='requiredWorkingHoursToWrite' shape='scalar' value='{SELECT ((totalTestToWriteCount - totalTestWriteDone) * hrAvgTestRuntime)/finalTesterForWriting+1/2}'/>
-		<let id='roundDayToWrite' shape='scalar' value='{Select case when toint((requiredWorkingHoursToWrite/8)*100)%100 = 0 then requiredWorkingHoursToWrite/8 else toint(requiredWorkingHoursToWrite/8)+1 end}'/>
-		<let id="daysToWrite" shape="scalar" value="{SELECT toint(roundDayToWrite)}" />
-		<let id="weekendsToWrite" shape="scalar" value="{SELECT CASE WHEN daysToWrite/5*2 = 0 THEN 0 ELSE (daysToWrite/5*2)+1 END}" />
-		<let id='endDateOfTestWriting' shape='scalar' value='{Select ADDDAY(sysp.dtlFormOpen, weekendsToWrite+daysToWrite+holiday)}'/>
-		<let id='endDateOfTestWritingCalculatedWeekend' shape='scalar' value='{Select case when dayofweek(endDateOfTestWriting) = 0 then ADDDAY(endDateOfTestWriting, 1) when dayofweek(endDateOfTestWriting) = 6 then ADDDAY(endDateOfTestWriting, 2) else endDateOfTestWriting End}'/>
-
-		<let id='endDateOfTestWritingPlusExtraTime' shape='scalar' value='{Select ADDDAY(endDateOfTestWriting, 14)}'/>
-		<let id='endDateOfTestWritingPlusCalculatedWeekend' shape='scalar' value='{Select case when dayofweek(endDateOfTestWritingPlusExtraTime) = 0 then ADDDAY(endDateOfTestWritingPlusExtraTime, 1) when dayofweek(endDateOfTestWritingPlusExtraTime) = 6 then ADDDAY(endDateOfTestWritingPlusExtraTime, 2) else endDateOfTestWritingPlusExtraTime End}'/>
-
 		<let id='plannedFinishDate' shape='scalar' value='{TODATE(toint(GETYEAR(sysp.dtlFormOpen)), toint(finishMonthOfTestRunning), toint(finishDayOfTestRunning),0,0,0)}'/>
 
 		<let id='tbTestData' shape='table' value='{select  ph.date, ph.imp_done, ph.imp_total, ph.tc_exec_done, ph.tc_exec_total, ph.sum_done, ph.tester_number, ph.exp_end_of_testing
@@ -87,51 +57,42 @@
 		}'/>
 		<let id='count_rows_ph' shape='scalar' value='{select count(pht.date) from progress_history_table pht}'/>
 	</declarations>
-	<if id='debug_hide' cond='{stLoggedUserRole == "Admin"}'>
-		<checkbox label="Debug tool" id="debug"/>
-	</if>
-	<if cond="{debug_hide.debug.checked}">
-		<chapter title="Test">
-		<textview text='{"endDateOfTestWriting: "||toString(endDateOfTestWriting)}' />
-		<textview text='{"endDateOfTestWritingCalculatedWeekend: "||toString(endDateOfTestWritingCalculatedWeekend)}' />
-		<textview text='{"weekendsToWrite: "||toString(weekendsToWrite)}' />
-		<textview text='{"holiday: "||toString(holiday)}' />
-		<textview text='{"daysToWrite: "||toString(daysToWrite)}' />
-		<textview text='{"roundDayToWrite: "||toString(roundDayToWrite)}' />
 
-		<textview text="{toString(holiday)}" />
-		<table record="debug" recordset="{SELECT c.id, c.dateFrom, c.user FROM holidayAdvancedInPrediod c}">
-			<row>
-				<cell><textview text="{debug.id}"/></cell>
-				<cell><textview text="{debug.user}"/></cell>
-				<cell><textview text="{toString(debug.dateFrom)}"/></cell>
-			</row>
-		</table>
-	</chapter>
-	</if>
+<header>
+</header>
 	
 	<chapter title='Test run finish date'>
-		<textview text='{"All selected test count: " || tostring(testCount)}'/>
-		<textview text='{"Tester count who is testing: " || tostring(finalTesterForTesting)}'/>
-		<textview text='{"Planned finish date: " || tostring(finishYearOfTestRunning)||"-"|| tostring(finishMonthOfTestRunning)||"-"||tostring(finishDayOfTestRunning)}'/>
-		<textview text='{"Remaining test count: " || tostring(remainingTests)}'/>
-		<textview text='{"Required working hours: " || tostring(requiredWorkingHours)}'/>
-		<textview text='{"Required working days: " || tostring(roundDay)}'/>
-		<textview text='{"Actual finish date: " || tostring(FORMATDTL( endDateCalculatedWeekend,(dtf yyyy "-" MM "-" dd)))}'/>
-		<textview text='{"Progress: %"|| tostring(toint((tofloat(DoneTests)/tofloat(testCount))*100))}'/>
+	<declarations>
+		<let id="result" shape="table" value='{loadNewerFromServer:SELECT cr.plannedFinish, cr.doneCount, cr.totalCount, cr.participate, cr.leftCount, cr.requiredHours, cr.requiredDays, cr.finishDate FROM calculatedResults cr WHERE cr.Type = "Run"}' />
+	</declarations>
+		<textview text='{"All selected test count: " || (SELECT tostring(r.totalCount) FROM result r)}'/>
+		<textview text='{"Tester count who is testing: " || (SELECT tostring(r.participate) FROM result r)}'/>
+		<textview text='{"Planned finish date: " || (SELECT toString(FORMATDTL(r.plannedFinish,(dtf yyyy "-" MM "-" dd))) FROM result r)}'/>
+		<textview text='{"Remaining test count: " || (SELECT tostring(r.leftCount) FROM result r)}'/>
+		<textview text='{"Required working hours: " || (SELECT tostring(r.requiredHours) FROM result r)}'/>
+		<textview text='{"Required working days: " || (SELECT tostring(r.requiredDays) FROM result r)}'/>
+		<textview text='{"Actual finish date: " || (SELECT tostring(FORMATDTL(r.finishDate,(dtf yyyy "-" MM "-" dd))) FROM result r)}'/>
+		<textview text='{"Progress: %"|| (SELECT tostring(toint((tofloat(r.doneCount)/tofloat(r.totalCount))*100)) FROM result r)}'/>
+		<submitbutton text="Recalculate" closeForm="{false}" id="recRun"/>
+		<submitbutton text="Save current date as planned finish date" closeForm="{false}" id="savePlannedRun"/>
 	</chapter>
 
 	<chapter title="Testcase write finish date">
 		
-		<textview text='{tostring(hrAvgTestRuntime)}'/>
-		<textview text='{"Tester count who is writeing tests: " || tostring(dbTesterForWriting)}'/>
-		<textview text='{"Planned finish date: " || tostring(finishYearOfTestWriting)||"-"|| tostring(finishMonthOfTestWriting)||"-"||tostring(finishDayOfTestWriting)}'/>
-		<textview text='{"Remaining to write test count: "||toString(totalTestToWriteCount - totalTestWriteDone)}'/>
-		<textview text='{"Required working hours to write tests: " || tostring(requiredWorkingHoursToWrite)}'/>
-		<textview text='{"Required rounded working days to write tests: " || tostring(roundDayToWrite)}'/>
-		<textview text='{"Actual finish date with test writing: " || tostring(FORMATDTL( endDateOfTestWritingCalculatedWeekend,(dtf yyyy "-" MM "-" dd)))}'/>
-		<textview text='{"Actual finish date with test writing and 2 week of late preparation: " || tostring(FORMATDTL( endDateOfTestWritingPlusCalculatedWeekend,(dtf yyyy "-" MM "-" dd)))}'/>
-		<textview text='{"Progress: %"|| tostring(toint((tofloat(totalTestWriteDone)/tofloat(totalTestToWriteCount))*100))}'/>
+	<declarations>
+		<let id="resultW" shape="table" value='{loadNewerFromServer:SELECT cr.plannedFinish, cr.doneCount, cr.totalCount, cr.participate, cr.leftCount, cr.requiredHours, cr.requiredDays, cr.finishDate, cr.finishDateExtended FROM calculatedResults cr WHERE cr.Type = "Write"}' />
+	</declarations>
+
+		<textview text='{"Tester count who is writeing tests: " || (SELECT tostring(cr.participate) FROM resultW cr)}'/>
+		<textview text='{"Planned finish date: " || (SELECT toString(FORMATDTL(cr.plannedFinish,(dtf yyyy "-" MM "-" dd))) FROM resultW cr)}'/>
+		<textview text='{"Remaining to write test count: "||(SELECT toString(cr.leftCount) FROM resultW cr)}'/>
+		<textview text='{"Required working hours to write tests: " || (SELECT tostring(cr.requiredHours) FROM resultW cr)}'/>
+		<textview text='{"Required rounded working days to write tests: " || (SELECT tostring(cr.requiredDays) FROM resultW cr)}'/>
+		<textview text='{"Actual finish date with test writing: " || (SELECT tostring(FORMATDTL(cr.finishDate,(dtf yyyy "-" MM "-" dd))) FROM resultW cr)}'/>
+		<textview text='{"Actual finish date with test writing and 2 week of late preparation: " || (SELECT tostring(FORMATDTL(cr.finishDateExtended,(dtf yyyy "-" MM "-" dd))) FROM resultW cr)}'/>
+		<textview text='{"Progress: %"|| (SELECT tostring(toint((tofloat(r.doneCount)/tofloat(r.leftCount))*100)) FROM resultW r)}'/>
+		<submitbutton text="Recalculate" closeForm="{false}" id="recWrite"/>
+		<submitbutton text="Save current date as planned finish date" closeForm="{false}" id="savePlannedWrite"/>
 	</chapter>
 	<chapter title='Progress history'>
 			<table id='progress' record='progress_r' recordset='{

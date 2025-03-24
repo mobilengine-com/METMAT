@@ -1,7 +1,5 @@
 ﻿// noinspection JSUnusedGlobalSymbols
 
-export {};
-
 declare global {
 
 /** Boolean value */
@@ -451,27 +449,6 @@ class list extends Array {
 	/** Initializes a new list object. */
 	static New(): list;
 }
-interface Array<T> {
-	/** Initializes a new list object based this list. */
-	Clone(): list;
-	/** Adds an object to the end of the list. */
-	Add(rvItem: any): void;
-	/** Gets the number of items in the list. */
-	Count(): number;
-	/** Retrieves the item in the list in the specified position. The [] operator can also be used for this purpose. */
-	GetAt(index: number): any;
-	/** Sets the item in the list in the specified position. The [] operator can also be used for this purpose. */
-	SetAt(index: number, rvItem: any): void;
-	/** Removes and returns the item at the specified index. */
-	RemoveAt(index: number): any;
-	/** Returns the single element of the list. An error occurs if the list is empy or contains more elements. */
-	Single(): any;
-	/** Returns the single element of the list or null if the list is empty. An error occurs if the list contains more elements. */
-	SingleOrDefault(): any;
-	/** Returns the contents of the list and the other list in a new list. */
-	Concat(other: list): list;
-}
-
 /** Represents a list of labelled values. Values are labelled with strings. Values can be of any type (rv). */
 class map extends Object {
 	/** Initializes a new map object. */
@@ -857,6 +834,8 @@ interface CompanyMessages {
 }
 }
 
+export {}
+
 declare global {
 
     interface map {
@@ -864,7 +843,7 @@ declare global {
     }
 
     interface __db_type {
-        tracking: table
+        tracking: __tracking_type
     }
 
     interface __location_type {
@@ -876,16 +855,57 @@ declare global {
     }
     
     interface __form_info {
-        formn: string;
-        platform: string;
-        resultId: number;
-        dtuSubmit: dtu;
-        dtlSubmit: dtl;
-        user: __user_type;
-        location: __location_type;
+        readonly formn: string;
+        readonly platform: string;
+        readonly resultId: number;
+        readonly dtuSubmit: dtu;
+        readonly dtlSubmit: dtl;
+        readonly user: __user_type;
+        readonly location: __location_type;
+        readonly autoSubmit: boolean;
     }
 
-    class __form_type extends map {
+    interface __form_base_type {
+        readonly info: __form_info;
+
+        /**
+         * @deprecated This is only available for android form results. Use the field on form.info instead, that works across all platforms.
+         */
+        readonly formn: string;
+
+        /**
+         * @deprecated This is only available for android form results. Use the field on form.info instead, that works across all platforms.
+         */
+        readonly platform: string;
+
+        /**
+         * @deprecated This is only available for android form results. Use the field on form.info instead, that works across all platforms.
+         */
+        readonly resultId: number;
+
+        /**
+         * @deprecated This is only available for android form results. Use the field on form.info instead, that works across all platforms.
+         */
+        readonly dtuSubmit: dtu;
+
+        /**
+         * @deprecated This is only available for android form results. Use the field on form.info instead, that works across all platforms.
+         */
+        readonly dtlSubmit: dtl;
+
+        /**
+         * @deprecated This is only available for android form results. Use the field on form.info instead, that works across all platforms.
+         */
+        readonly user: __user_type;
+
+        /**
+         * @deprecated This is only available for android form results. Use the field on form.info instead, that works across all platforms.
+         */
+        readonly location: __location_type;
+    }
+
+
+    class __form_type extends map implements __form_base_type {
         info: __form_info;
 
         /**
@@ -926,26 +946,34 @@ declare global {
 
     const form: __form_type;
 
-    const params: any;
+    const params: any | TaskResult
 
     const dacs: any;
 
+    type __DacsOutArray<T> = Array<T> & {
+        AddNew(): T
+        Add(p: T): void
+    }
+    type __DacsOutContentOnlyArray<T> = Array<T> & {
+        Add(p: T): void
+    }
+
     interface __report_input_type {
-        Name: string;
-        ReportviewId: string;
-        AttachmentName: string;
-        DtuT0: dtu;
-        DtuArchive: dtu;
-        ResultIdList: number[] | null;
-        Params: any;
+        readonly Name: string;
+        readonly ReportviewId: string;
+        readonly AttachmentName: string;
+        readonly DtuT0: dtu;
+        readonly DtuArchive: dtu;
+        readonly ResultIdList: number[] | null;
+        readonly Params: any;
     }
 
     const report: __report_input_type;
 
     interface __package_type {
-        name: string;
-        displayName: string;
-        version: string;
+        readonly name: string;
+        readonly displayName: string;
+        readonly version: string;
     }
     
     interface __iep_type {
@@ -956,9 +984,15 @@ declare global {
         readonly dacsNames: string[];
     }
 
+    interface __systeminfo_package_type {
+        readonly name: string;
+        readonly displayName: string;
+        readonly version: string;
+    }
+    
     interface __systeminfo_type {
         systemVersion: string;
-        package: string;
+        package: __systeminfo_package_type;
         ieps: __iep_type[];
         url: string;
     }
@@ -975,21 +1009,21 @@ declare global {
     const programInfo: __programInfo_type;
 
     interface __company_type {
-        id: number
-        name: string
+        readonly id: number
+        readonly name: string
     }
 
     const company: __company_type;
 
     interface __user_type {
-        id: number
-        companyId: number
-        name: string
+        readonly id: number
+        readonly companyId: number
+        readonly name: string
     }
 
     interface __endsync_type {
-        event: map
-        user: __user_type
+        readonly event: map
+        readonly user: __user_type
     }
 
     const endsync: __endsync_type;
@@ -999,7 +1033,14 @@ declare global {
         T0: dtu
         AllowParallel: boolean | null
 
-        SetPriority(priority: string): void
+        /**
+         * Filters for reftabs referenced in the report.
+         * 
+         * Only rows matching these filters will be included in the report's input database.
+         */
+        filters: any
+
+        SetPriority(priority: TaskPriority): void
 
         Run(): void
     }
@@ -1007,14 +1048,16 @@ declare global {
     interface __report_ref {
         New(): __report_start_type
     }
+    
+    interface __report_ref_filtered<T> {
+        New(): T
+    }
 
     interface __message_factory {
         New(): __message;
     }
 
     interface __message extends map {
-        Packet: any;
-
         Send(): void;
     }
 
@@ -1403,7 +1446,7 @@ declare global {
         save(): void
     }
 
-    type TaskPriority = "Lower" | "Low" | "Medium" | "High"
+    type TaskPriority = "lower" | "low" | "medium" | "high"
 
     interface InIep extends BaseIep {
         type: "Wdi"
@@ -1447,8 +1490,10 @@ declare global {
     interface User {
         readonly id: number
         name: string
+        idpIssuer: "##microsoft##" | string | null
         email: string | null
         friendlyName: string
+        extraData: string
         phoneNumber: string | null
         hardwareIdValidation: boolean
         mobilePlatforms: MobilePlatforms
@@ -1562,15 +1607,185 @@ declare global {
      * messages may cause a failed task.
      */
     function SendSms(phoneNumber: string, text: string): void;
+    
+    interface Task {
+        readonly type: TaskType
+    }
+    
+    type TaskType = "XktConversion" | "PdfRender"
+
+    type PdfRenderOutputFormat = "jpg" | "png"
+
+    /** 
+     * A background task that converts an *.ifc BIM file to an .xkt file, 
+     * that can be used in the BIM viewer control. 
+     */
+    class XktConversion implements Task {
+        readonly type = "XktConversion"
+        
+        /** The mediaId or fileref of the file to convert. */
+        readonly input: string | fileref
+
+        /**
+         * Create a new XktConversion task.
+         * 
+         * @param input The mediaId or fileref of the file to convert.
+         */
+        constructor(input: string | fileref)
+    }
+
+    /**
+     * A background task that renders a page of a PDF to an image.
+     */
+    class PdfRender implements Task {
+        readonly type = "PdfRender"
+
+        /** The mediaId or fileref of the PDF file to render. */
+        readonly input: string | fileref
+
+        /** The zero-based index of the page to render. */
+        readonly pageIndex: number;
+
+        /** The scale to use - a scale of N means 1pt in the PDF will be Npx in the image. */
+        readonly scale: number;
+
+        /** The image format of the output. */
+        readonly outputFormat: "jpg" | "png";
+
+        /**
+         * Create a new PdfRender task.
+         * 
+         * @param input The mediaId or fileref of the PDF file to render.
+         * @param pageIndex The zero-based index of the page to render.
+         * @param scale The scale to use - a scale of N means 1pt in the PDF will be Npx in the image.
+         * @param outputFormat The image format of the output.
+         */
+        constructor(input: string | fileref, pageIndex: number, scale: number, outputFormat: PdfRenderOutputFormat);
+    }
+    
+    /** 
+     * Start a background task.
+     * 
+     * The task is only started if this script finishes successfully.
+     * 
+     * @param task The task to run.
+     * @param resultHandler A scheduled RFS that will be ran when the task completes.
+     * @param priority The priority of the task, 'low' by default. Also used when enqueueing the resultHandler RFS.
+     */
+    function StartTask(task: Task, resultHandler: rfsref, priority?: TaskPriority): void
+    
+    interface TaskResult {
+        readonly type: TaskType
+    }
+    
+    interface XktConversionResult extends TaskResult {
+        readonly inputMediaId: string
+        readonly outputMediaId: string | null
+        readonly success: boolean
+        readonly buildings: XktConversionBuilding[] | null
+    }
+
+    interface PdfRenderResult extends TaskResult {
+        readonly inputMediaId: string
+        readonly outputMediaId: string | null
+        readonly success: boolean
+        readonly pageIndex: number
+        readonly scale: number
+        readonly outputFormat: PdfRenderOutputFormat
+    }
+    
+    interface XktConversionBuilding {
+        id: string,
+        name: string,
+        storeys: XktConversionStorey[]
+    }
+    
+    interface XktConversionStorey {
+        id: string,
+        name: string
+    }
+
+    interface __rtab_filter<Type> {
+        equal?: Type
+        notEqual?: Type
+        greaterThan?: Type
+        lessThan?: Type
+        greaterOrEqual?: Type
+        lessOrEqual?: Type
+        within?: Type[]
+        notIn?: Type[]
+    }
+
+    class typed_table<TypeRow, TypeFilter, TypeFields> {
+    }
+    interface typed_table<TypeRow, TypeFilter, TypeFields extends keyof TypeRow> {
+        /** Returns the list of rows from the table matching the criteria specified in the rvmapFbe parameter. Each returned row is converted to a map. */
+        Read(rvmapFbe: TypeFilter): Array<TypeRow>;
+        /** Returns the list of rows from the table matching the criteria specified in the rvmapFbe parameter, mapped to given field list in second parameter. Each returned row is converted to a map. */
+        ReadFields(rvmapFbe: TypeFilter, rvrgFields: Array<TypeFields>): Array<Pick<TypeRow, TypeFields>>;
+        /** Updates the row specified by the rvmapWhere parameter with the values set by the rvmapSet parameter. Error occurs if rvmapWhere matches multiple rows. */
+        Update(rvmapWhere: TypeFilter, rvmapSet: Partial<TypeRow>): void;
+        /** Updates the rows specified by the rvmapWhere parameter with the values set by the rvmapSet parameter. */
+        UpdateMany(rvmapWhere: TypeFilter, rvmapSet: Partial<TypeRow>): void;
+        /** Inserts the row specified by the rvmapWhere parameter to the table.
+    If the row already presents, updates it with rvmapSet.
+    In the later case rvmapWhere should match precisely one row in the table. */
+        InsertOrUpdate(rvmapWhere: TypeFilter, rvmapSet: Partial<TypeRow>): void;
+        /** Inserts the specified row the the table. Error occurs if the table already contains the row. */
+        Insert(rvmapInsert: TypeRow): void;
+        /** Deletes the specified row from the table. Error occurs if rvmapWhere matches multiple rows. */
+        Delete(rvmapWhere: TypeFilter): void;
+        /** Deletes the specified row(s) from the table. */
+        DeleteMany(rvmapWhere: TypeFilter): void;
+        /** Locks the specified row(s) until the end of the RFS run. Throws an error if the lock cannot be acquired and returns the locked rows. */
+        Lock(rvmapWhere: TypeFilter): Array<TypeRow>;
+    }
+
+    interface Array<T> {
+        /** Initializes a new list object based this list. */
+        Clone(): Array<T>;
+        /** Adds an object to the end of the list. */
+        Add(rvItem: T): void;
+        /** Gets the number of items in the list. */
+        Count(): number;
+        /** Retrieves the item in the list in the specified position. The [] operator can also be used for this purpose. */
+        GetAt(index: number): T;
+        /** Sets the item in the list in the specified position. The [] operator can also be used for this purpose. */
+        SetAt(index: number, rvItem: T): void;
+        /** Removes and returns the item at the specified index. */
+        RemoveAt(index: number): T;
+        /** Returns the single element of the list. An error occurs if the list is empy or contains more elements. */
+        Single(): T;
+        /** Returns the single element of the list or null if the list is empty. An error occurs if the list contains more elements. */
+        SingleOrDefault(): T;
+        /** Returns the contents of the list and the other list in a new list. */
+        Concat(other:list): list;
+    }
+
+    interface __typed_message_factory<T> {
+        New(): T;
+    }
+    
+    interface SafeHtml {
+        value: any;
+        
+        print(): pdf;
+    }
+    type HtmlTemplateParam = string | SafeHtml | SafeHtml[]
+    function html(parts: TemplateStringsArray, ...params: HtmlTemplateParam[]): SafeHtml
 }
 
 // ---- solution dependent code starts here ---
 
 declare global {
 	class __db_type {
+		"calculatedResults": table
 		"environment": table
 		"environmentValues": table
+		"holidays": table
 		"jira_list": table
+		"manualTests": table
+		"manualTestsMedia": table
 		"progress_by_user": table
 		"progress_history": table
 		"reportparams": table
@@ -1591,24 +1806,29 @@ declare global {
 	const db: __db_type;
 }
 declare global {
-	class __reports_type {
+	interface __reports_type {
 		"generate_Report": __report_ref
 	}
 	const reports: __reports_type;
 }
 declare global {
 	class __rfs_type {
-		"assignEnvTester": rfsref
 		"dashboard": rfsref
 		"envVarSave": rfsref
 		"generate_Report": rfsref
+		"holidays": rfsref
+		"manualTestWriter": rfsref
+		"progressLog": rfsref
+		"saveProjektDetails": rfsref
 		"savetestingStatus": rfsref
 		"task_execution": rfsref
+		"task_executionNew": rfsref
 		"taskReassign": rfsref
 		"testcase_monitor": rfsref
 		"testcase_writer": rfsref
 		"testCasesLinks": rfsref
 		"testers": rfsref
+		"testFixed": rfsref
 	}
 	const rfs: __rfs_type;
 }
@@ -1627,9 +1847,12 @@ declare global {
 		"badtestcaselist": __formref_type
 		"dashboard": __formref_type
 		"enviromentVariableEdit": __formref_type
-		"envtesterassign": __formref_type
 		"generate_Report": __formref_type
+		"holidaysDayOff": __formref_type
+		"manualTestWriter": __formref_type
+		"projektDetails": __formref_type
 		"task_execution": __formref_type
+		"task_executionNew": __formref_type
 		"task_reassign": __formref_type
 		"tclinks": __formref_type
 		"testcase_monitor": __formref_type
@@ -1638,4 +1861,1999 @@ declare global {
 		"testingStatus": __formref_type
 	}
 	const forms: __forms_type;
+}
+declare global {
+/** column type for reference table calculatedResults */
+	type reftab_columns_calculatedResults = 'Type'|'participate'|'totalCount'|'doneCount'|'leftCount'|'requiredHours'|'requiredDays'|'finishDate'|'finishDateExtended'|'plannedFinish'
+/** row type for reference table calculatedResults */
+	class reftab_row_calculatedResults {
+/** column Type: Text  */
+		"Type"?: string | null
+/** column participate: Float  */
+		"participate"?: number | null
+/** column totalCount: Integer  */
+		"totalCount"?: number | null
+/** column doneCount: Integer  */
+		"doneCount"?: number | null
+/** column leftCount: Integer  */
+		"leftCount"?: number | null
+/** column requiredHours: Float  */
+		"requiredHours"?: number | null
+/** column requiredDays: Integer  */
+		"requiredDays"?: number | null
+/** column finishDate: Date  */
+		"finishDate"?: dtdb | null
+/** column finishDateExtended: Date  */
+		"finishDateExtended"?: dtdb | null
+/** column plannedFinish: Date  */
+		"plannedFinish"?: dtdb | null
+	}
+/** filter type for reference table calculatedResults */
+	class reftab_filter_calculatedResults {
+		"Type"?: string | Array<string> | null | __rtab_filter<string>
+		"participate"?: number | Array<number> | null | __rtab_filter<number>
+		"totalCount"?: number | Array<number> | null | __rtab_filter<number>
+		"doneCount"?: number | Array<number> | null | __rtab_filter<number>
+		"leftCount"?: number | Array<number> | null | __rtab_filter<number>
+		"requiredHours"?: number | Array<number> | null | __rtab_filter<number>
+		"requiredDays"?: number | Array<number> | null | __rtab_filter<number>
+		"finishDate"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"finishDateExtended"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"plannedFinish"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_calculatedResults>
+	}
+}
+declare global {
+/** column type for reference table environmentValues */
+	type reftab_columns_environmentValues = 'name'|'value'
+/** row type for reference table environmentValues */
+	class reftab_row_environmentValues {
+/** column name: Text primary key, not null */
+		"name": string
+/** column value: Text  */
+		"value"?: string | null
+	}
+/** filter type for reference table environmentValues */
+	class reftab_filter_environmentValues {
+		"name"?: string | Array<string> | __rtab_filter<string>
+		"value"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_environmentValues>
+	}
+}
+declare global {
+/** column type for reference table environment */
+	type reftab_columns_environment = 'env_name'|'tester_email'|'tester_name'|'env_detail'|'default_workingday'
+/** row type for reference table environment */
+	class reftab_row_environment {
+/** column env_name: Text primary key, not null */
+		"env_name": string
+/** column tester_email: Text  */
+		"tester_email"?: string | null
+/** column tester_name: Text  */
+		"tester_name"?: string | null
+/** column env_detail: Text  */
+		"env_detail"?: string | null
+/** column default_workingday: Float  */
+		"default_workingday"?: number | null
+	}
+/** filter type for reference table environment */
+	class reftab_filter_environment {
+		"env_name"?: string | Array<string> | __rtab_filter<string>
+		"tester_email"?: string | Array<string> | null | __rtab_filter<string>
+		"tester_name"?: string | Array<string> | null | __rtab_filter<string>
+		"env_detail"?: string | Array<string> | null | __rtab_filter<string>
+		"default_workingday"?: number | Array<number> | null | __rtab_filter<number>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_environment>
+	}
+}
+declare global {
+/** column type for reference table holidays */
+	type reftab_columns_holidays = 'id'|'dateFrom'|'dateTo'|'user'|'categoryId'
+/** row type for reference table holidays */
+	class reftab_row_holidays {
+/** column id: Text  */
+		"id"?: string | null
+/** column dateFrom: Date  */
+		"dateFrom"?: dtdb | null
+/** column dateTo: Date  */
+		"dateTo"?: dtdb | null
+/** column user: Text  */
+		"user"?: string | null
+/** column categoryId: Text  */
+		"categoryId"?: string | null
+	}
+/** filter type for reference table holidays */
+	class reftab_filter_holidays {
+		"id"?: string | Array<string> | null | __rtab_filter<string>
+		"dateFrom"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"dateTo"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"user"?: string | Array<string> | null | __rtab_filter<string>
+		"categoryId"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_holidays>
+	}
+}
+declare global {
+/** column type for reference table manualTests */
+	type reftab_columns_manualTests = 'TestId'|'Step'|'Expected'|'Task'|'Photo'|'Platform'
+/** row type for reference table manualTests */
+	class reftab_row_manualTests {
+/** column TestId: Text primary key, not null */
+		"TestId": string
+/** column Step: Integer primary key, not null */
+		"Step": number
+/** column Expected: Text  */
+		"Expected"?: string | null
+/** column Task: Text  */
+		"Task"?: string | null
+/** column Photo: Integer  */
+		"Photo"?: number | null
+/** column Platform: Text  */
+		"Platform"?: string | null
+	}
+/** filter type for reference table manualTests */
+	class reftab_filter_manualTests {
+		"TestId"?: string | Array<string> | __rtab_filter<string>
+		"Step"?: number | Array<number> | __rtab_filter<number>
+		"Expected"?: string | Array<string> | null | __rtab_filter<string>
+		"Task"?: string | Array<string> | null | __rtab_filter<string>
+		"Photo"?: number | Array<number> | null | __rtab_filter<number>
+		"Platform"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_manualTests>
+	}
+}
+declare global {
+/** column type for reference table jira_list */
+	type reftab_columns_jira_list = 'Key'|'Summary'|'Reporter'
+/** row type for reference table jira_list */
+	class reftab_row_jira_list {
+/** column Key: Text  */
+		"Key"?: string | null
+/** column Summary: Text  */
+		"Summary"?: string | null
+/** column Reporter: Text  */
+		"Reporter"?: string | null
+	}
+/** filter type for reference table jira_list */
+	class reftab_filter_jira_list {
+		"Key"?: string | Array<string> | null | __rtab_filter<string>
+		"Summary"?: string | Array<string> | null | __rtab_filter<string>
+		"Reporter"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_jira_list>
+	}
+}
+declare global {
+/** column type for reference table manualTestsMedia */
+	type reftab_columns_manualTestsMedia = 'TestId'|'mediaId'|'Step'
+/** row type for reference table manualTestsMedia */
+	class reftab_row_manualTestsMedia {
+/** column TestId: Text  */
+		"TestId"?: string | null
+/** column mediaId: Text  */
+		"mediaId"?: string | null
+/** column Step: Integer  */
+		"Step"?: number | null
+	}
+/** filter type for reference table manualTestsMedia */
+	class reftab_filter_manualTestsMedia {
+		"TestId"?: string | Array<string> | null | __rtab_filter<string>
+		"mediaId"?: string | Array<string> | null | __rtab_filter<string>
+		"Step"?: number | Array<number> | null | __rtab_filter<number>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_manualTestsMedia>
+	}
+}
+declare global {
+/** column type for reference table reportparams */
+	type reftab_columns_reportparams = 'name'|'filterdate'
+/** row type for reference table reportparams */
+	class reftab_row_reportparams {
+/** column name: Text  */
+		"name"?: string | null
+/** column filterdate: Date  */
+		"filterdate"?: dtdb | null
+	}
+/** filter type for reference table reportparams */
+	class reftab_filter_reportparams {
+		"name"?: string | Array<string> | null | __rtab_filter<string>
+		"filterdate"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_reportparams>
+	}
+}
+declare global {
+/** column type for reference table task */
+	type reftab_columns_task = 'guid'|'task_id'|'result'|'version'|'env_name'|'note'|'start_tc_date'|'end_tc_date'|'task_type'|'platformID'|'time_need'|'saved'
+/** row type for reference table task */
+	class reftab_row_task {
+/** column guid: Text primary key, not null */
+		"guid": string
+/** column task_id: Text not null */
+		"task_id": string
+/** column result: Text  */
+		"result"?: string | null
+/** column version: Text  */
+		"version"?: string | null
+/** column env_name: Text  */
+		"env_name"?: string | null
+/** column note: Text  */
+		"note"?: string | null
+/** column start_tc_date: Date  */
+		"start_tc_date"?: dtdb | null
+/** column end_tc_date: Date  */
+		"end_tc_date"?: dtdb | null
+/** column task_type: Text  */
+		"task_type"?: string | null
+/** column platformID: Text not null */
+		"platformID": string
+/** column time_need: Text  */
+		"time_need"?: string | null
+/** column saved: Integer  */
+		"saved"?: number | null
+	}
+/** filter type for reference table task */
+	class reftab_filter_task {
+		"guid"?: string | Array<string> | __rtab_filter<string>
+		"task_id"?: string | Array<string> | __rtab_filter<string>
+		"result"?: string | Array<string> | null | __rtab_filter<string>
+		"version"?: string | Array<string> | null | __rtab_filter<string>
+		"env_name"?: string | Array<string> | null | __rtab_filter<string>
+		"note"?: string | Array<string> | null | __rtab_filter<string>
+		"start_tc_date"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"end_tc_date"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"task_type"?: string | Array<string> | null | __rtab_filter<string>
+		"platformID"?: string | Array<string> | __rtab_filter<string>
+		"time_need"?: string | Array<string> | null | __rtab_filter<string>
+		"saved"?: number | Array<number> | null | __rtab_filter<number>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_task>
+	}
+}
+declare global {
+/** column type for reference table tc_jira_list */
+	type reftab_columns_tc_jira_list = 'jira_id'|'task_id'|'env_name'|'platform'|'tested_version'|'jira_state'
+/** row type for reference table tc_jira_list */
+	class reftab_row_tc_jira_list {
+/** column jira_id: Text  */
+		"jira_id"?: string | null
+/** column task_id: Text  */
+		"task_id"?: string | null
+/** column env_name: Text  */
+		"env_name"?: string | null
+/** column platform: Text  */
+		"platform"?: string | null
+/** column tested_version: Text  */
+		"tested_version"?: string | null
+/** column jira_state: Text  */
+		"jira_state"?: string | null
+	}
+/** filter type for reference table tc_jira_list */
+	class reftab_filter_tc_jira_list {
+		"jira_id"?: string | Array<string> | null | __rtab_filter<string>
+		"task_id"?: string | Array<string> | null | __rtab_filter<string>
+		"env_name"?: string | Array<string> | null | __rtab_filter<string>
+		"platform"?: string | Array<string> | null | __rtab_filter<string>
+		"tested_version"?: string | Array<string> | null | __rtab_filter<string>
+		"jira_state"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_tc_jira_list>
+	}
+}
+declare global {
+/** column type for reference table tc_list */
+	type reftab_columns_tc_list = 'tc_id'|'tc_prio'|'tc_impreg'|'tc_desc'|'last_status'|'last_sent_in'|'note'
+/** row type for reference table tc_list */
+	class reftab_row_tc_list {
+/** column tc_id: Text  */
+		"tc_id"?: string | null
+/** column tc_prio: Text  */
+		"tc_prio"?: string | null
+/** column tc_impreg: Text  */
+		"tc_impreg"?: string | null
+/** column tc_desc: Text  */
+		"tc_desc"?: string | null
+/** column last_status: Text  */
+		"last_status"?: string | null
+/** column last_sent_in: Date  */
+		"last_sent_in"?: dtdb | null
+/** column note: Text  */
+		"note"?: string | null
+	}
+/** filter type for reference table tc_list */
+	class reftab_filter_tc_list {
+		"tc_id"?: string | Array<string> | null | __rtab_filter<string>
+		"tc_prio"?: string | Array<string> | null | __rtab_filter<string>
+		"tc_impreg"?: string | Array<string> | null | __rtab_filter<string>
+		"tc_desc"?: string | Array<string> | null | __rtab_filter<string>
+		"last_status"?: string | Array<string> | null | __rtab_filter<string>
+		"last_sent_in"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"note"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_tc_list>
+	}
+}
+declare global {
+/** column type for reference table tc_tag */
+	type reftab_columns_tc_tag = 'tag'
+/** row type for reference table tc_tag */
+	class reftab_row_tc_tag {
+/** column tag: Text primary key, not null */
+		"tag": string
+	}
+/** filter type for reference table tc_tag */
+	class reftab_filter_tc_tag {
+		"tag"?: string | Array<string> | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_tc_tag>
+	}
+}
+declare global {
+/** column type for reference table testedVersion */
+	type reftab_columns_testedVersion = 'version'|'platformID'|'addedDate'
+/** row type for reference table testedVersion */
+	class reftab_row_testedVersion {
+/** column version: Text not null */
+		"version": string
+/** column platformID: Text not null */
+		"platformID": string
+/** column addedDate: Date  */
+		"addedDate"?: dtdb | null
+	}
+/** filter type for reference table testedVersion */
+	class reftab_filter_testedVersion {
+		"version"?: string | Array<string> | __rtab_filter<string>
+		"platformID"?: string | Array<string> | __rtab_filter<string>
+		"addedDate"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_testedVersion>
+	}
+}
+declare global {
+/** column type for reference table tester */
+	type reftab_columns_tester = 'tester_name'|'tester_email'|'tester_role'|'work_type'|'tester_active'|'participation'
+/** row type for reference table tester */
+	class reftab_row_tester {
+/** column tester_name: Text  */
+		"tester_name"?: string | null
+/** column tester_email: Text  */
+		"tester_email"?: string | null
+/** column tester_role: Text  */
+		"tester_role"?: string | null
+/** column work_type: Text  */
+		"work_type"?: string | null
+/** column tester_active: Text  */
+		"tester_active"?: string | null
+/** column participation: Float  */
+		"participation"?: number | null
+	}
+/** filter type for reference table tester */
+	class reftab_filter_tester {
+		"tester_name"?: string | Array<string> | null | __rtab_filter<string>
+		"tester_email"?: string | Array<string> | null | __rtab_filter<string>
+		"tester_role"?: string | Array<string> | null | __rtab_filter<string>
+		"work_type"?: string | Array<string> | null | __rtab_filter<string>
+		"tester_active"?: string | Array<string> | null | __rtab_filter<string>
+		"participation"?: number | Array<number> | null | __rtab_filter<number>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_tester>
+	}
+}
+declare global {
+/** column type for reference table testingChecklist */
+	type reftab_columns_testingChecklist = 'id'|'done'|'task'|'ordernum'
+/** row type for reference table testingChecklist */
+	class reftab_row_testingChecklist {
+/** column id: Text primary key, not null */
+		"id": string
+/** column done: Integer  */
+		"done"?: number | null
+/** column task: Text  */
+		"task"?: string | null
+/** column ordernum: Integer  */
+		"ordernum"?: number | null
+	}
+/** filter type for reference table testingChecklist */
+	class reftab_filter_testingChecklist {
+		"id"?: string | Array<string> | __rtab_filter<string>
+		"done"?: number | Array<number> | null | __rtab_filter<number>
+		"task"?: string | Array<string> | null | __rtab_filter<string>
+		"ordernum"?: number | Array<number> | null | __rtab_filter<number>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_testingChecklist>
+	}
+}
+declare global {
+/** column type for reference table test_case */
+	type reftab_columns_test_case = 'id'|'desc'|'platform'|'link'|'time'|'addedDate'|'lastAssigned'|'PreCond'
+/** row type for reference table test_case */
+	class reftab_row_test_case {
+/** column id: Text primary key, not null */
+		"id": string
+/** column desc: Text  */
+		"desc"?: string | null
+/** column platform: Text primary key, not null */
+		"platform": string
+/** column link: Text  */
+		"link"?: string | null
+/** column time: Float  */
+		"time"?: number | null
+/** column addedDate: Date  */
+		"addedDate"?: dtdb | null
+/** column lastAssigned: Date  */
+		"lastAssigned"?: dtdb | null
+/** column PreCond: Text  */
+		"PreCond"?: string | null
+	}
+/** filter type for reference table test_case */
+	class reftab_filter_test_case {
+		"id"?: string | Array<string> | __rtab_filter<string>
+		"desc"?: string | Array<string> | null | __rtab_filter<string>
+		"platform"?: string | Array<string> | __rtab_filter<string>
+		"link"?: string | Array<string> | null | __rtab_filter<string>
+		"time"?: number | Array<number> | null | __rtab_filter<number>
+		"addedDate"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"lastAssigned"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"PreCond"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_test_case>
+	}
+}
+declare global {
+/** column type for reference table test_case_tag */
+	type reftab_columns_test_case_tag = 'tc_id'|'tag'|'platform'
+/** row type for reference table test_case_tag */
+	class reftab_row_test_case_tag {
+/** column tc_id: Text primary key, not null */
+		"tc_id": string
+/** column tag: Text primary key, not null */
+		"tag": string
+/** column platform: Text primary key, not null */
+		"platform": string
+	}
+/** filter type for reference table test_case_tag */
+	class reftab_filter_test_case_tag {
+		"tc_id"?: string | Array<string> | __rtab_filter<string>
+		"tag"?: string | Array<string> | __rtab_filter<string>
+		"platform"?: string | Array<string> | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_test_case_tag>
+	}
+}
+declare global {
+/** column type for reference table test_to_be_write_category */
+	type reftab_columns_test_to_be_write_category = 'category'|'planned_count'|'finished'|'closedByTesters'|'testerWhoClosed'|'result_count'|'active'
+/** row type for reference table test_to_be_write_category */
+	class reftab_row_test_to_be_write_category {
+/** column category: Text  */
+		"category"?: string | null
+/** column planned_count: Integer  */
+		"planned_count"?: number | null
+/** column finished: Integer  */
+		"finished"?: number | null
+/** column closedByTesters: Integer  */
+		"closedByTesters"?: number | null
+/** column testerWhoClosed: Text  */
+		"testerWhoClosed"?: string | null
+/** column result_count: Integer  */
+		"result_count"?: number | null
+/** column active: Integer  */
+		"active"?: number | null
+	}
+/** filter type for reference table test_to_be_write_category */
+	class reftab_filter_test_to_be_write_category {
+		"category"?: string | Array<string> | null | __rtab_filter<string>
+		"planned_count"?: number | Array<number> | null | __rtab_filter<number>
+		"finished"?: number | Array<number> | null | __rtab_filter<number>
+		"closedByTesters"?: number | Array<number> | null | __rtab_filter<number>
+		"testerWhoClosed"?: string | Array<string> | null | __rtab_filter<string>
+		"result_count"?: number | Array<number> | null | __rtab_filter<number>
+		"active"?: number | Array<number> | null | __rtab_filter<number>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_test_to_be_write_category>
+	}
+}
+declare global {
+/** column type for reference table test_to_be_write_done */
+	type reftab_columns_test_to_be_write_done = 'category'|'id'|'label'|'type'|'platform'|'status'|'location'|'creator'|'note'|'PreCond'
+/** row type for reference table test_to_be_write_done */
+	class reftab_row_test_to_be_write_done {
+/** column category: Text  */
+		"category"?: string | null
+/** column id: Text primary key, not null */
+		"id": string
+/** column label: Text  */
+		"label"?: string | null
+/** column type: Text  */
+		"type"?: string | null
+/** column platform: Text  */
+		"platform"?: string | null
+/** column status: Text  */
+		"status"?: string | null
+/** column location: Text  */
+		"location"?: string | null
+/** column creator: Text  */
+		"creator"?: string | null
+/** column note: Text  */
+		"note"?: string | null
+/** column PreCond: Text  */
+		"PreCond"?: string | null
+	}
+/** filter type for reference table test_to_be_write_done */
+	class reftab_filter_test_to_be_write_done {
+		"category"?: string | Array<string> | null | __rtab_filter<string>
+		"id"?: string | Array<string> | __rtab_filter<string>
+		"label"?: string | Array<string> | null | __rtab_filter<string>
+		"type"?: string | Array<string> | null | __rtab_filter<string>
+		"platform"?: string | Array<string> | null | __rtab_filter<string>
+		"status"?: string | Array<string> | null | __rtab_filter<string>
+		"location"?: string | Array<string> | null | __rtab_filter<string>
+		"creator"?: string | Array<string> | null | __rtab_filter<string>
+		"note"?: string | Array<string> | null | __rtab_filter<string>
+		"PreCond"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_test_to_be_write_done>
+	}
+}
+declare global {
+/** column type for reference table test_to_be_write_tags */
+	type reftab_columns_test_to_be_write_tags = 'id'|'tag'
+/** row type for reference table test_to_be_write_tags */
+	class reftab_row_test_to_be_write_tags {
+/** column id: Text primary key, not null */
+		"id": string
+/** column tag: Text primary key, not null */
+		"tag": string
+	}
+/** filter type for reference table test_to_be_write_tags */
+	class reftab_filter_test_to_be_write_tags {
+		"id"?: string | Array<string> | __rtab_filter<string>
+		"tag"?: string | Array<string> | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_test_to_be_write_tags>
+	}
+}
+declare global {
+/** column type for reference table test_to_be_write_tickets */
+	type reftab_columns_test_to_be_write_tickets = 'id'|'ticket'
+/** row type for reference table test_to_be_write_tickets */
+	class reftab_row_test_to_be_write_tickets {
+/** column id: Text primary key, not null */
+		"id": string
+/** column ticket: Text primary key, not null */
+		"ticket": string
+	}
+/** filter type for reference table test_to_be_write_tickets */
+	class reftab_filter_test_to_be_write_tickets {
+		"id"?: string | Array<string> | __rtab_filter<string>
+		"ticket"?: string | Array<string> | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_test_to_be_write_tickets>
+	}
+}
+declare global {
+/** column type for reference table progress_by_user */
+	type reftab_columns_progress_by_user = 'date'|'tester_name'|'working_day'|'daily_work_done'|'sum_work_done'|'sum_work'
+/** row type for reference table progress_by_user */
+	class reftab_row_progress_by_user {
+/** column date: Date  */
+		"date"?: dtdb | null
+/** column tester_name: Text  */
+		"tester_name"?: string | null
+/** column working_day: Float  */
+		"working_day"?: number | null
+/** column daily_work_done: Integer  */
+		"daily_work_done"?: number | null
+/** column sum_work_done: Integer  */
+		"sum_work_done"?: number | null
+/** column sum_work: Integer  */
+		"sum_work"?: number | null
+	}
+/** filter type for reference table progress_by_user */
+	class reftab_filter_progress_by_user {
+		"date"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"tester_name"?: string | Array<string> | null | __rtab_filter<string>
+		"working_day"?: number | Array<number> | null | __rtab_filter<number>
+		"daily_work_done"?: number | Array<number> | null | __rtab_filter<number>
+		"sum_work_done"?: number | Array<number> | null | __rtab_filter<number>
+		"sum_work"?: number | Array<number> | null | __rtab_filter<number>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_progress_by_user>
+	}
+}
+declare global {
+/** column type for reference table progress_history */
+	type reftab_columns_progress_history = 'date'|'imp_done'|'imp_total'|'imp_perc'|'tc_exec_done'|'tc_exec_total'|'tc_perc'|'sum_done'|'sum_total'|'sum_perc'|'tester_number'|'exp_end_of_testing'
+/** row type for reference table progress_history */
+	class reftab_row_progress_history {
+/** column date: Date primary key, not null */
+		"date": dtdb
+/** column imp_done: Integer  */
+		"imp_done"?: number | null
+/** column imp_total: Integer  */
+		"imp_total"?: number | null
+/** column imp_perc: Integer  */
+		"imp_perc"?: number | null
+/** column tc_exec_done: Integer  */
+		"tc_exec_done"?: number | null
+/** column tc_exec_total: Integer  */
+		"tc_exec_total"?: number | null
+/** column tc_perc: Integer  */
+		"tc_perc"?: number | null
+/** column sum_done: Integer  */
+		"sum_done"?: number | null
+/** column sum_total: Integer  */
+		"sum_total"?: number | null
+/** column sum_perc: Integer  */
+		"sum_perc"?: number | null
+/** column tester_number: Float  */
+		"tester_number"?: number | null
+/** column exp_end_of_testing: Date  */
+		"exp_end_of_testing"?: dtdb | null
+	}
+/** filter type for reference table progress_history */
+	class reftab_filter_progress_history {
+		"date"?: dtdb | Array<dtdb> | __rtab_filter<dtdb>
+		"imp_done"?: number | Array<number> | null | __rtab_filter<number>
+		"imp_total"?: number | Array<number> | null | __rtab_filter<number>
+		"imp_perc"?: number | Array<number> | null | __rtab_filter<number>
+		"tc_exec_done"?: number | Array<number> | null | __rtab_filter<number>
+		"tc_exec_total"?: number | Array<number> | null | __rtab_filter<number>
+		"tc_perc"?: number | Array<number> | null | __rtab_filter<number>
+		"sum_done"?: number | Array<number> | null | __rtab_filter<number>
+		"sum_total"?: number | Array<number> | null | __rtab_filter<number>
+		"sum_perc"?: number | Array<number> | null | __rtab_filter<number>
+		"tester_number"?: number | Array<number> | null | __rtab_filter<number>
+		"exp_end_of_testing"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_progress_history>
+	}
+}
+declare global {
+    interface form_enviromentVariableEdit extends __form_base_type {
+        "envVariableTb": {
+            "rows": Array<{
+                "envName": {
+                    "text": string
+                }
+                "envValue": {
+                    "text": string
+                }
+            }>
+        }
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_generate_Report extends __form_base_type {
+        "name": {
+            "text": string
+        }
+        "to": {
+            "text": string
+        }
+        "filterdate": {
+            "date": dtl
+        }
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_badtestcaselist extends __form_base_type {
+        "badtclist": {
+            "rows": Array<{
+                "task_id": {
+                    "text": string
+                }
+                "result": {
+                    "text": string
+                }
+                "note": {
+                    "text": string
+                }
+                "fixSubmit": {
+                    "submitter": boolean
+                    "closeForm": boolean
+                    "validatorGroup": string
+                }
+            }>
+        }
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_holidaysDayOff extends __form_base_type {
+        "calPage1": {
+            "date": dtl
+        }
+        "cal": {
+            "newEvent": {
+                "dateFrom": dtl
+                "dateTo": dtl
+            }
+            "events": Array<{
+                "id": string
+                "categoryId": string
+                "dateFrom": dtl
+                "dateTo": dtl
+                "label": string
+            }>
+            "selectedEvent": {
+                "id": string
+                "categoryId": string
+                "dateFrom": dtl
+                "dateTo": dtl
+                "label": string
+            }
+        }
+        "Delete": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "Add": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "adminPanel": {
+            "UserType": {
+                "selectedKey": string
+                "selectedText": string
+                "selectedValue": {
+                    "v": string
+                }
+            }
+            "CustomUser": {
+                "CustomUserName": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "tester_email": string
+                    }
+                }
+                "cond": boolean
+            }
+            "cond": boolean
+        }
+        "newEvent": Array<{
+            "id": string
+            "categoryId": string
+            "dateFrom": dtl
+            "dateTo": dtl
+            "user": string
+        }>
+        "selectedEvent": string
+        "userName": string
+        "stLoggedUserRole": string
+        "eventsAll": Array<{
+            "id": string
+            "categoryId": string
+            "dateFrom": dtl
+            "dateTo": dtl
+            "label": string
+        }>
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_dashboard extends __form_base_type {
+        "recRun": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "savePlannedRun": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "result": Array<{
+            "plannedFinish": dtl
+            "doneCount": number
+            "totalCount": number
+            "participate": number
+            "leftCount": number
+            "requiredHours": number
+            "requiredDays": number
+            "finishDate": dtl
+        }>
+        "recWrite": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "savePlannedWrite": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "resultW": Array<{
+            "plannedFinish": dtl
+            "doneCount": number
+            "totalCount": number
+            "participate": number
+            "leftCount": number
+            "requiredHours": number
+            "requiredDays": number
+            "finishDate": dtl
+            "finishDateExtended": dtl
+        }>
+        "progress": {
+            "imp_done_today": number
+            "last_imp_done": number
+            "imp_all_today": {
+                "text": string
+            }
+            "imp_perc_today": number
+            "tc_exec_done_today": number
+            "last_exec_done": number
+            "tc_exec_all_today": {
+                "text": string
+            }
+            "tc_exec_perc_today": number
+            "sum_done_today": number
+            "last_sum_done": number
+            "sum_all_today": {
+                "text": string
+            }
+        }
+        "sTestUserHistroy": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "tester_name": string
+            }
+        }
+        "today_tester_work": {
+            "rows": Array<{
+                "tester_name": {
+                    "text": string
+                }
+                "daily_work_done": {
+                    "sum_work_done_reftab": number
+                    "last_item_case": string
+                    "text": string
+                }
+                "sum_work_done": {
+                    "text": string
+                }
+                "sum_work": {
+                    "text": string
+                }
+            }>
+        }
+        "task_list_table_j": {
+            "filter_taskid": {
+                "text": string
+            }
+            "rows": Array<{
+                "add_tcs_status": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+            }>
+        }
+        "sTestUserEnvironment": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "tester_name": string
+            }
+        }
+        "env_by_result": {
+            "not_yet_started_sum_t": {
+                "text": string
+            }
+            "success_sum_t": {
+                "text": string
+            }
+            "failed_sum_t": {
+                "text": string
+            }
+            "not_tested_sum_t": {
+                "text": string
+            }
+            "bad_testcase_sum_t": {
+                "text": string
+            }
+            "all_tc_exec_sum": {
+                "text": string
+            }
+            "unassigned_t": number
+            "rows": Array<{
+                "not_yet_started_t": {
+                    "text": string
+                }
+                "success_t": {
+                    "text": string
+                }
+                "failed_t": {
+                    "text": string
+                }
+                "not_tested_t": {
+                    "text": string
+                }
+                "bad_testcase_t": {
+                    "text": string
+                }
+            }>
+        }
+        "tester_by_result": {
+            "unassigned_j": number
+            "not_yet_started_sum_j": {
+                "text": string
+            }
+            "closed_sum_j": {
+                "text": string
+            }
+            "all_jira_ver_sum": {
+                "text": string
+            }
+            "rows": Array<{
+                "not_yet_started_j": {
+                    "text": string
+                }
+                "closed_j": {
+                    "text": string
+                }
+            }>
+        }
+        "stLoggedUserRole": string
+        "dbTesterForTesting": number
+        "dbTesterForWriting": number
+        "testersCount": number
+        "today": dtl
+        "left_from_today_hour": number
+        "left_from_today_minut": number
+        "remains_from_today_hour": number
+        "finishYearOfTestRunning": string
+        "finishMonthOfTestRunning": string
+        "finishDayOfTestRunning": string
+        "finishYearOfTestWriting": string
+        "finishMonthOfTestWriting": string
+        "finishDayOfTestWriting": string
+        "plannedFinishDate": dtl
+        "tbTestData": Array<{
+            "date": dtl
+            "imp_done": number
+            "imp_total": number
+            "tc_exec_done": number
+            "tc_exec_total": number
+            "sum_done": number
+            "tester_number": number
+            "exp_end_of_testing": dtl
+        }>
+        "tc_done": string
+        "tc_exec_sum": string
+        "jira_done": string
+        "jira_sum": string
+        "task_env_table": Array<{
+            "task_id": string
+            "result": string
+            "env_name": string
+            "task_type": string
+            "end_tc_date": dtl
+            "tester_name": string
+            "tc_prio": string
+            "tc_impreg": string
+        }>
+        "tc_jira_table": Array<{
+            "jira_id": string
+            "task_id": string
+            "env_name": string
+        }>
+        "jira_list_table": Array<{
+            "Key": string
+            "Summary": string
+            "Reporter": string
+        }>
+        "progress_history_table": Array<{
+            "date": dtl
+        }>
+        "count_rows_ph": number
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_projektDetails extends __form_base_type {
+        "env_name": {
+            "text": string
+        }
+        "env_detail": {
+            "text": string
+        }
+        "env_tester": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "tester_name": string
+                "tester_email": string
+            }
+        }
+        "tbEnviromnents": {
+            "rows": Array<{
+                "envName": {
+                    "text": string
+                }
+                "envTestername": {
+                    "text": string
+                }
+                "envTesterMail": {
+                    "text": string
+                }
+                "envDetail": {
+                    "text": string
+                }
+                "new": number
+                "deleted": number
+            }>
+        }
+        "ver_name": {
+            "text": string
+        }
+        "ver_platform": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "v": string
+            }
+        }
+        "tbVersions": {
+            "rows": Array<{
+                "verName": {
+                    "text": string
+                }
+                "verPlatform": {
+                    "text": string
+                }
+                "new": number
+                "deleted": number
+            }>
+        }
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_manualTestWriter extends __form_base_type {
+        "TcId": {
+            "text": string
+        }
+        "newTcId": {
+            "text": string
+        }
+        "createTcId": {
+            "text": string
+        }
+        "newTcDesc": {
+            "text": string
+        }
+        "newTcPrecond": {
+            "text": string
+        }
+        "newTC": {
+            "rows": Array<{
+                "stepTask": {
+                    "text": string
+                }
+                "newTcPlatform": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "task": {
+                    "text": string
+                }
+                "expect": {
+                    "text": string
+                }
+                "photoUpload": {
+                    "photos": Array<{
+                        "photoId": string
+                        "datetime": dtl
+                        "locationLatitude": number
+                        "locationLongitude": number
+                        "locationAltitude": number
+                        "locationAccuracy": number
+                        "locationDtuAcquired": dtl
+                        "fileSize": number
+                        "height": number
+                        "width": number
+                        "type": string
+                    }>
+                }
+                "hasPhoto": number
+                "stepCount": number
+            }>
+        }
+        "editTC": {
+            "rows": Array<{
+                "stepTask": {
+                    "text": string
+                }
+                "newTcPlatform": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "task": {
+                    "text": string
+                }
+                "expect": {
+                    "text": string
+                }
+                "photoUpload": {
+                    "photos": Array<{
+                        "photoId": string
+                        "mediaId": string
+                    }>
+                }
+                "hasPhoto": number
+                "mediaIdPhoto": string
+                "stepCount": number
+            }>
+        }
+        "currentStep": number
+        "edit": number
+        "deletedStep": number
+        "stfromForm": string
+        "originalTestId": string
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_task_reassign extends __form_base_type {
+        "btns": {
+            "modify_to_env": {
+                "selectedKey": string
+                "selectedText": string
+                "selectedValue": {
+                    "env_name": string
+                }
+            }
+            "assignBtnUpper": {
+                "submitter": boolean
+                "closeForm": boolean
+                "validatorGroup": string
+            }
+        }
+        "tsk": {
+            "filter_platform": {
+                "selectedKey": string
+                "selectedText": string
+                "selectedValue": {
+                    "v": string
+                }
+            }
+            "filter_taskid": {
+                "text": string
+            }
+            "filter_result": {
+                "selectedKey": string
+                "selectedText": string
+                "selectedValue": {
+                    "v": string
+                }
+            }
+            "filter_envname": {
+                "selectedKey": string
+                "selectedText": string
+                "selectedValue": {
+                    "env_name": string
+                }
+            }
+            "rows": Array<{
+                "tsk_guid": {
+                    "text": string
+                }
+                "tsk_platform": {
+                    "text": string
+                }
+                "tskid": {
+                    "text": string
+                }
+                "tsk_result": {
+                    "text": string
+                }
+                "tsk_actual_env": {
+                    "text": string
+                }
+                "mark_to_reassign": {
+                    "checked": boolean
+                }
+            }>
+        }
+        "assignBtnButton": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "letpage": number
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_task_executionNew extends __form_base_type {
+        "platformID": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "platformID": string
+            }
+        }
+        "dd_versionGlobal": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "version": string
+                "addedDate": dtl
+            }
+        }
+        "ddstatus": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "v": string
+            }
+        }
+        "ch_all_user": {
+            "checked": boolean
+        }
+        "selectedTasks": {
+            "rows": Array<{
+                "id": {
+                    "text": string
+                }
+                "description": {
+                    "text": string
+                }
+                "linkText": {
+                    "fChanged": boolean
+                    "text": string
+                }
+                "result": {
+                    "fChanged": boolean
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "testedVer": {
+                    "text": string
+                }
+                "envName": {
+                    "text": string
+                }
+                "runTime": {
+                    "number": number
+                }
+                "note": {
+                    "text": string
+                }
+                "guid": string
+            }>
+        }
+        "selected": number
+        "open_form": dtl
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_task_execution extends __form_base_type {
+        "taskExecBtn": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "platformID": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "platformID": string
+            }
+        }
+        "dd_versionGlobal": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "version": string
+                "addedDate": dtl
+            }
+        }
+        "ch_not_yet_started": {
+            "checked": boolean
+        }
+        "ch_success": {
+            "checked": boolean
+        }
+        "ch_failed": {
+            "checked": boolean
+        }
+        "ch_not_tested": {
+            "checked": boolean
+        }
+        "ch_bad_testcase": {
+            "checked": boolean
+        }
+        "ch_all_user": {
+            "checked": boolean
+        }
+        "env_table_t": {
+            "rows": Array<{
+                "selected_tc_link_update": {
+                    "text": string
+                }
+                "env_name": {
+                    "text": string
+                }
+                "dd_result": {
+                    "fChanged": boolean
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "text": string
+                    }
+                }
+                "dd_version": {
+                    "fChanged": boolean
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "version": string
+                    }
+                }
+                "fFos": boolean
+                "jira_id": {
+                    "fChanged": boolean
+                    "rows": Array<{
+                        "tb_jira_id": {
+                            "text": string
+                        }
+                    }>
+                }
+                "jira_ids": Array<{
+                    "jira_id": string
+                }>
+                "tb_note": {
+                    "fChanged": boolean
+                    "text": string
+                }
+                "tgs": {
+                    "selectedTags": Array<{
+                        "v": string
+                    }>
+                }
+                "tcTimeNeed": {
+                    "number": number
+                }
+                "guid_tsk": string
+                "selected_tc": string
+            }>
+        }
+        "fSelectedTestcase": boolean
+        "env_table_j": {
+            "rows": Array<{
+                "selected_jira": {
+                    "text": string
+                }
+                "dd_result": {
+                    "fChanged": boolean
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "text": string
+                    }
+                }
+                "tb_note": {
+                    "fChanged": boolean
+                    "text": string
+                }
+                "guid_tsk": string
+            }>
+        }
+        "fSelectedJira": boolean
+        "task_list_table": {
+            "filter_taskid": {
+                "text": string
+            }
+            "filter_priority": {
+                "text": string
+            }
+            "filter_impreg": {
+                "text": string
+            }
+            "rows": Array<{
+                "tc_prio": {
+                    "text": string
+                }
+                "tc_impreg": {
+                    "text": string
+                }
+                "tc_allres": {
+                    "text": string
+                }
+            }>
+        }
+        "act_tester": string
+        "open_form": dtl
+        "task_env_table": Array<{
+            "guid": string
+            "note": string
+            "result": string
+            "version": string
+            "task_id": string
+            "env_name": string
+            "env_detail": string
+            "Summary": string
+        }>
+        "task_allFailed_table": Array<{
+            "guid": string
+            "note": string
+            "result": string
+            "version": string
+            "task_id": string
+            "env_name": string
+            "env_detail": string
+            "Summary": string
+        }>
+        "jira_table": Array<{
+            "jira_id": string
+            "task_id": string
+            "env_name": string
+        }>
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_testingStatus extends __form_base_type {
+        "adminPanel": {
+            "startNew": {
+                "submitter": boolean
+                "closeForm": boolean
+                "validatorGroup": string
+            }
+            "saveChange": {
+                "submitter": boolean
+                "closeForm": boolean
+                "validatorGroup": string
+            }
+            "saveOrder": {
+                "submitter": boolean
+            }
+            "cond": boolean
+        }
+        "tasks": {
+            "rows": Array<{
+                "editButton": {
+                    "cond": boolean
+                }
+                "editedResult": {
+                    "selectedKey": number
+                    "selectedText": string
+                    "selectedValue": {
+                        "code": number
+                        "text": string
+                    }
+                }
+                "editedOrder": {
+                    "text": string
+                }
+                "edit": boolean
+                "id": string
+            }>
+        }
+        "stLoggedUserRole": string
+        "editOrder": boolean
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_testers extends __form_base_type {
+        "tester_table": {
+            "rows": Array<{
+                "tb_tester_name": {
+                    "text": string
+                }
+                "tb_tester_email": {
+                    "text": string
+                }
+                "drRole": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "drWork": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "drActive": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "part": {
+                    "number": number
+                }
+                "bDelete": boolean
+            }>
+        }
+        "stLoggedUserRole": string
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_tclinks extends __form_base_type {
+        "selected_tester": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "tester_name": string
+            }
+        }
+        "selected_environment": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "env_name": string
+            }
+        }
+        "assignBtn": {
+            "submitter": boolean
+        }
+        "save_tags": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "wipe_assignement": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "prMove": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "prDelete": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "assignedTb": {
+            "rows": Array<{
+                "move_task": {
+                    "text": string
+                }
+                "move_task_guid": {
+                    "text": string
+                }
+                "selected_environment_to_move": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "env_name": string
+                    }
+                }
+                "edited": boolean
+                "delete": boolean
+            }>
+        }
+        "tcs": {
+            "filter_taskid": {
+                "text": string
+            }
+            "filter_desc": {
+                "text": string
+            }
+            "filter_platform": {
+                "selectedKey": string
+                "selectedText": string
+                "selectedValue": {
+                    "v": string
+                }
+            }
+            "tag_filter": {
+                "text": string
+            }
+            "tvDelete": {
+                "text": string
+            }
+            "rows": Array<{
+                "mark_to_run": {
+                    "checked": boolean
+                }
+                "tcsid": {
+                    "text": string
+                }
+                "tcsdesc": {
+                    "text": string
+                }
+                "tcsplatform": {
+                    "text": string
+                }
+                "tags_ctr": {
+                    "selectedTags": Array<{
+                        "v": string
+                    }>
+                }
+                "last_status": {
+                    "text": string
+                }
+                "last_sent_in": {
+                    "text": string
+                }
+                "time_need": {
+                    "text": string
+                }
+                "last_assigned": {
+                    "text": string
+                }
+                "bToDelete": boolean
+            }>
+        }
+        "let_tags": Array<{
+            "tag": string
+        }>
+        "letpage": number
+        "adntc": boolean
+        "testCount": number
+        "iLabelEditedRows": number
+        "iLabelDeletedRows": number
+        "selectedTestsTable": Array<{
+            "id": string
+            "desc": string
+            "platform": string
+            "link": string
+            "time": number
+            "lastAssigned": string
+        }>
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_testcase_monitor extends __form_base_type {
+        "addtest": {
+            "saveMissingTests": {
+                "submitter": boolean
+                "closeForm": boolean
+                "validatorGroup": string
+            }
+            "tbNewLb": {
+                "rows": Array<{
+                    "add_tcs_id": {
+                        "text": string
+                    }
+                    "add_tcs_dc": {
+                        "text": string
+                    }
+                    "add_tcs_platform": {
+                        "selectedKey": string
+                        "selectedText": string
+                        "selectedValue": {
+                            "v": string
+                        }
+                    }
+                    "add_tcs_time": {
+                        "number": number
+                    }
+                    "add_tcs_tags": {
+                        "selectedTags": Array<{
+                            "v": string
+                        }>
+                    }
+                    "add_tcs_link": {
+                        "text": string
+                    }
+                }>
+            }
+        }
+        "sbsave": {
+            "submitter": boolean
+        }
+        "tcTable": {
+            "idSc": {
+                "text": string
+            }
+            "descSc": {
+                "text": string
+            }
+            "platSc": {
+                "selectedKey": string
+                "selectedText": string
+                "selectedValue": {
+                    "v": string
+                }
+            }
+            "tagsSc": {
+                "selectedTags": Array<{
+                    "v": string
+                }>
+            }
+            "rows": Array<{
+                "tcId": {
+                    "text": string
+                }
+                "tcEditedDesc": {
+                    "text": string
+                }
+                "tcDesc": {
+                    "text": string
+                }
+                "tcPlatform": {
+                    "text": string
+                }
+                "editedTags": {
+                    "selectedTags": Array<{
+                        "v": string
+                    }>
+                }
+                "nbEditedTime": {
+                    "number": number
+                }
+                "tcTime": {
+                    "text": string
+                }
+                "tcEditedLink": {
+                    "text": string
+                }
+                "newTcId": {
+                    "text": string
+                }
+                "newTcDesc": {
+                    "text": string
+                }
+                "newTcPrecond": {
+                    "text": string
+                }
+                "maxStep": number
+                "tcAdded": {
+                    "text": string
+                }
+                "edited": boolean
+                "tags": Array<{
+                    "tag": string
+                }>
+                "delete": boolean
+            }>
+        }
+        "iLabelEditedRows": number
+        "letpage": number
+        "stscTags": string
+        "stavailableTags": string
+        "tcCount": number
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_testcase_writer extends __form_base_type {
+        "adminPanel": {
+            "sbSaveToDb": {
+                "submitter": boolean
+                "closeForm": boolean
+                "validatorGroup": string
+            }
+            "tcCat": {
+                "rows": Array<{
+                    "categoryNew": {
+                        "text": string
+                    }
+                    "category": {
+                        "text": string
+                    }
+                    "plannedNew": {
+                        "number": number
+                    }
+                    "editedptcount": {
+                        "number": number
+                    }
+                    "activeNew": {
+                        "checked": boolean
+                    }
+                    "activeEdited": {
+                        "checked": boolean
+                    }
+                    "testCount": number
+                    "progress": number
+                    "isNew": boolean
+                    "edited": boolean
+                    "editedptc": boolean
+                    "toDelete": boolean
+                    "toReopen": boolean
+                    "inProgressTcCount": number
+                }>
+            }
+            "cond": boolean
+        }
+        "drDoneTests": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "category": string
+            }
+        }
+        "assignBtn": {
+            "submitter": boolean
+        }
+        "sbCloseCategory": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "sbSaveEditedLabels": {
+            "submitter": boolean
+        }
+        "categoryClosedStatusTester": number
+        "categoryClosedStatusFinished": number
+        "addTcBtn": {
+            "submitter": boolean
+        }
+        "tbNewLb": {
+            "rows": Array<{
+                "add_tcs_id": {
+                    "text": string
+                }
+                "add_tcs_lb": {
+                    "text": string
+                }
+                "add_tcs_status": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "add_tcs_ty": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "add_tcs_platform": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "add_tcs_lc": {
+                    "text": string
+                }
+                "add_tcs_tags": {
+                    "selectedTags": Array<{
+                        "v": string
+                    }>
+                }
+                "add_tcs_note": {
+                    "text": string
+                }
+            }>
+        }
+        "tcDone": {
+            "rows": Array<{
+                "editedId": {
+                    "text": string
+                }
+                "tcDoneId": {
+                    "text": string
+                }
+                "editedLabel": {
+                    "text": string
+                }
+                "editedStatus": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "editedType": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "editedPlatform": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "editedLocation": {
+                    "text": string
+                }
+                "editedTags": {
+                    "selectedTags": Array<{
+                        "v": string
+                    }>
+                }
+                "editTickets": {
+                    "rows": Array<{
+                        "editedTicket": {
+                            "text": string
+                        }
+                    }>
+                }
+                "editedNote": {
+                    "text": string
+                }
+                "edit": boolean
+                "edited": boolean
+                "delete": boolean
+                "tags": Array<{
+                    "tag": string
+                }>
+            }>
+        }
+        "stLoggedUserRole": string
+        "iFinishedStatusEdit": number
+        "bNewTestCaseAdded": boolean
+        "iNewTestCaseAdded": number
+        "bNewLabelAdded": boolean
+        "iLabelEditedRows": number
+        "adnlb": boolean
+        "unfinishedCategoryCount": number
+        "saveEdit": boolean
+        "submissionTitle": string
+        "submitButton": any
+    }
 }

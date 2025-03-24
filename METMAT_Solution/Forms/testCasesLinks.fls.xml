@@ -167,7 +167,13 @@
 				<textview id="tcsplatform" text='{tcs.platform}'/>
 			</cell>
 			<cell>
+			<if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = tcs.id) > 0}'>
+				<textview text="GOMB"></textview>
+			</if>
+			<if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = tcs.id) = 0}'>
 				<linkview text='{tcs.link}' url='{tcs.link}'/>
+			</if>
+				
 			</cell>		
 			<cell>
 				<tags id= 'tags_ctr' availableTags='{select t.tag v from let_tags t}' selectedTags='{select t.tag v from test_case_tag t where tcs.id = t.tc_id}' 

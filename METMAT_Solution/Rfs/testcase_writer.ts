@@ -8,6 +8,7 @@
 
 
 {
+    Log(form.adminPanel.tcCat.rows)
     if(form.iFinishedStatusEdit>0){
         for(var row of form.adminPanel.tcCat.rows){
             let catName = row.category.text.Trim(" ");
@@ -21,14 +22,14 @@
                         Log("Reopen the following category: "+catName)
                         db.test_to_be_write_category.Update({category: catName},{finished:row.progress, result_count: row.testCount, closedByTesters: 0, testerWhoClosed:""})
                     }else{
-                        Log("Edited the following category: "+catName)
+                        Log("Edited the following category: "+catName+" progress")
                         db.test_to_be_write_category.Update({category: catName},{finished:row.progress, planned_count: row.testCount, result_count: row.testCount})
                     }
                 }
             }else{
                 if (row.editedptc) {
-                    Log("Edited the following category planned test count: "+catName)
-                    db.test_to_be_write_category.Update({category: catName},{planned_count: row.editedptcount.number})
+                    Log("Edited the following category: "+catName)
+                    db.test_to_be_write_category.Update({category: catName},{planned_count: row.editedptcount.number, active: row.activeEdited.checked?1:0})
                 }
             }
         }
@@ -39,7 +40,7 @@
             if (row.isNew) {
                 let newCatName = row.categoryNew.text.Trim(" ");
                 Log("Inserting the following category: "+newCatName)
-                db.test_to_be_write_category.Insert({category: newCatName, planned_count:row.plannedNew.number, finished:0, result_count:0, closedByTesters: 0, testerWhoClosed:""})
+                db.test_to_be_write_category.Insert({category: newCatName, planned_count:row.plannedNew.number, finished:0, result_count:0, closedByTesters: 0, testerWhoClosed:"", active: row.activeNew.checked?1:0})
             }
         }
     }

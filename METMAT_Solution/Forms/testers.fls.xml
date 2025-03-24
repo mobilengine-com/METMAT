@@ -32,6 +32,9 @@
                         <textview text='Participation'/>
                     </cell>
                     <cell>
+                        <textview text='Day off'/>
+                    </cell>
+                    <cell>
                         <textview text=''/>
                     </cell>
                 </row>

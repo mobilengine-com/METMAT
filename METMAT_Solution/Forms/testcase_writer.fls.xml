@@ -25,7 +25,7 @@
         <hbox style="{styles.hbox100w}">
             <combinedbutton text="Add new category">
                 <addbutton
-                    records='{SELECT "" category, 0 planned_count , 0 finished, 0 closedByTesters, "" testerWhoClosed, true new}'
+                    records='{SELECT "" category, 0 planned_count , 0 finished, 0 closedByTesters, "" testerWhoClosed, 1 active, true new}'
                     table='tcCat' />
                 <actionbutton>
                     <set value="{true}" target="bNewTestCaseAdded" />
@@ -54,7 +54,7 @@
             </if>
         </hbox>
         <table id="tcCat" record="tcCat" style="{styles.fullPageTable}"
-            recordset="{loadNewerFromServer:SELECT tcc.category, tcc.planned_count, tcc.finished, tcc.closedByTesters, tcc.testerWhoClosed, false new FROM test_to_be_write_category tcc}">
+            recordset="{loadNewerFromServer:SELECT tcc.category, tcc.planned_count, tcc.finished, tcc.closedByTesters, tcc.testerWhoClosed, tcc.active, false new FROM test_to_be_write_category tcc}">
             <header>
                 <row>
                     <cell>
@@ -71,6 +71,9 @@
                     </cell>
                     <cell>
                         <textview text="InProgress" />
+                    </cell>
+                    <cell>
+                        <textview text="Active" />
                     </cell>
                     <cell>
                         <textview text="Edit" />
@@ -138,6 +141,19 @@
                 <cell>
                     <textview text="{tostring(inProgressTcCount)}" />
                 </cell>
+                 <cell>
+                 <if cond="{tcCat.new}">
+                        <checkbox id="activeNew" checked="{tcCat.active = 1}" />
+                    </if>
+                    <if cond="{not tcCat.new}">
+                        <if cond="{editedptc}">
+                            <checkbox id="activeEdited" checked="{tcCat.active = 1}" />
+                        </if>
+                        <if cond="{not editedptc}">
+                            <textview text='{SELECT CASE WHEN tcCat.active = 1 THEN "Enabled" ELSE "Disabled" END}'/>
+                        </if>
+                    </if>
+                </cell>
                 <cell>
                     <if cond="{tcCat.new}">
                         <combinedbutton text="Undo">
@@ -152,7 +168,7 @@
                             <if cond="{progress = 0}">
                                 <hbox style="{styles.hbox100w}">
                                     <if cond="{not editedptc}">
-                                        <combinedbutton text="Edit planned test count">
+                                        <combinedbutton text="Edit">
                                             <actionbutton>
                                                 <set value="{true}" target="editedptc" />
                                                 <set value="{iFinishedStatusEdit+1}" target="iFinishedStatusEdit" />
