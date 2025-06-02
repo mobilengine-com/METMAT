@@ -7,14 +7,29 @@
         <let id="stscTags" shape="scalar" value="{SELECT GROUP_CONCAT(st.v) FROM tcTable.tagsSc.selectedTags st}" />
         <let id="stavailableTags" shape="scalar" value='{SELECT GROUP_CONCAT(tct.tc_id) FROM test_case_tag tct WHERE INSTR(stscTags, tct.tag )!= 0}' />
 
+        <let id='stLoggedUserRole' shape='scalar'
+            value='{
+        SELECT
+            U.tester_role
+        FROM
+            tester U
+        WHERE
+            U.tester_email = sysp.user
+        }' />
+
         <let id="tcCount" shape="scalar" value='{loadNewerFromServer:SELECT COUNT(DISTINCT tc.id) FROM test_case tc LEFT JOIN test_case_tag tct ON tc.id = tct.tc_id 
             WHERE COALESCE(tcTable.platSc.selectedKey,tc.platform) = tc.platform 
             AND  tc.id LIKE "%" || COALESCE(tcTable.idSc.text,"") || "%" 
             AND tc.desc LIKE "%" || COALESCE(tcTable.descSc.text,"") || "%" 
+            AND CASE WHEN tcTable.dateSc.date IS NULL THEN true ELSE tc.addedDate >= tcTable.dateSc.date END
             AND CASE WHEN LENGTH(stscTags)>0 THEN INSTR(stavailableTags, tc.id) != 0 ELSE true END
             }' />
         
     </declarations>
+    <if cond='{stLoggedUserRole == "Admin"}'>
+        <submitbutton text="Create report from selected tests" id="createReport" closeForm="{false}"></submitbutton>
+        <textbox hint="Recipient email" id="to"/>
+    </if>
     <hbox style="{styles.SearchBar}">
         <popup id="addtest" title="Add missing tests" >
             <hbox style="{styles.SearchBar}">
@@ -89,6 +104,7 @@
             WHERE   COALESCE(platSc.selectedKey,TR.platform) = TR.platform 
                     AND  TR.id LIKE "%" || COALESCE(idSc.text,"") || "%" 
                     AND TR.desc LIKE "%" || COALESCE(descSc.text,"") || "%"
+                    AND CASE WHEN dateSc.date IS NULL THEN true ELSE TR.addedDate >= dateSc.date END
                     AND CASE WHEN LENGTH(stscTags)>0 THEN INSTR(stavailableTags, TR.id) != 0 ELSE true END
                     ORDER BY id LIMIT 20 OFFSET letpage*20}'>
         <header>
@@ -119,7 +135,7 @@
                 </cell>
                 <cell>
                     <textview text="Added date" />
-                    <textview text="" />
+                    <datepicker id="dateSc" />
                 </cell>
                 <cell>
                     <textview text="Edit" />
@@ -177,7 +193,8 @@
                     <backbutton text="Back"/>
                     <discardbutton text='Edit' id="Edit" nextForm='{forms.manualTestWriter}'> 
                         <params>
-                            <param id='editTestId' value='{tcTable.id}'/>
+                            <param id='test_Id' value='{tcTable.id}'/>
+                            <param id='edit' value='{"1"}'/>
                             <param id='currentLastStep' value='{toString(maxStep)}'/>
                             <param id='fromForm' value='{"testcase_monitor"}'/>
                         </params>
@@ -194,7 +211,7 @@
                             </header>
                             <row>
                                 <cell>
-                                <hbox style='{styles.mtCountTask}'>
+                                <hbox style='{styles.mtCountTaskRead}'>
                                     <textview  text="{tostring(test.Step)}" />
                                     <textview  text="{test.Platform}" />
                                     <textarea style='{styles.centerText}' text="{test.Task}" lines="10"/>

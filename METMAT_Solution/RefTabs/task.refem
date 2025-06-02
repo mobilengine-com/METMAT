@@ -12,5 +12,7 @@
 		<Column Name="platformID" Type="Text" NotNull='true'/>
 		<Column Name="time_need" Type="Text"/>
 		<Column Name="saved" Type="Integer"/>
+		<Column Name="project" Type="Text"/>
+		<Column Name="assigned_version" Type="Text"/>
 	</Columns>
 </Reftab>

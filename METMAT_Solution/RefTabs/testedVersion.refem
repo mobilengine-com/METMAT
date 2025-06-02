@@ -1,7 +1,8 @@
 <Reftab Name="testedVersion" Push="true" xmlns="http://schemas.mobilengine.com/reftab/v1" >
 	<Columns>
-		<Column Name="version" Type="Text" NotNull="true" />
+		<Column Name="version" Type="Text" NotNull="true" PrimaryKey="true"/>
 		<Column Name="platformID" Type="Text" NotNull='true'/>
+		<Column Name="mainVersion" Type="Text" NotNull='true' PrimaryKey="true"/>
 		<Column Name="addedDate" Type="Date"/>
 	</Columns>
 </Reftab>

@@ -56,4 +56,30 @@
             }
         }
     }
+    if(form.createReport.submitter) {
+		Log("Create report from created tests")
+
+        let sheetName = "Test list";
+		let list = excel.New();
+		list.AddSheet(sheetName);
+		list.SetValue(sheetName,0,0,"Added date");
+		list.SetValue(sheetName,0,1,"Test name");
+		list.SetValue(sheetName,0,2,"Link");
+		let assignedTests = db.test_case.Read({addedDate:{greaterOrEqual: form.tcTable.dateSc.date.DtlToDtdb()}});
+		let i = 1;
+		for (let a of assignedTests) {
+			list.SetValue(sheetName,i,0,a.addedDate);
+			list.SetValue(sheetName,i,1,a.id);
+			list.SetValue(sheetName,i,2,a.link);
+			i=i+1;
+		}
+		let resultMediaId = list.Store("Created tests");
+		smtp.SendEmail({
+			recipients: [form.to.text],
+			body: "",
+			subject: "Created test list from "+ToString(form.tcTable.dateSc.date),
+			attachments: [{fileref: fileref.Parse(resultMediaId+"|1") , filename: "Created_tests.xlsx"}]
+		});
+
+	}
 }

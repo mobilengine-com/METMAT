@@ -6,7 +6,10 @@
 //# using reftab 'tester';
 //# using reftab 'task';
 
+
+import { assertNotNull, parseToFloat  } from "./lib";
 {
+	
 	let now = dtl.Now();
 	let dayofweek = now.DayOfWeek();
 	let remTests = db.task.Read({ result: "not yet started" });
@@ -23,8 +26,10 @@
 		let done_total = db.task.Read({ result: "success" });
 		let testers = db.tester.Read({});
 
-		let hrAvgTestRuntime = float.Parse(db.environmentValues.Read({ name: "hrAvgTestRuntime" })[0].value);
-		let holiday = float.Parse(db.environmentValues.Read({ name: "holidays" })[0].value);
+		let stavgtestRuntime = db.environmentValues.Read({ name: "hrAvgTestRuntime" }).Single().value as string;
+
+		let hrAvgTestRuntime = parseToFloat(stavgtestRuntime) ;
+		let holiday = parseToFloat(db.environmentValues.Read({ name: "holidays" }).Single().value as string);
 		let requiredWorkingHours = remTests.Count() * hrAvgTestRuntime;
 		Log(requiredWorkingHours);
 		let roundDay = (requiredWorkingHours / 8).Ceiling();
@@ -55,7 +60,7 @@
 		Log("Succesfull rate in total is " + sum_perc + "%")
 
 		db.progress_history.Insert({
-			date: dtl.Parse(dtfday, now.Format(dtfday)).DtlToDtdb(),
+			date: assertNotNull(dtl.Parse(dtfday, now.Format(dtfday))).DtlToDtdb(),
 			imp_done: done_today.Count(),
 			imp_total: total_today,
 			imp_perc: imp_perc,
@@ -66,7 +71,7 @@
 			sum_total: total + remTests.Count(),
 			sum_perc: sum_perc,
 			tester_number: testers.Count(),
-			exp_end_of_testing: dtl.Parse(dtfday, endDate.Format(dtfday)).DtlToDtdb()
+			exp_end_of_testing: assertNotNull(dtl.Parse(dtfday, endDate.Format(dtfday))).DtlToDtdb()
 		});
 		for (let tester of testers) {
 			//Calculating the count of the done_tests by testers
@@ -86,7 +91,7 @@
 			}
 
 			db.progress_by_user.Insert({
-				date: dtl.Parse(dtfday, now.Format(dtfday)).DtlToDtdb(),
+				date: assertNotNull(dtl.Parse(dtfday, now.Format(dtfday))).DtlToDtdb(),
 				tester_name: tester.tester_name,
 				daily_work_done: done_today_by_tester,
 				sum_work_done: sum_done_by_tester,

@@ -29,15 +29,12 @@
 		<let id='finishDayOfTestWriting' shape='scalar' value='{Select envVal.value From environmentValues envVal Where envVal.name = "finishDayOfTestWriting"}'/>
 		
 		<let id='plannedFinishDate' shape='scalar' value='{TODATE(toint(GETYEAR(sysp.dtlFormOpen)), toint(finishMonthOfTestRunning), toint(finishDayOfTestRunning),0,0,0)}'/>
-
-		<let id='tbTestData' shape='table' value='{select  ph.date, ph.imp_done, ph.imp_total, ph.tc_exec_done, ph.tc_exec_total, ph.sum_done, ph.tester_number, ph.exp_end_of_testing
-			 from progress_history ph}'/>
 		
 		<let id='tc_done' shape='scalar' value='{env_by_result.success_sum_t.text}'/>
 		<let id='tc_exec_sum' shape='scalar' value='{env_by_result.all_tc_exec_sum.text}'/>
 		<let id='jira_done' shape='scalar' value='{tester_by_result.closed_sum_j.text}'/>		
 		<let id='jira_sum' shape='scalar' value='{tester_by_result.all_jira_ver_sum.text}'/>		
-		<let id='task_env_table' shape='table' value='{
+		<let id='task_env_table' access="private" shape='table' value='{
 			select tsk.task_id, tsk.result, tsk.env_name, tsk.task_type, tsk.end_tc_date, e.tester_name, tcl.tc_prio, tcl.tc_impreg
 				from task tsk
 				left join environment e on tsk.env_name = e.env_name
@@ -51,16 +48,50 @@
 			select jtl.Key, jtl.Summary, jtl.Reporter
 			from jira_list jtl 
 		}'/>
-		<let id='progress_history_table' shape='table' value='{
+		<let id='progress_history_table' access="private" shape='table' value='{
 			select ph.date
 			from progress_history ph 
 		}'/>
 		<let id='count_rows_ph' shape='scalar' value='{select count(pht.date) from progress_history_table pht}'/>
+
+		<let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
 	</declarations>
 
 <header>
-</header>
 	
+</header>
+	<hbox style="{styles.projectDisplay}">
+		<textview style="{styles.projectDisplay}" text='{"Current selected project is: "||user_proj}'/>
+		<popup id="changeppop" title="" openMode='dialog' deferred='true' linkIcon='{icons.settings}'>
+			<backbutton text="X"/>
+			<table id="projectTable" record="ver" recordset="{loadNewerFromServer:SELECT  v.project FROM versions v GROUP BY v.project}">
+				<header><row>
+					<cell>
+						<textview text='Project name'/>
+					</cell>
+					<cell>
+						<textview text='Selected'/>
+					</cell>
+				</row></header>
+				<row>
+					<cell>
+						<textview id="project" text='{ver.project}'/>
+					</cell>
+					<cell>
+						<if cond='{ver.project = user_proj}'>
+							<textview labelIcon="{icons.qa_accept_x}"/>
+						</if>
+						<if cond='{not (ver.project = user_proj)}'>
+							<combinedbutton id="changeProjectSubmit" text="Select">
+							<submitbutton closeForm="{false}" />
+							<backbutton />
+						</combinedbutton>
+						</if>
+					</cell>
+				</row>
+			</table>
+		</popup>
+	</hbox>
 	<chapter title='Test run finish date'>
 	<declarations>
 		<let id="result" shape="table" value='{loadNewerFromServer:SELECT cr.plannedFinish, cr.doneCount, cr.totalCount, cr.participate, cr.leftCount, cr.requiredHours, cr.requiredDays, cr.finishDate FROM calculatedResults cr WHERE cr.Type = "Run"}' />
@@ -86,11 +117,12 @@
 		<textview text='{"Tester count who is writeing tests: " || (SELECT tostring(cr.participate) FROM resultW cr)}'/>
 		<textview text='{"Planned finish date: " || (SELECT toString(FORMATDTL(cr.plannedFinish,(dtf yyyy "-" MM "-" dd))) FROM resultW cr)}'/>
 		<textview text='{"Remaining to write test count: "||(SELECT toString(cr.leftCount) FROM resultW cr)}'/>
+		<textview text='{"Already created test count: "||(SELECT toString(cr.doneCount) FROM resultW cr)}'/>
 		<textview text='{"Required working hours to write tests: " || (SELECT tostring(cr.requiredHours) FROM resultW cr)}'/>
 		<textview text='{"Required rounded working days to write tests: " || (SELECT tostring(cr.requiredDays) FROM resultW cr)}'/>
 		<textview text='{"Actual finish date with test writing: " || (SELECT tostring(FORMATDTL(cr.finishDate,(dtf yyyy "-" MM "-" dd))) FROM resultW cr)}'/>
 		<textview text='{"Actual finish date with test writing and 2 week of late preparation: " || (SELECT tostring(FORMATDTL(cr.finishDateExtended,(dtf yyyy "-" MM "-" dd))) FROM resultW cr)}'/>
-		<textview text='{"Progress: %"|| (SELECT tostring(toint((tofloat(r.doneCount)/tofloat(r.leftCount))*100)) FROM resultW r)}'/>
+		<textview text='{"Progress: %"|| (SELECT tostring(toint((tofloat(cr.doneCount)/tofloat(cr.totalCount))*100)) FROM resultW cr)}'/>
 		<submitbutton text="Recalculate" closeForm="{false}" id="recWrite"/>
 		<submitbutton text="Save current date as planned finish date" closeForm="{false}" id="savePlannedWrite"/>
 	</chapter>
@@ -173,7 +205,7 @@
 						<cell>
 							<textview text='{tostring(imp_done_today) || " (+" || tostring(imp_done_today - last_imp_done) || ")"}'>
 								<declarations>
-									<let id='imp_done_today' shape='scalar' value='{select count(tet.task_id) from task_env_table tet where tet.result="success" and tet.tc_impreg="imp"}'/>
+									<let id='imp_done_today' access="private" shape='scalar' value='{select count(tet.task_id) from task_env_table tet where tet.result="success" and tet.tc_impreg="imp"}'/>
 									<let id='last_imp_done' shape='scalar' value='{
 										select v.phd 
 										from (select ph.date, coalesce(ph.imp_done, 0) phd 

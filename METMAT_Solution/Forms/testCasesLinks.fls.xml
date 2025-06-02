@@ -8,9 +8,12 @@
 		<let id="iLabelEditedRows" shape="scalar" value="{0}" />
 		<let id="iLabelDeletedRows" shape="scalar" value="{0}" />
 		<let id="selectedTestsTable" shape="table" value='{loadNewerFromServer:SELECT tcst.id, tcst.desc, tcst.platform, tcst.link, tcst.time, formatDtl(tcst.lastAssigned, (dtf yyyy"-"MM"-"dd" "HH":"mm":"ss)) lastAssigned FROM test_case tcst where UPPER(tcst.id) LIKE "%" || UPPER(tcs.filter_taskid.text) || "%" and 
-	UPPER(tcst.desc) LIKE "%" || UPPER(tcs.filter_desc.text) || "%" and
+	UPPER(tcst.desc) LIKE "%" || UPPER(tcs.filter_desc.text) || "%" and	(CASE WHEN tcs.assigned_date_filter.date IS NULL THEN true ELSE tcst.lastAssigned >= tcs.assigned_date_filter.date END) and
 	(tcst.platform = tcs.filter_platform.selectedKey OR tcs.filter_platform.selectedKey IS NULL) and
 	(exists (select t.tag from test_case_tag t where t.tag = tcs.tag_filter.text and t.tc_id = tcst.id) OR tcs.tag_filter.text="") order by id}' />
+	
+		<let id='user_proj' shape='scalar' value='{SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+		<let id='currentVersion' shape='scalar' value='{SELECT v.version FROM versions v WHERE v.current = 1 AND v.project = user_proj}' />
 	</declarations>
 	<header>
 		<discardbutton text="X"/>
@@ -45,7 +48,7 @@
 		<if cond="{iLabelDeletedRows>0}">
 			<submitbutton id="prDelete" text="Process delete" closeForm="{false}"></submitbutton>
 		</if>
-		<table id="assignedTb" label="Assigned tests" record="at" recordset="{loadNewerFromServer:SELECT ta.guid, ta.task_id, ta.result, ta.platformID FROM task ta where ta.env_name = selected_environment.selectedKey order by task_id}">
+		<table id="assignedTb" label="Assigned tests" record="at" recordset="{loadNewerFromServer:SELECT ta.guid, ta.task_id, ta.result, ta.platformID FROM task ta where ta.assigned_version = currentVersion AND ta.project = user_proj AND ta.env_name = selected_environment.selectedKey order by task_id}">
 			
 			<header>
 				<row>
@@ -144,6 +147,7 @@
 				</cell>
 				<cell>
 					<textview text="Last time assigned"/>
+					<datepicker id="assigned_date_filter"/>
 				</cell>
 				<cell>
 					<textview id='tvDelete' text=''/>
@@ -168,7 +172,13 @@
 			</cell>
 			<cell>
 			<if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = tcs.id) > 0}'>
-				<textview text="GOMB"></textview>
+				<discardbutton text='Go to manual test' id="totestWrite" nextForm='{forms.manualTestWriter}'> 
+                            <params>
+                                <param id='test_Id' value='{tcs.id}'/>
+								<param id='edit' value='{"0"}'/>
+                                <param id='fromForm' value='{"tclinks"}'/>
+                            </params>
+                            </discardbutton>
 			</if>
 			<if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = tcs.id) = 0}'>
 				<linkview text='{tcs.link}' url='{tcs.link}'/>

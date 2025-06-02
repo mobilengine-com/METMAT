@@ -1,4 +1,5 @@
 <form id="generate_Report"  menuName="Generate Report"  title='Generate Report'  platforms="ios web" xmlns="http://schemas.mobilengine.com/fls/v2">
+	  <header></header>
 	  <textbox id="name" label="Name" >
 		<validation>
 			<validator cond='{length(name.text) > 0}' message='Give a name'/>
@@ -16,5 +17,6 @@
 			<validator cond='{filterdate.date is not NULL}' message='Give a date'/>
 		  </validation>
 		</datepicker>
-	  
+	  <submitbutton text="Generate test report" id="generateTcReport"/>
+	  <submitbutton text="Generate assigned testcase list" id="generateAssignedTcList"/>
 </form>

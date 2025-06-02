@@ -575,7 +575,8 @@
                                                 THEN icons.qa_accept_x
                                                 ELSE icons.qa_edit_x END}" text='Write test' id="totestWrite" nextForm='{forms.manualTestWriter}'> 
                         <params>
-                            <param id='editTestId' value='{SELECT CASE WHEN edited THEN editedId.text ELSE tcDone.id END}'/>
+                            <param id='test_Id' value='{SELECT CASE WHEN edited THEN editedId.text ELSE tcDone.id END}'/>
+                            <param id='edit' value='{"1"}'/>
                             <param id='currentLastStep' value='{"2"}'/>
                             <param id='fromForm' value='{"testcase_writer"}'/>
                         </params>

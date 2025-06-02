@@ -2,6 +2,7 @@
 //#using reftab environment;
 //#using reftab testedVersion;
 
+import { assertNotNull, parseToFloat  } from "./lib";
 {
 	let now = dtl.Now();
 	let dtfday = dtf.Parse("yyyy\".\"MM\".\"dd\" \"HH\":\"mm\":\"ss");
@@ -22,11 +23,12 @@
 			db.testedVersion.Insert({
 				version: row.verName.text,
 				platformID: row.verPlatform.text,
-				addedDate: dtl.Parse(dtfday, now.Format(dtfday)).DtlToDtdb()
+				mainVersion: row.mainVersion.text,
+				addedDate: assertNotNull(dtl.Parse(dtfday, now.Format(dtfday))).DtlToDtdb()
 			});
 		}
 		if (row.deleted == 1) {
-			db.testedVersion.Delete({version: row.verName.text, platformID:  row.verPlatform.text})
+			db.testedVersion.Delete({version: row.verName.text, platformID:  row.verPlatform.text, mainVersion: row.mainVersion.text})
 		}
 	} 
 }

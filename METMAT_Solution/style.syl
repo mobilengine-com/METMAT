@@ -1,4 +1,15 @@
 styles {
+    style projectDisplay {
+        textview {
+            control {
+					fontSize = 24px
+            }
+        }
+        hbox {
+            sizes = 300px, 100px
+        }
+    }
+
     style taskAndList {
         table {
             columnWidth = 10em, 30em, 2em, 3em, 60em, 15em
@@ -40,26 +51,53 @@ styles {
             textAlign = left
         }
     }
-    style mtCountTask{
+    style mtCountTaskRead{
         hbox{
             sizes = 30px, 90px, 470px
+            height = 230px
         }
     }
-    style mtCountExpWithPhoto{
+    style mtCountTask{
         hbox{
-            sizes = 30px, 470px, 300px 
+            sizes = 100px, 30px, 90px, 470px
+            height = 230px
+        }
+        submitbutton{
+            margin { top=109px }
+        }
+        actionbutton{
+            margin { top=45px }
+        }
+        combinedbutton{
+            margin { top=121px }
+        }
+        photoview{
+            margin { top=94px }
+        }
+        textview{
+            margin { top=47px }
+        }
+        dropdown{
+            margin { top=47px }
         }
     }
     style mtCountExp{
         hbox{
-            sizes = 30px, 470px, 300px 
+            sizes = 30px, 470px, 140px, 120px, 150px
+            height = 230px
+        }
+    }
+     style mtCountExpNoPhoto{
+        hbox{
+            sizes = 30px, 470px, 130px, 147px
+            height = 230px
         }
     }
     style fullPageTableForTestCase {
         table {
             width = content
             columnWidth = 590px, 800px
-            margin { right=200px left=310px }
+            margin { right=90px left=210px }
             borderWidth {
 				top=5px
 				right=5px
@@ -70,6 +108,7 @@ styles {
         }
         cell{
             content = allignContent
+            
         }
         row{
             margin {
@@ -92,7 +131,7 @@ styles {
         table {
             width = content
             columnWidth = 590px, 600px
-            margin { right=200px left=310px }
+            margin { right=340px left=310px }
             borderWidth {
 				top=5px
 				right=5px
@@ -125,7 +164,7 @@ styles {
                 padding { top=5px right=5px bottom=5px left=5px }
 				margin { top=5px right=5px bottom=5px left=5px }
             }
-            
+            margin { top=65px }
         }
     }
 

@@ -1,7 +1,13 @@
 <form id='projektDetails' menuName='Projekt details' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2" >
+	<declarations>
+		<let id='user_proj' shape='scalar' value='{SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+		<let id='currentVersion' shape='scalar' value='{SELECT ver.version FROM versions ver WHERE ver.current = 1 AND user_proj = ver.project}' />
+		
+	</declarations>
 	<header>
 		<submitbutton text="Save" closeForm="{false}"/>
 	</header>
+
 	<chapter title='Environments'>
 	<hbox style="{styles.textboxInHbox}">
 		<textbox id='env_name'  label='Environment name:' style="{styles.textboxInHbox}"/>
@@ -83,7 +89,7 @@
 				textMap="{v}"
         	    choices='{["Android", "IOS", "BO", "Wef"]}'/>
 			<combinedbutton text="Add new version">
-				<addbutton records="{SELECT ver_name.text version, ver_platform.selectedKey platformID, 1 new}" table="tbVersions"/>
+				<addbutton records="{SELECT ver_name.text version, ver_platform.selectedKey platformID, currentVersion mainVersion, 1 new}" table="tbVersions"/>
 				<actionbutton>
 					<set value='{""}' target="ver_name.text" />
 					<set value='{"None"}' target="ver_platform.selectedKey" />
@@ -92,7 +98,7 @@
 		</hbox>
 		
 	
-	<table id="tbVersions" record='ver' recordset='{loadnewerfromserver:select e.version, e.platformID, 0 new from testedVersion e ORDER BY version}'>
+	<table id="tbVersions" record='ver' recordset='{loadnewerfromserver:select e.version, e.platformID, e.mainVersion, 0 new from testedVersion e WHERE e.mainVersion IN (SELECT ver.version FROM versions ver WHERE ver.project = user_proj) ORDER BY version}'>
 		<header>
 			<row>
 				<cell>
@@ -100,6 +106,9 @@
 				</cell>
 				<cell>
 					<textview text='Platform'/>
+				</cell>
+				<cell>
+					<textview text='Main version'/>
 				</cell>
 			</row>
 		</header>
@@ -113,6 +122,9 @@
 			</cell>
 			<cell>
 				<textview id="verPlatform" text='{ver.platformID}'/>
+			</cell>
+			<cell>
+				<textview id="mainVersion" text='{ver.mainVersion}'/>
 			</cell>
 			<cell>
 				<if cond="{deleted = 0}">

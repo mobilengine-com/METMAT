@@ -34,7 +34,8 @@
 					<if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task_id.text) > 0}'>
 						<discardbutton text='Go to manual test' id="totestWrite" nextForm='{forms.manualTestWriter}'> 
                         <params>
-                            <param id='editTestId' value='{task_id.text}'/>
+                            <param id='test_Id' value='{task_id.text}'/>
+							<param id='edit' value='{"1"}'/>
                             <param id='fromForm' value='{"badtestcaselist"}'/>
                         </params>
                     </discardbutton>

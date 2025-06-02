@@ -6,5 +6,6 @@
 		<Column Name="work_type" Type="Text" />
 		<Column Name="tester_active" Type="Text" />
 		<Column Name="participation" Type="Float" />
+		<Column Name="selected_project" Type="Text" />
 	</Columns>
 </Reftab>

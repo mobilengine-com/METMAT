@@ -1,0 +1,1 @@
+UPDATE `testedVersion` SET `mainVersion` = 'S54' WHERE `version` IS NOT NULL;

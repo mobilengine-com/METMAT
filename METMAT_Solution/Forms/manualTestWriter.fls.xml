@@ -1,32 +1,39 @@
 <form id='manualTestWriter' menuName='Manual test Writer' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
     <declarations>
-        <let id="currentStep" shape="scalar" value="{SELECT COALESCE(toint(params.currentLastStep) , 2)}" />
-        <let id="edit" shape="scalar" value="{SELECT CASE WHEN params.editTestId IS NULL THEN 0 ELSE 1 END}" />
+        <let id="currentStep" shape="scalar" value="{SELECT COALESCE(toint(params.currentLastStep), 2)}" />
+        <let id="edit" shape="scalar" value="{SELECT COALESCE(toint(params.edit), 0)}" />
         <let id="deletedStep" shape="scalar" value="{0}" />
         <let id="stfromForm" shape="scalar" value="{params.fromForm}" />
-        <let id="originalTestId" shape="scalar" value="{params.editTestId}" />
+        <let id="originalTestId" shape="scalar" value="{params.test_Id}" />
     </declarations>
     <header>
-        <submitbutton text="Save" nextForm='{parseFormn(stfromForm)}' />
-        <discardbutton text="Discard" nextForm='{parseFormn(stfromForm)}'/>
+        <if cond='{not (edit = 2)}'>
+           <submitbutton text="Save" nextForm='{parseFormn(stfromForm)}' />
+           <discardbutton text="Discard" nextForm='{parseFormn(stfromForm)}'/>
+        </if>
+        <if cond='{edit = 2}'>
+              <discardbutton confirm="{false}" text="Close" nextForm='{parseFormn(stfromForm)}' />
+        </if>
     </header>
     <params>
-		<param id="editTestId" />
+		<param id="edit" />
+        <param id="test_Id" />
         <param id="currentLastStep" />
         <param id="fromForm" />
 	</params>
-    <if cond='{(stfromForm = "testcase_monitor") or (stfromForm = "badtestcaselist") or (stfromForm = "task_executionNew")}'>
-        <textview id="TcId" style='{styles.tcWriteId}' label="Test id" text='{Select COALESCE(params.editTestId, "")}' />
+    <if cond='{(stfromForm = "testcase_monitor") or (stfromForm = "badtestcaselist") or (stfromForm = "task_executionNew") or (stfromForm = "tclinks")}'>
+        <textview id="TcId" style='{styles.tcWriteId}' label="Test id" text='{Select COALESCE(params.test_Id, "")}' />
     </if>
-    <if cond='{not (stfromForm = "testcase_monitor") or not (stfromForm = "badtestcaselist") or not (stfromForm = "task_executionNew")}'>
-        <textbox id="newTcId" style='{styles.tcWriteId}' label="Test id" text='{Select COALESCE(params.editTestId, "")}' />
+    <if cond='{not (stfromForm = "testcase_monitor") or not (stfromForm = "badtestcaselist") or not (stfromForm = "task_executionNew") or not (stfromForm = "tclinks")}'>
+        <textbox disabled = '{edit = 2}' id="newTcId" style='{styles.tcWriteId}' label="Test id" text='{Select COALESCE(params.test_Id, "")}' />
     </if>
     <if cond='{SELECT stfromForm IS NULL}'>
         <textbox id="createTcId" style='{styles.tcWriteId}' label="Test id" text='{""}' />
     </if>
-    <textarea id="newTcDesc" style='{styles.tcWriteId}' lines="3" label="Description" text='{Select COALESCE((SELECT tc.desc FROM test_case tc WHERE tc.id = params.editTestId), (SELECT tc.label FROM test_to_be_write_done tc WHERE tc.id = params.editTestId), "")}'/>
-    <textarea id="newTcPrecond" style='{styles.tcWriteId}' lines="5" label="Pre-Conditions" text='{Select COALESCE((SELECT tc.PreCond FROM test_case tc WHERE tc.id = params.editTestId), (SELECT tc.PreCond FROM test_to_be_write_done tc WHERE tc.id = params.editTestId), "")}'/>
+    <textarea disabled = '{edit = 2}' id="newTcDesc" style='{styles.tcWriteId}' lines="3" label="Description" text='{Select COALESCE((SELECT tc.desc FROM test_case tc WHERE tc.id = params.test_Id), (SELECT tc.label FROM test_to_be_write_done tc WHERE tc.id = params.test_Id), "")}'/>
+    <textarea disabled = '{edit = 2}' id="newTcPrecond" style='{styles.tcWriteId}' lines="5" label="Pre-Conditions" text='{Select COALESCE((SELECT tc.PreCond FROM test_case tc WHERE tc.id = params.test_Id), (SELECT tc.PreCond FROM test_to_be_write_done tc WHERE tc.id = params.test_Id), "")}'/>
     <if cond='{edit = 0}'>
+        <textview text="New" />
     <table id="newTC" style="{styles.fullPageTableForTestCase}" record="test" recordset='{SELECT "" TestId, "" Expected, "" Task, 1 Step}'>
         <row>
         <declarations>
@@ -35,6 +42,7 @@
         </declarations>
             <cell>
             <hbox style='{styles.mtCountTask}'>
+                <submitbutton id="iStep" text="Insert step" closeForm="{false}"/>
                 <textview  id="stepTask" text="{tostring(stepCount)}" />
                 <dropdown id="newTcPlatform" keyMap="{v}" textMap="{v}"
                         choices='{["Android", "IOS", "BO", "Wef"]}'>
@@ -75,8 +83,8 @@
         </actionbutton>
     </combinedbutton>
     </if>
-    <if cond="{edit = 1}">
-    <table id="editTC" style="{styles.fullPageTableForTestCase}" record="editTest" recordset='{SELECT tc.TestId, tc.Expected, tc.Task, tc.Step, tc.Platform FROM manualTests tc WHERE tc.TestId = params.editTestId}'>
+        <textview text='{SELECT CASE WHEN edit = 2 THEN "styles.mtCountTaskRead" ELSE "styles.mtCountTask" END}' />
+    <table id="editTC" style="{SELECT CASE WHEN edit = 2 THEN styles.fullPageTableForTestView ELSE styles.fullPageTableForTestCase END}" record="editTest" recordset='{loadNewerFromServer:SELECT tc.TestId, tc.Expected, tc.Task, tc.Step, tc.Platform FROM manualTests tc WHERE tc.TestId = params.test_Id order by Step}'>
         <row>
         <declarations>
             <let id="hasPhoto" shape="scalar" value="{0}" />
@@ -84,9 +92,12 @@
             <let id="stepCount" shape="scalar" value="{editTestIndex}" />
         </declarations>
             <cell>
-            <hbox style='{styles.mtCountTask}'>
-                <textview  id="stepTask" text="{tostring(stepCount)}" />
-                <dropdown id="newTcPlatform" keyMap="{v}" textMap="{v}"
+            <hbox style='{ SELECT CASE WHEN edit = 2 THEN styles.mtCountTaskRead ELSE styles.mtCountTask END}'>
+                <if cond="{ not (edit = 2)}">
+                    <submitbutton style='{styles.mtCountTask}' id="iStep" text="Insert step" closeForm="{false}"/>
+                </if>
+                <textview style='{styles.mtCountTask}' id="stepTask" text="{tostring(stepCount)}" />
+                <dropdown style='{styles.mtCountTask}' id="newTcPlatform" keyMap="{v}" textMap="{v}"
                         choices='{["Android", "IOS", "BO", "Wef"]}'
                         selectedKey="{editTest.Platform}">
                         <validation>
@@ -101,37 +112,47 @@
             </hbox>
             </cell>
             <cell>
-            <hbox style='{styles.mtCountExp}'>
+            <hbox style='{SELECT CASE WHEN mediaIdPhoto IS NULL THEN styles.mtCountExpNoPhoto ELSE styles.mtCountExp END}'>
                 <textview  text="{tostring(stepCount)}" />
                 <vbox>
                     <textview style='{styles.centerText}' text="Expected"/>
                     <textarea id="expect" style='{styles.centerText}' text="{editTest.Expected}" lines="10"/>
                 </vbox>
-                <if cond="{SELECT mediaIdPhoto IS NULL}">
-                 <photo id="photoUpload" singlePhoto="true" style="{styles.phototest}" photoData="{TABLE mediaId (mediaIdPhoto)}"/>
+                <if cond="{ not (edit = 2)}">
+                    <combinedbutton style='{styles.mtCountTask}' text="Delete step">
+                        <actionbutton  >
+                            <set value="{1}" target="deletedStep" />
+                        </actionbutton>
+                        <removebutton />
+                    </combinedbutton>
                 </if>
-                <if cond="{SELECT mediaIdPhoto IS NOT NULL}">
-                    <photoview photos='{TABLE mediaId (mediaIdPhoto)}'/>
-                    <actionbutton text="Delete">
-                        <set value="{NULL}" target="mediaIdPhoto" />
-                    </actionbutton>
+                <if cond="{ not (edit = 2)}">
+                    <if cond="{SELECT mediaIdPhoto IS NULL}">
+                        <photo  id="photoUpload" singlePhoto="true" style="{styles.phototest}" photoData="{TABLE mediaId (mediaIdPhoto)}"/>
+                    </if>
                 </if>
-                <combinedbutton text="Delete step">
-                    <actionbutton  >
-                        <set value="{1}" target="deletedStep" />
-                    </actionbutton>
-                    <removebutton />
-                </combinedbutton>
                 
+                <if cond="{SELECT mediaIdPhoto IS NOT NULL}">
+                    <vbox>
+                        <photoview style='{SELECT CASE WHEN edit = 2 THEN styles.mtCountTask ELSE null END}' photos='{TABLE mediaId (mediaIdPhoto)}'/>
+                        <if cond="{ not (edit = 2)}">
+                            <actionbutton style='{styles.mtCountTask}' text="Delete">
+                                <set value="{NULL}" target="mediaIdPhoto" />
+                            </actionbutton>
+                        </if>
+                    </vbox>
+                    
+                </if>
             </hbox>
             </cell>
         </row>
     </table>
-    <combinedbutton text="Add new step">
-        <addbutton records='{SELECT "" TestId, "" Expected, "" Task, currentStep Step, "" Platform}' table="editTC"></addbutton>
-        <actionbutton>
-            <set value="{currentStep+1}" target="currentStep" />
-        </actionbutton>
-    </combinedbutton>
+    <if cond="{ not (edit = 2)}">
+        <combinedbutton text="Add new step">
+            <addbutton records='{SELECT "" TestId, "" Expected, "" Task, currentStep Step, "" Platform}' table="editTC"></addbutton>
+            <actionbutton>
+                <set value="{currentStep+1}" target="currentStep" />
+            </actionbutton>
+        </combinedbutton>
     </if>
 </form>

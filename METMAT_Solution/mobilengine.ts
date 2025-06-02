@@ -1779,29 +1779,30 @@ declare global {
 
 declare global {
 	class __db_type {
-		"calculatedResults": table
-		"environment": table
-		"environmentValues": table
-		"holidays": table
-		"jira_list": table
-		"manualTests": table
-		"manualTestsMedia": table
-		"progress_by_user": table
-		"progress_history": table
-		"reportparams": table
-		"task": table
-		"tc_jira_list": table
-		"tc_list": table
-		"tc_tag": table
-		"test_case": table
-		"test_case_tag": table
-		"test_to_be_write_category": table
-		"test_to_be_write_done": table
-		"test_to_be_write_tags": table
-		"test_to_be_write_tickets": table
-		"testedVersion": table
-		"tester": table
-		"testingChecklist": table
+		"calculatedResults": typed_table<reftab_row_calculatedResults, reftab_filter_calculatedResults, reftab_columns_calculatedResults>
+		"environment": typed_table<reftab_row_environment, reftab_filter_environment, reftab_columns_environment>
+		"environmentValues": typed_table<reftab_row_environmentValues, reftab_filter_environmentValues, reftab_columns_environmentValues>
+		"holidays": typed_table<reftab_row_holidays, reftab_filter_holidays, reftab_columns_holidays>
+		"jira_list": typed_table<reftab_row_jira_list, reftab_filter_jira_list, reftab_columns_jira_list>
+		"manualTests": typed_table<reftab_row_manualTests, reftab_filter_manualTests, reftab_columns_manualTests>
+		"manualTestsMedia": typed_table<reftab_row_manualTestsMedia, reftab_filter_manualTestsMedia, reftab_columns_manualTestsMedia>
+		"progress_by_user": typed_table<reftab_row_progress_by_user, reftab_filter_progress_by_user, reftab_columns_progress_by_user>
+		"progress_history": typed_table<reftab_row_progress_history, reftab_filter_progress_history, reftab_columns_progress_history>
+		"reportparams": typed_table<reftab_row_reportparams, reftab_filter_reportparams, reftab_columns_reportparams>
+		"task": typed_table<reftab_row_task, reftab_filter_task, reftab_columns_task>
+		"tc_jira_list": typed_table<reftab_row_tc_jira_list, reftab_filter_tc_jira_list, reftab_columns_tc_jira_list>
+		"tc_list": typed_table<reftab_row_tc_list, reftab_filter_tc_list, reftab_columns_tc_list>
+		"tc_tag": typed_table<reftab_row_tc_tag, reftab_filter_tc_tag, reftab_columns_tc_tag>
+		"test_case": typed_table<reftab_row_test_case, reftab_filter_test_case, reftab_columns_test_case>
+		"test_case_tag": typed_table<reftab_row_test_case_tag, reftab_filter_test_case_tag, reftab_columns_test_case_tag>
+		"test_to_be_write_category": typed_table<reftab_row_test_to_be_write_category, reftab_filter_test_to_be_write_category, reftab_columns_test_to_be_write_category>
+		"test_to_be_write_done": typed_table<reftab_row_test_to_be_write_done, reftab_filter_test_to_be_write_done, reftab_columns_test_to_be_write_done>
+		"test_to_be_write_tags": typed_table<reftab_row_test_to_be_write_tags, reftab_filter_test_to_be_write_tags, reftab_columns_test_to_be_write_tags>
+		"test_to_be_write_tickets": typed_table<reftab_row_test_to_be_write_tickets, reftab_filter_test_to_be_write_tickets, reftab_columns_test_to_be_write_tickets>
+		"testedVersion": typed_table<reftab_row_testedVersion, reftab_filter_testedVersion, reftab_columns_testedVersion>
+		"tester": typed_table<reftab_row_tester, reftab_filter_tester, reftab_columns_tester>
+		"testingChecklist": typed_table<reftab_row_testingChecklist, reftab_filter_testingChecklist, reftab_columns_testingChecklist>
+		"versions": typed_table<reftab_row_versions, reftab_filter_versions, reftab_columns_versions>
 	}
 	const db: __db_type;
 }
@@ -1817,6 +1818,7 @@ declare global {
 		"envVarSave": rfsref
 		"generate_Report": rfsref
 		"holidays": rfsref
+		"lib": rfsref
 		"manualTestWriter": rfsref
 		"progressLog": rfsref
 		"saveProjektDetails": rfsref
@@ -1829,6 +1831,7 @@ declare global {
 		"testCasesLinks": rfsref
 		"testers": rfsref
 		"testFixed": rfsref
+		"version_control": rfsref
 	}
 	const rfs: __rfs_type;
 }
@@ -1859,51 +1862,9 @@ declare global {
 		"testcase_writer": __formref_type
 		"testers": __formref_type
 		"testingStatus": __formref_type
+		"version_control": __formref_type
 	}
 	const forms: __forms_type;
-}
-declare global {
-/** column type for reference table calculatedResults */
-	type reftab_columns_calculatedResults = 'Type'|'participate'|'totalCount'|'doneCount'|'leftCount'|'requiredHours'|'requiredDays'|'finishDate'|'finishDateExtended'|'plannedFinish'
-/** row type for reference table calculatedResults */
-	class reftab_row_calculatedResults {
-/** column Type: Text  */
-		"Type"?: string | null
-/** column participate: Float  */
-		"participate"?: number | null
-/** column totalCount: Integer  */
-		"totalCount"?: number | null
-/** column doneCount: Integer  */
-		"doneCount"?: number | null
-/** column leftCount: Integer  */
-		"leftCount"?: number | null
-/** column requiredHours: Float  */
-		"requiredHours"?: number | null
-/** column requiredDays: Integer  */
-		"requiredDays"?: number | null
-/** column finishDate: Date  */
-		"finishDate"?: dtdb | null
-/** column finishDateExtended: Date  */
-		"finishDateExtended"?: dtdb | null
-/** column plannedFinish: Date  */
-		"plannedFinish"?: dtdb | null
-	}
-/** filter type for reference table calculatedResults */
-	class reftab_filter_calculatedResults {
-		"Type"?: string | Array<string> | null | __rtab_filter<string>
-		"participate"?: number | Array<number> | null | __rtab_filter<number>
-		"totalCount"?: number | Array<number> | null | __rtab_filter<number>
-		"doneCount"?: number | Array<number> | null | __rtab_filter<number>
-		"leftCount"?: number | Array<number> | null | __rtab_filter<number>
-		"requiredHours"?: number | Array<number> | null | __rtab_filter<number>
-		"requiredDays"?: number | Array<number> | null | __rtab_filter<number>
-		"finishDate"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
-		"finishDateExtended"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
-		"plannedFinish"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
-		 _limit?: number
-		 _offset?: number
-		 _orderBy?: Array<reftab_columns_calculatedResults>
-	}
 }
 declare global {
 /** column type for reference table environmentValues */
@@ -1953,6 +1914,49 @@ declare global {
 	}
 }
 declare global {
+/** column type for reference table calculatedResults */
+	type reftab_columns_calculatedResults = 'Type'|'participate'|'totalCount'|'doneCount'|'leftCount'|'requiredHours'|'requiredDays'|'finishDate'|'finishDateExtended'|'plannedFinish'
+/** row type for reference table calculatedResults */
+	class reftab_row_calculatedResults {
+/** column Type: Text  */
+		"Type"?: string | null
+/** column participate: Float  */
+		"participate"?: number | null
+/** column totalCount: Integer  */
+		"totalCount"?: number | null
+/** column doneCount: Integer  */
+		"doneCount"?: number | null
+/** column leftCount: Integer  */
+		"leftCount"?: number | null
+/** column requiredHours: Float  */
+		"requiredHours"?: number | null
+/** column requiredDays: Integer  */
+		"requiredDays"?: number | null
+/** column finishDate: Date  */
+		"finishDate"?: dtdb | null
+/** column finishDateExtended: Date  */
+		"finishDateExtended"?: dtdb | null
+/** column plannedFinish: Date  */
+		"plannedFinish"?: dtdb | null
+	}
+/** filter type for reference table calculatedResults */
+	class reftab_filter_calculatedResults {
+		"Type"?: string | Array<string> | null | __rtab_filter<string>
+		"participate"?: number | Array<number> | null | __rtab_filter<number>
+		"totalCount"?: number | Array<number> | null | __rtab_filter<number>
+		"doneCount"?: number | Array<number> | null | __rtab_filter<number>
+		"leftCount"?: number | Array<number> | null | __rtab_filter<number>
+		"requiredHours"?: number | Array<number> | null | __rtab_filter<number>
+		"requiredDays"?: number | Array<number> | null | __rtab_filter<number>
+		"finishDate"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"finishDateExtended"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"plannedFinish"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_calculatedResults>
+	}
+}
+declare global {
 /** column type for reference table holidays */
 	type reftab_columns_holidays = 'id'|'dateFrom'|'dateTo'|'user'|'categoryId'
 /** row type for reference table holidays */
@@ -1978,6 +1982,28 @@ declare global {
 		 _limit?: number
 		 _offset?: number
 		 _orderBy?: Array<reftab_columns_holidays>
+	}
+}
+declare global {
+/** column type for reference table jira_list */
+	type reftab_columns_jira_list = 'Key'|'Summary'|'Reporter'
+/** row type for reference table jira_list */
+	class reftab_row_jira_list {
+/** column Key: Text  */
+		"Key"?: string | null
+/** column Summary: Text  */
+		"Summary"?: string | null
+/** column Reporter: Text  */
+		"Reporter"?: string | null
+	}
+/** filter type for reference table jira_list */
+	class reftab_filter_jira_list {
+		"Key"?: string | Array<string> | null | __rtab_filter<string>
+		"Summary"?: string | Array<string> | null | __rtab_filter<string>
+		"Reporter"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_jira_list>
 	}
 }
 declare global {
@@ -2009,28 +2035,6 @@ declare global {
 		 _limit?: number
 		 _offset?: number
 		 _orderBy?: Array<reftab_columns_manualTests>
-	}
-}
-declare global {
-/** column type for reference table jira_list */
-	type reftab_columns_jira_list = 'Key'|'Summary'|'Reporter'
-/** row type for reference table jira_list */
-	class reftab_row_jira_list {
-/** column Key: Text  */
-		"Key"?: string | null
-/** column Summary: Text  */
-		"Summary"?: string | null
-/** column Reporter: Text  */
-		"Reporter"?: string | null
-	}
-/** filter type for reference table jira_list */
-	class reftab_filter_jira_list {
-		"Key"?: string | Array<string> | null | __rtab_filter<string>
-		"Summary"?: string | Array<string> | null | __rtab_filter<string>
-		"Reporter"?: string | Array<string> | null | __rtab_filter<string>
-		 _limit?: number
-		 _offset?: number
-		 _orderBy?: Array<reftab_columns_jira_list>
 	}
 }
 declare global {
@@ -2076,7 +2080,7 @@ declare global {
 }
 declare global {
 /** column type for reference table task */
-	type reftab_columns_task = 'guid'|'task_id'|'result'|'version'|'env_name'|'note'|'start_tc_date'|'end_tc_date'|'task_type'|'platformID'|'time_need'|'saved'
+	type reftab_columns_task = 'guid'|'task_id'|'result'|'version'|'env_name'|'note'|'start_tc_date'|'end_tc_date'|'task_type'|'platformID'|'time_need'|'saved'|'project'|'assigned_version'
 /** row type for reference table task */
 	class reftab_row_task {
 /** column guid: Text primary key, not null */
@@ -2103,6 +2107,10 @@ declare global {
 		"time_need"?: string | null
 /** column saved: Integer  */
 		"saved"?: number | null
+/** column project: Text  */
+		"project"?: string | null
+/** column assigned_version: Text  */
+		"assigned_version"?: string | null
 	}
 /** filter type for reference table task */
 	class reftab_filter_task {
@@ -2118,6 +2126,8 @@ declare global {
 		"platformID"?: string | Array<string> | __rtab_filter<string>
 		"time_need"?: string | Array<string> | null | __rtab_filter<string>
 		"saved"?: number | Array<number> | null | __rtab_filter<number>
+		"project"?: string | Array<string> | null | __rtab_filter<string>
+		"assigned_version"?: string | Array<string> | null | __rtab_filter<string>
 		 _limit?: number
 		 _offset?: number
 		 _orderBy?: Array<reftab_columns_task>
@@ -2206,13 +2216,15 @@ declare global {
 }
 declare global {
 /** column type for reference table testedVersion */
-	type reftab_columns_testedVersion = 'version'|'platformID'|'addedDate'
+	type reftab_columns_testedVersion = 'version'|'platformID'|'mainVersion'|'addedDate'
 /** row type for reference table testedVersion */
 	class reftab_row_testedVersion {
-/** column version: Text not null */
+/** column version: Text primary key, not null */
 		"version": string
 /** column platformID: Text not null */
 		"platformID": string
+/** column mainVersion: Text primary key, not null */
+		"mainVersion": string
 /** column addedDate: Date  */
 		"addedDate"?: dtdb | null
 	}
@@ -2220,6 +2232,7 @@ declare global {
 	class reftab_filter_testedVersion {
 		"version"?: string | Array<string> | __rtab_filter<string>
 		"platformID"?: string | Array<string> | __rtab_filter<string>
+		"mainVersion"?: string | Array<string> | __rtab_filter<string>
 		"addedDate"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
 		 _limit?: number
 		 _offset?: number
@@ -2228,7 +2241,7 @@ declare global {
 }
 declare global {
 /** column type for reference table tester */
-	type reftab_columns_tester = 'tester_name'|'tester_email'|'tester_role'|'work_type'|'tester_active'|'participation'
+	type reftab_columns_tester = 'tester_name'|'tester_email'|'tester_role'|'work_type'|'tester_active'|'participation'|'selected_project'
 /** row type for reference table tester */
 	class reftab_row_tester {
 /** column tester_name: Text  */
@@ -2243,6 +2256,8 @@ declare global {
 		"tester_active"?: string | null
 /** column participation: Float  */
 		"participation"?: number | null
+/** column selected_project: Text  */
+		"selected_project"?: string | null
 	}
 /** filter type for reference table tester */
 	class reftab_filter_tester {
@@ -2252,6 +2267,7 @@ declare global {
 		"work_type"?: string | Array<string> | null | __rtab_filter<string>
 		"tester_active"?: string | Array<string> | null | __rtab_filter<string>
 		"participation"?: number | Array<number> | null | __rtab_filter<number>
+		"selected_project"?: string | Array<string> | null | __rtab_filter<string>
 		 _limit?: number
 		 _offset?: number
 		 _orderBy?: Array<reftab_columns_tester>
@@ -2457,6 +2473,28 @@ declare global {
 	}
 }
 declare global {
+/** column type for reference table versions */
+	type reftab_columns_versions = 'project'|'version'|'current'
+/** row type for reference table versions */
+	class reftab_row_versions {
+/** column project: Text primary key, not null */
+		"project": string
+/** column version: Text primary key, not null */
+		"version": string
+/** column current: Integer  */
+		"current"?: number | null
+	}
+/** filter type for reference table versions */
+	class reftab_filter_versions {
+		"project"?: string | Array<string> | __rtab_filter<string>
+		"version"?: string | Array<string> | __rtab_filter<string>
+		"current"?: number | Array<number> | null | __rtab_filter<number>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_versions>
+	}
+}
+declare global {
 /** column type for reference table progress_by_user */
 	type reftab_columns_progress_by_user = 'date'|'tester_name'|'working_day'|'daily_work_done'|'sum_work_done'|'sum_work'
 /** row type for reference table progress_by_user */
@@ -2537,22 +2575,6 @@ declare global {
 	}
 }
 declare global {
-    interface form_enviromentVariableEdit extends __form_base_type {
-        "envVariableTb": {
-            "rows": Array<{
-                "envName": {
-                    "text": string
-                }
-                "envValue": {
-                    "text": string
-                }
-            }>
-        }
-        "submissionTitle": string
-        "submitButton": any
-    }
-}
-declare global {
     interface form_generate_Report extends __form_base_type {
         "name": {
             "text": string
@@ -2562,6 +2584,16 @@ declare global {
         }
         "filterdate": {
             "date": dtl
+        }
+        "generateTcReport": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "generateAssignedTcList": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
         }
         "submissionTitle": string
         "submitButton": any
@@ -2584,6 +2616,22 @@ declare global {
                     "submitter": boolean
                     "closeForm": boolean
                     "validatorGroup": string
+                }
+            }>
+        }
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_enviromentVariableEdit extends __form_base_type {
+        "envVariableTb": {
+            "rows": Array<{
+                "envName": {
+                    "text": string
+                }
+                "envValue": {
+                    "text": string
                 }
             }>
         }
@@ -2669,6 +2717,18 @@ declare global {
 }
 declare global {
     interface form_dashboard extends __form_base_type {
+        "changeppop": {
+            "projectTable": {
+                "rows": Array<{
+                    "project": {
+                        "text": string
+                    }
+                    "changeProjectSubmit": {
+                        "submitter": boolean
+                    }
+                }>
+            }
+        }
         "recRun": {
             "submitter": boolean
             "closeForm": boolean
@@ -2711,7 +2771,6 @@ declare global {
             "finishDateExtended": dtl
         }>
         "progress": {
-            "imp_done_today": number
             "last_imp_done": number
             "imp_all_today": {
                 "text": string
@@ -2848,30 +2907,10 @@ declare global {
         "finishMonthOfTestWriting": string
         "finishDayOfTestWriting": string
         "plannedFinishDate": dtl
-        "tbTestData": Array<{
-            "date": dtl
-            "imp_done": number
-            "imp_total": number
-            "tc_exec_done": number
-            "tc_exec_total": number
-            "sum_done": number
-            "tester_number": number
-            "exp_end_of_testing": dtl
-        }>
         "tc_done": string
         "tc_exec_sum": string
         "jira_done": string
         "jira_sum": string
-        "task_env_table": Array<{
-            "task_id": string
-            "result": string
-            "env_name": string
-            "task_type": string
-            "end_tc_date": dtl
-            "tester_name": string
-            "tc_prio": string
-            "tc_impreg": string
-        }>
         "tc_jira_table": Array<{
             "jira_id": string
             "task_id": string
@@ -2882,10 +2921,8 @@ declare global {
             "Summary": string
             "Reporter": string
         }>
-        "progress_history_table": Array<{
-            "date": dtl
-        }>
         "count_rows_ph": number
+        "user_proj": string
         "submissionTitle": string
         "submitButton": any
     }
@@ -2942,10 +2979,15 @@ declare global {
                 "verPlatform": {
                     "text": string
                 }
+                "mainVersion": {
+                    "text": string
+                }
                 "new": number
                 "deleted": number
             }>
         }
+        "user_proj": string
+        "currentVersion": string
         "submissionTitle": string
         "submitButton": any
     }
@@ -2969,6 +3011,11 @@ declare global {
         }
         "newTC": {
             "rows": Array<{
+                "iStep": {
+                    "submitter": boolean
+                    "closeForm": boolean
+                    "validatorGroup": string
+                }
                 "stepTask": {
                     "text": string
                 }
@@ -3006,6 +3053,11 @@ declare global {
         }
         "editTC": {
             "rows": Array<{
+                "iStep": {
+                    "submitter": boolean
+                    "closeForm": boolean
+                    "validatorGroup": string
+                }
                 "stepTask": {
                     "text": string
                 }
@@ -3171,6 +3223,7 @@ declare global {
                     "number": number
                 }
                 "note": {
+                    "fChanged": boolean
                     "text": string
                 }
                 "guid": string
@@ -3350,6 +3403,48 @@ declare global {
     }
 }
 declare global {
+    interface form_testers extends __form_base_type {
+        "tester_table": {
+            "rows": Array<{
+                "tb_tester_name": {
+                    "text": string
+                }
+                "tb_tester_email": {
+                    "text": string
+                }
+                "drRole": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "drWork": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "drActive": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "part": {
+                    "number": number
+                }
+                "bDelete": boolean
+            }>
+        }
+        "stLoggedUserRole": string
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
     interface form_testingStatus extends __form_base_type {
         "adminPanel": {
             "startNew": {
@@ -3389,48 +3484,6 @@ declare global {
         }
         "stLoggedUserRole": string
         "editOrder": boolean
-        "submissionTitle": string
-        "submitButton": any
-    }
-}
-declare global {
-    interface form_testers extends __form_base_type {
-        "tester_table": {
-            "rows": Array<{
-                "tb_tester_name": {
-                    "text": string
-                }
-                "tb_tester_email": {
-                    "text": string
-                }
-                "drRole": {
-                    "selectedKey": string
-                    "selectedText": string
-                    "selectedValue": {
-                        "v": string
-                    }
-                }
-                "drWork": {
-                    "selectedKey": string
-                    "selectedText": string
-                    "selectedValue": {
-                        "v": string
-                    }
-                }
-                "drActive": {
-                    "selectedKey": string
-                    "selectedText": string
-                    "selectedValue": {
-                        "v": string
-                    }
-                }
-                "part": {
-                    "number": number
-                }
-                "bDelete": boolean
-            }>
-        }
-        "stLoggedUserRole": string
         "submissionTitle": string
         "submitButton": any
     }
@@ -3510,6 +3563,9 @@ declare global {
             "tag_filter": {
                 "text": string
             }
+            "assigned_date_filter": {
+                "date": dtl
+            }
             "tvDelete": {
                 "text": string
             }
@@ -3562,12 +3618,22 @@ declare global {
             "time": number
             "lastAssigned": string
         }>
+        "user_proj": string
+        "currentVersion": string
         "submissionTitle": string
         "submitButton": any
     }
 }
 declare global {
     interface form_testcase_monitor extends __form_base_type {
+        "createReport": {
+            "submitter": boolean
+            "closeForm": boolean
+            "validatorGroup": string
+        }
+        "to": {
+            "text": string
+        }
         "addtest": {
             "saveMissingTests": {
                 "submitter": boolean
@@ -3625,6 +3691,9 @@ declare global {
                     "v": string
                 }>
             }
+            "dateSc": {
+                "date": dtl
+            }
             "rows": Array<{
                 "tcId": {
                     "text": string
@@ -3676,7 +3745,60 @@ declare global {
         "letpage": number
         "stscTags": string
         "stavailableTags": string
+        "stLoggedUserRole": string
         "tcCount": number
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_version_control extends __form_base_type {
+        "addNewProj": {
+            "newProjectName": {
+                "text": string
+            }
+            "newProjFirstVersionName": {
+                "text": string
+            }
+            "sbnewProjectName": {
+                "submitter": boolean
+            }
+        }
+        "addNewVer": {
+            "newVersionProject": {
+                "selectedKey": string
+                "selectedText": string
+                "selectedValue": {
+                    "project": string
+                }
+            }
+            "newVersionName": {
+                "text": string
+            }
+            "sbnewVersionName": {
+                "submitter": boolean
+            }
+        }
+        "selectedproject": {
+            "selectedKey": string
+            "selectedText": string
+            "selectedValue": {
+                "project": string
+            }
+        }
+        "versionsTable": {
+            "rows": Array<{
+                "version": {
+                    "text": string
+                }
+                "setTesting": {
+                    "submitter": boolean
+                    "closeForm": boolean
+                    "validatorGroup": string
+                }
+            }>
+        }
+        "user_proj": string
         "submissionTitle": string
         "submitButton": any
     }

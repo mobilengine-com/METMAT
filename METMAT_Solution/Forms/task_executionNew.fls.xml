@@ -89,10 +89,21 @@
                         <textview id="description" text="{task.description}"/>
                     </cell>
                     <cell>
-                        <linkview url="{task.link}" text="Go to test"/>
-                        <textbox id="linkText" text="{task.link}"> 
-                        <declarations><let id="fChanged" shape="scalar" value="{text IS NOT task.link}"/></declarations>
+                        <if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task.TestId) > 0}'>
+						    <discardbutton text='Go to manual test' id="totestWrite" nextForm='{forms.manualTestWriter}'> 
+                            <params>
+                                <param id='test_Id' value='{task.TestId}'/>
+                                <param id='edit' value='{"2"}'/>
+                                <param id='fromForm' value='{"task_executionNew"}'/>
+                            </params>
+                            </discardbutton>
+					    </if>
+					    <if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task.TestId) = 0}'>
+                            <linkview url="{task.link}" text="Go to test"/>
+                            <textbox id="linkText" text="{task.link}"> 
+                            <declarations><let id="fChanged" shape="scalar" value="{text IS NOT task.link}"/></declarations>
                         </textbox>
+                        </if>
                     </cell>
                     <cell>
                         <dropdown id="result" selectedKey="{task.result}" keyMap='{v}' textMap='{v}' choices='{["not yet started", "success", "failed", "not tested", "bad test case"]}'>
@@ -114,9 +125,11 @@
                     </cell>
                     <cell>
                         <textbox id="note" text="{task.note}"> 
+                            <declarations><let id="fChanged" shape="scalar" value="{text IS NOT task.note}"/></declarations>
                             <validation>
                                 <validator cond='{(note.text is not NULL ) OR (result.selectedKey IS NOT "bad test case")}' message="Required"></validator>
                             </validation>
+                            
                         </textbox>
                     </cell>
                 </row>
@@ -135,9 +148,10 @@
                             tc.link,
                             tc.desc
 		                from task tsk INNER JOIN test_case tc  ON tc.id = tsk.task_id
-                        WHERE   tsk.result = ddstatus.selectedKey AND
+                        WHERE   (tsk.result = ddstatus.selectedKey AND
                                 tsk.platformID = platformID.selectedKey AND
-                                tsk.env_name IN (SELECT env.env_name FROM environment env WHERE CASE WHEN ch_all_user.checked THEN true ELSE env.tester_email = sysp.user END)
+                                tsk.env_name IN (SELECT env.env_name FROM environment env WHERE CASE WHEN ch_all_user.checked THEN true ELSE env.tester_email = sysp.user END)) ORDER BY task_id
+                                
                         }'>
                 <header>
                     <row>
@@ -203,7 +217,8 @@
                         <if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task.task_id) > 0}'>
 						    <discardbutton text='Go to manual test' id="totestWrite" nextForm='{forms.manualTestWriter}'> 
                             <params>
-                                <param id='editTestId' value='{task.task_id}'/>
+                                <param id='test_Id' value='{task.task_id}'/>
+                                <param id='edit' value='{"2"}'/>
                                 <param id='fromForm' value='{"task_executionNew"}'/>
                             </params>
                             </discardbutton>

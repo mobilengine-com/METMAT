@@ -1,4 +1,4 @@
-<Reftab Name="manualTests" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+<Reftab Name="manualTests" Push="true" Notify="true" xmlns="http://schemas.mobilengine.com/reftab/v1" >
 	<Columns>
 		<Column Name="TestId" Type="Text" PrimaryKey="true" NotNull="true"/>
 		<Column Name="Step" Type="Integer" PrimaryKey="true" NotNull="true"/>

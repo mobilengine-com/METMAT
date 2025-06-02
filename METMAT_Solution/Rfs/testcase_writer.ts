@@ -138,7 +138,7 @@
                 db.test_case.Insert({
                     id: testCase.id,
                     desc: testCase.label,
-                    platform: testCase.platform,
+                    platform: testCase.platform as string,
                     link: testCase.location,
                     time: 0,
                     addedDate: dtl.Now().DtlToDtdb(),
@@ -150,7 +150,7 @@
                     db.test_case_tag.Insert({
                         tc_id: testCase.id,
                         tag: tag.tag,
-                        platform: testCase.platform
+                        platform: testCase.platform as string
                     })
                 }
             }catch{

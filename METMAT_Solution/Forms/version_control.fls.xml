@@ -1,0 +1,91 @@
+<form id='version_control' menuName='Version Control' platforms="web"
+    xmlns="http://schemas.mobilengine.com/fls/v2">
+    <declarations>
+        <let id='user_proj' shape='scalar'
+            value='{
+            SELECT
+                t.selected_project
+            FROM
+                tester t
+            WHERE
+                t.tester_email = sysp.user
+            }' />
+    </declarations>
+        <popup id="addNewProj" title="Add new project or version" openMode="dialog">
+            <backbutton text="Close"/>
+            <vbox>
+                <textview text="Add new project" />
+                <textbox id="newProjectName" />
+                <textview text="Add first version for this project" />
+                <textbox id="newProjFirstVersionName" />
+                <combinedbutton text="Add Project" id="sbnewProjectName">
+                    <submitbutton closeForm="{false}" />
+                    <backbutton />
+                </combinedbutton>
+                
+            </vbox>
+        </popup>
+        <popup id="addNewVer" title="Add new project or version" openMode="dialog">
+            <backbutton text="Close"/>
+            <vbox>
+                <textview text="Select project for new version" />
+                <dropdown id="newVersionProject"
+                    choices='{loadNewerFromServer:SELECT  v.project FROM versions v GROUP BY v.project}'
+                    keyMap="{project}"
+                    textMap="{project}"
+                    selectedKey="{SELECT v.project FROM versions v where user_proj = v.project Limit 1}"
+                />
+                <textbox id="newVersionName" />
+                <combinedbutton text="Add Version" id="sbnewVersionName">
+                    <submitbutton closeForm="{false}" />
+                    <backbutton />
+                </combinedbutton>
+                
+            </vbox>
+        </popup>
+    <dropdown choices='{loadNewerFromServer:SELECT  v.project FROM versions v GROUP BY v.project}'
+        keyMap="{project}"
+        textMap="{project}"
+        selectedKey="{SELECT v.project FROM versions v where user_proj = v.project Limit 1}"
+        id="selectedproject"
+    />
+    <dropdown
+        choices='{loadNewerFromServer:SELECT v.version FROM versions v WHERE v.project = selectedproject.selectedKey}'
+        keyMap="{version}"
+        textMap="{version}"
+        selectedKey="{SELECT v.version FROM versions v WHERE v.current = 1 AND v.project = selectedproject.selectedKey}"
+    />
+    <table id="versionsTable"
+        record="ver"
+        recordset='{loadNewerFromServer:SELECT v.version, v.current FROM versions v WHERE v.project = selectedproject.selectedKey}'>
+        <header>
+            <row>
+                <cell>
+                    <textview text="Version" />
+                </cell>
+                <cell>
+                    <textview text="Testing version" />
+                </cell>
+                <cell>
+                    <textview text="Change testing version" />
+                </cell>
+            </row>
+        </header>
+        <row>
+            <cell>
+                <textview id="version" text="{ver.version}" />
+            </cell>
+            <cell>
+                <if cond="{ver.current = 1}">
+                    <textview text="Yes" />
+                </if>
+                <if cond="{ver.current = 0}">
+                    <textview text="No" />
+                </if>
+            </cell>
+            <cell>
+                <submitbutton id="setTesting" closeForm="{false}" text="Select"></submitbutton>
+            </cell>
+        </row>
+    </table>
+</form>
