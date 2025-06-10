@@ -16,20 +16,20 @@
                 if (row.toDelete) {
                     Log("Delete the following category: "+catName)
                     db.test_to_be_write_done.DeleteMany({category: catName})
-                    db.test_to_be_write_category.Delete({category: catName})
+                    db.test_to_be_write_category.Delete({category: catName, mainVersion: form.currentVersion, project: form.user_proj})
                 }else{
                     if (row.progress == 0) {
                         Log("Reopen the following category: "+catName)
-                        db.test_to_be_write_category.Update({category: catName},{finished:row.progress, result_count: row.testCount, closedByTesters: 0, testerWhoClosed:""})
+                        db.test_to_be_write_category.Update({category: catName, mainVersion: form.currentVersion, project: form.user_proj},{finished:row.progress, result_count: row.testCount, closedByTesters: 0, testerWhoClosed:""})
                     }else{
                         Log("Edited the following category: "+catName+" progress")
-                        db.test_to_be_write_category.Update({category: catName},{finished:row.progress, planned_count: row.testCount, result_count: row.testCount})
+                        db.test_to_be_write_category.Update({category: catName, mainVersion: form.currentVersion, project: form.user_proj},{finished:row.progress, planned_count: row.testCount, result_count: row.testCount})
                     }
                 }
             }else{
                 if (row.editedptc) {
                     Log("Edited the following category: "+catName)
-                    db.test_to_be_write_category.Update({category: catName},{planned_count: row.editedptcount.number, active: row.activeEdited.checked?1:0})
+                    db.test_to_be_write_category.Update({category: catName, mainVersion: form.currentVersion, project: form.user_proj},{planned_count: row.editedptcount.number, active: row.activeEdited.checked?1:0})
                 }
             }
         }
@@ -40,7 +40,7 @@
             if (row.isNew) {
                 let newCatName = row.categoryNew.text.Trim(" ");
                 Log("Inserting the following category: "+newCatName)
-                db.test_to_be_write_category.Insert({category: newCatName, planned_count:row.plannedNew.number, finished:0, result_count:0, closedByTesters: 0, testerWhoClosed:"", active: row.activeNew.checked?1:0})
+                db.test_to_be_write_category.Insert({category: newCatName, planned_count:row.plannedNew.number, finished:0, result_count:0, closedByTesters: 0, testerWhoClosed:"", active: row.activeNew.checked?1:0, mainVersion: form.currentVersion, project: form.user_proj})
             }
         }
     }
@@ -136,13 +136,14 @@
             Log(testCase.id)
             try{
                 db.test_case.Insert({
-                    id: testCase.id,
-                    desc: testCase.label,
-                    platform: testCase.platform as string,
-                    link: testCase.location,
-                    time: 0,
-                    addedDate: dtl.Now().DtlToDtdb(),
-                    PreCond: testCase.PreCond
+                    id:             testCase.id,
+                    tc_description: testCase.label,
+                    platform:       testCase.platform as string,
+                    link:           testCase.location,
+                    time:           0,
+                    addedDate:      dtl.Now().DtlToDtdb(),
+                    PreCond:        testCase.PreCond,
+                    project:        form.user_proj
                 })
                 var tcTags = db.test_to_be_write_tags.Read({id:testCase.id})
                 for(var tag of tcTags){

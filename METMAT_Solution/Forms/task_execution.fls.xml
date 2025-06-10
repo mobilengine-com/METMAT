@@ -1,357 +1,252 @@
-<form id='task_execution' menuName='Execute task' title='{"Task list for " || act_tester}' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
-	
-	<declarations>
-		<let id='act_tester' shape='scalar' value='{sysp.user}'/>
-		<let id='open_form' shape='scalar' value='{sysp.dtlFormOpen}'/>
-		<let id='task_env_table' shape='table' value='{
-			select tsk.guid, tsk.note, tsk.result, tsk.version, tsk.task_id, tsk.env_name, e.env_detail , j.Summary
-				from task tsk 
-				left join environment e on tsk.env_name = e.env_name 
-				left join jira_list j on tsk.task_id = j.Key
-				where 
-					e.tester_email = act_tester
-				and tsk.platformID = platformID.selectedKey	
-		}'/>
-		<let id='task_allFailed_table' shape='table' value='{
-			select tsk.guid, tsk.note, tsk.result, tsk.version, tsk.task_id, tsk.env_name, e.env_detail , j.Summary
-				from task tsk 
-				left join environment e on tsk.env_name = e.env_name 
-				left join jira_list j on tsk.task_id = j.Key
-				where 
-					tsk.platformID = platformID.selectedKey	
-		}'/>
-		<let id='jira_table' shape='table' value='{
-			select tcj.jira_id, tcj.task_id, tcj.env_name
-			from tc_jira_list tcj 
-		}'/>
-	</declarations>
-
-	<header>
-		<submitbutton id="taskExecBtn" confirm='{false}' text="Submit" nextForm='{forms.task_execution}'>
-			<params>
-				<param id='platformID' value='{platformID.selectedKey}' />
-			</params>
-		</submitbutton>
-	</header>
-
-	<params>
-		<param id='platformID' />
-	</params>
-	
-	<!-- <if cond='{params.platformID is NULL or params.platformID=""}'> -->
-	<chapter title="Select platform">
-		<segmentedbutton id='platformID' 
-		choices='{SELECT DISTINCT tsk.platformID from task tsk left join environment env ON tsk.env_name = env.env_name WHERE CASE
+<form id='task_execution' menuName='Execute task' title='{"Task list"}' platforms="web"
+    xmlns="http://schemas.mobilengine.com/fls/v2">
+    <declarations>
+        <let id='open_form' shape='scalar' value='{sysp.dtlFormOpen}'/>
+        <let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+    </declarations>
+    <header>
+    <submitbutton text="Save" nextForm="{forms.task_execution}"></submitbutton>
+    </header>
+    <chapter title="Select platform">
+        <segmentedbutton id='platformID'
+            choices='{SELECT DISTINCT tsk.platformID from task tsk left join environment env ON tsk.env_name = env.env_name WHERE
+            tsk.project = user_proj AND CASE
     	WHEN ch_all_user.checked THEN true
     	ELSE env.tester_email = sysp.user END }'
-			keyMap="{platformID}" 
-			textMap="{platformID}">
-		</segmentedbutton>
-		<!-- <textview text="{platformID.selectedKey}" /> -->
-		<!-- <textview text="{params.platformID}" /> -->
+            keyMap="{platformID}"
+            textMap="{platformID}">
+        </segmentedbutton>
+    </chapter>
+    <chapter title='Select tested version (default is latest)'>
+        <dropdown id='dd_versionGlobal'
+            choices='{select tv.version from versions tv where tv.project = user_proj order by version desc}'
+            keyMap='{version}'
+            textMap='{version}'
+            selectedKey='{select tv.version from versions tv where tv.current = 1 AND tv.project = user_proj}'>
+        </dropdown>
+    </chapter>
+    <chapter title='Filter by status'>
+        <dropdown id="ddstatus" keyMap='{v}' textMap='{v}' choices='{["not yet started", "success", "failed", "not tested", "bad test case"]}' selectedKey='{"not yet started"}'/>
+    </chapter>
+    <chapter title='Filter by user(s)'>
+        <checkbox id='ch_all_user' text='all user' />
+    </chapter>
+    <chapter title="Selected test cases">
+    <declarations>
+        <let id="selected" shape="scalar" value="{0}"/>
+    </declarations>
+        <if cond="{selected = 1}">
+            <table id="selectedTasks" record="task" recordset='{SELECT "" guid, "" TestId, "" description,"" result, "" version, "" envName, 0 time, "" note,  "" link WHERE false}'>
+                <header>
+                    <row>
+                        <cell>
+                            <textview text=""/>
+                        </cell>
+                        <cell>
+                            <textview text="Test case id"/>
+                        </cell>
+                        <cell>
+                            <textview text="Description"/>
+                        </cell>
+                        <cell>
+                            <textview text="To test case"/>
+                        </cell>
+                        <cell>
+                            <textview text="Result"/>
+                        </cell>
+                        <cell>
+                            <textview text="Version"/>
+                        </cell>
+                        <cell>
+                            <textview text="Enviromnent"/>
+                        </cell>
+                        <cell>
+                            <textview text="Time needed"/>
+                        </cell>
+                        <cell>
+                            <textview text="Note"/>
+                        </cell>
+                        <cell>
+                            <textview text=""/>
+                        </cell>
+                    </row>
+                </header>
+                <row>
+                <declarations>
+                    <let id="guid" shape="scalar" value="{task.guid}" />
+                </declarations>
+                    <cell>
+                    <combinedbutton text="Cancel">
+                        <actionbutton>
+                            <set value="{0}" target="selected"/>
+                        </actionbutton>
+                        <removebutton/>
+                    </combinedbutton>
 
-	</chapter>
-	<!-- </if> -->
+                    </cell>
+                    <cell>
+                        <textview id="id" text="{task.TestId}"/>
+                    </cell>
+                    <cell>
+                        <textview id="description" text="{task.description}"/>
+                    </cell>
+                    <cell>
+                        <if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task.TestId) > 0}'>
+						    <discardbutton text='Go to manual test' id="totestWrite" nextForm='{forms.manualTestWriter}'> 
+                            <params>
+                                <param id='test_Id' value='{task.TestId}'/>
+                                <param id='edit' value='{"2"}'/>
+                                <param id='fromForm' value='{"task_executionNew"}'/>
+                            </params>
+                            </discardbutton>
+					    </if>
+					    <if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task.TestId) = 0}'>
+                            <linkview url="{task.link}" text="Go to test"/>
+                            <textbox id="linkText" text="{task.link}"> 
+                            <declarations><let id="fChanged" shape="scalar" value="{text IS NOT task.link}"/></declarations>
+                        </textbox>
+                        </if>
+                    </cell>
+                    <cell>
+                        <dropdown id="result" selectedKey="{task.result}" keyMap='{v}' textMap='{v}' choices='{["not yet started", "success", "failed", "not tested", "bad test case"]}'>
+                        <declarations><let id="fChanged" shape="scalar" value="{selectedKey IS NOT task.result}"/></declarations>
+                        </dropdown>
+                    </cell>
+                    <cell>
+                        <textview id="testedVer" text="{task.version}"/>
+                    </cell>
+                    <cell>
+                        <textview id="envName" text="{task.envName}"/>
+                    </cell>
+                    <cell>
+                        <numberbox id="runTime" number="{task.time}"> 
+                            <validation>
+                                <validator cond='{runTime.number is not NULL}' message="Required"></validator>
+                            </validation>
+                        </numberbox>
+                    </cell>
+                    <cell>
+                        <textbox id="note" text="{task.note}"> 
+                            <declarations><let id="fChanged" shape="scalar" value="{text IS NOT task.note}"/></declarations>
+                            <validation>
+                                <validator cond='{(note.text is not NULL ) OR (result.selectedKey IS NOT "bad test case")}' message="Required"></validator>
+                            </validation>
+                            
+                        </textbox>
+                    </cell>
+                </row>
+            </table>
+        </if>
+        <if cond="{selected = 0}">
+            <table id="assignedTasks" record="task"
+            recordset='{SELECT tsk.guid, 
+                            tsk.task_id, 
+                            tsk.env_name, 
+                            tsk.task_type, 
+                            tsk.note, 
+                            tsk.time_need,
+                            tsk.result,
+                            tsk.version,
+                            tc.link,
+                            tc.tc_description
+		                from task tsk INNER JOIN test_case tc  ON tc.id = tsk.task_id
+                        WHERE   (tsk.result = ddstatus.selectedKey AND
+                                tsk.project = user_proj AND
+                                tsk.platformID = platformID.selectedKey AND
+                                tsk.env_name IN (SELECT env.env_name FROM environment env WHERE CASE WHEN ch_all_user.checked THEN true ELSE env.tester_email = sysp.user END)) ORDER BY task_id
+                                
+                        }'>
+                <header>
+                    <row>
+                         <cell>
+                            <textview text=""/>
+                        </cell>
+                        <cell>
+                            <textview text="Test case id"/>
+                        </cell>
+                        <cell>
+                            <textview text="Description"/>
+                        </cell>
+                        <cell>
+                            <textview text="To test case"/>
+                        </cell>
+                        <cell>
+                            <textview text="Result"/>
+                        </cell>
+                        <cell>
+                            <textview text="Version"/>
+                        </cell>
+                        <cell>
+                            <textview text="Enviromnent"/>
+                        </cell>
+                        <cell>
+                            <textview text="Time needed"/>
+                        </cell>
+                        <cell>
+                            <textview text="Note"/>
+                        </cell>
+                        <cell>
+                            <textview text=""/>
+                        </cell>
+                    </row>
+                </header>
+                <row>
+                    <cell>
 
-	<chapter title='Select tested version (default is latest)'>
-		<dropdown id='dd_versionGlobal' 
-			choices='{select tv.version, tv.addedDate from testedVersion tv where tv.platformID = platformID.selectedKey order by addedDate desc}' 
-			keyMap='{version}' 
-			textMap='{version}'
-			selectedKey='{select tv.version from testedVersion tv where tv.platformID = platformID.selectedKey order by version desc limit 1}' >
-		</dropdown>
-	</chapter>
-	<chapter title='Filter by status'>
-		<checkbox id= 'ch_not_yet_started' text='not yet started' checked='{true}'/>
-		<checkbox id= 'ch_success' text='success' />
-		<checkbox id= 'ch_failed' text='failed'/>
-		<checkbox id= 'ch_not_tested' text='not tested' />
-		<checkbox id= 'ch_bad_testcase' text='bad test case'/>
-	</chapter>
-	<chapter title='Filter by user(s)'>
-		<checkbox id='ch_all_user' text='all user'/>
-	</chapter>
-	<if cond='{fSelectedTestcase}'>
-		<declarations><let id='fSelectedTestcase' shape='scalar' value='{(select count(*) from env_table_t.rows t) > 0}'/></declarations>
-		<chapter title='Your selected testcase'>
-			<!--a validacio meg nem mukodik-->
-			<!-- tescase -->
-			<table id='env_table_t' record='env_table_t_r' recordset='{
-				select "" as guid, "" as note, "" as result, "" as version, "" as task_id, "" as env_name, "" as env_detail where false}'>
-				<header>
-					<row>
-						<cell>
-							<textview/>
-						</cell>
-						<cell>
-							<textview text='Task Id'/>
-						</cell>
-						<cell>
-							<textview text='Environment'/>
-						</cell>
-						<cell>
-							<textview text='Result'/>
-						</cell>  
-						<cell>
-							<textview text='Version'/>
-						</cell>					
-						<cell>
-							<textview text='Jira id'/>
-						</cell>
-						<cell>
-							<textview text='Note'/>
-						</cell>
-						<cell>
-							<textview text='Tags'/>
-						</cell>
-						<cell>
-							<textview text='Time need [min]'/>
-						</cell>
-						
-					</row>           							
-				</header>
-				<row>		
-					<declarations>
-						<let id="guid_tsk" shape="scalar" value="{env_table_t_r.guid}" />
-						<let id="selected_tc" shape="scalar" value='{env_table_t_r.task_id}' />
-					</declarations>
-					<cell>
-						<removebutton text='Cancel'/>
-					</cell>
-					<cell>
-						<linkview id='selected_tc_link' text='{env_table_t_r.task_id}' url='{select tc.link from test_case tc where tc.id = env_table_t_r.task_id and tc.platform = platformID.selectedKey}'/>
-						<textbox id='selected_tc_link_update' hint="TC link update" text='{select tc.link from test_case tc where tc.id = env_table_t_r.task_id and tc.platform = platformID.selectedKey}'/>
-					</cell>
-					<cell>
-						<if cond='{true}'>
-							<textview id="env_name" text='{env_table_t_r.env_name}'/>
-							<textview text='{env_table_t_r.env_detail}'/>
-						</if>							
-					</cell>
-					<cell>
-							<dropdown id='dd_result' 
-								choices='{table text ("not yet started"; "success"; "failed"; "not tested"; "bad test case")}' 
-								keyMap='{text}' 
-								textMap='{text}'
-								selectedKey='{env_table_t_r.result}' >								
-								<declarations><let id="fChanged" shape="scalar" value="{selectedKey IS NOT env_table_t_r.result}"/></declarations>
-							</dropdown>
-					</cell>
-					<cell>
-						<if cond='{fFos}'>
-							<declarations><let id="fFos" shape="scalar" value='{dd_result.selectedText="success" OR dd_result.selectedText="failed"}'/></declarations>
-							<dropdown id='dd_version' 
-								choices='{select v.version from testedVersion v where v.platformID = platformID.selectedKey}' 
-								keyMap='{version}' 
-								textMap='{version}'
-								selectedKey='{case when fFos then coalesce(env_table_t_r.version, dd_versionGlobal.selectedKey) else NULL end}'>
-								<declarations><let id="fChanged" shape="scalar" value="{selectedKey IS NOT env_table_t_r.version}"/></declarations>
-							</dropdown>
-						</if>
-					</cell>
-					<cell>
-						<if cond='{dd_result.selectedText="failed"}'>
-							<declarations>
-								<let id='jira_ids' shape='table' value='{
-									select tcj.jira_id 
-									from jira_table tcj 
-									where 
-										tcj.task_id = env_table_t_r.task_id 
-										and tcj.env_name = env_name.text
-								}'/>
-							</declarations>
-							<table id='jira_id' record='r_jira_id' recordset='{select tcj.jira_id from jira_ids tcj}'>
-								<declarations>
-									<let id="fChanged" shape="scalar" value='{
-										(select group_concat(tcj.tb_jira_id.text, "#") from jira_id.rows tcj) 
-										IS NOT 
-										(select group_concat(tcj.jira_id, "#") from jira_ids tcj)}'/>
-								</declarations>
-								<row>
-									<cell>
-										<textbox id='tb_jira_id' text='{r_jira_id.jira_id}'/>
-										<linkview id='tb_jira_id_link' text='{r_jira_id.jira_id}' url='{r_jira_id.jira_id}'/>
-									</cell>
-									<cell>
-										<removebutton text='Remove'/>
-									</cell>
-								</row>									
-							</table>
-							 <addbutton table='jira_id' records='{select tostring(null) jira_id}' text="Add new JIRA id"/>
-						</if>
-					</cell>
-					<cell>
-						<textbox id='tb_note' text='{env_table_t_r.note}' >
-							<declarations><let id="fChanged" shape="scalar" value="{text IS NOT env_table_t_r.note}"/></declarations>
-						</textbox>
-					</cell>
-					<cell>
-						
-						<tags id="tgs" predictionMode="substring" 
-							availableTags='{select tct.tag v from tc_tag tct}'  
-							selectedTags='{select tct.tag v from test_case_tag tct where tct.tc_id = env_table_t_r.task_id and tct.platform = platformID.selectedKey}'
-							hint="add TC tags"/>
+                            <combinedbutton text="Select">
+                                <addbutton records='{SELECT task.guid guid, 
+                                                            task.task_id TestId, 
+                                                            task.tc_description description, 
+                                                            task.result , 
+                                                            dd_versionGlobal.selectedKey version, 
+                                                            task.env_name envName, 
+                                                            toint(task.time_need) time,
+                                                            task.note,
+                                                            task.link
+                                                    }' table="selectedTasks" />
+                                <actionbutton>
+                                    <set value="{1}" target="selected" />
+                                </actionbutton>
+                            </combinedbutton>
 
-							
-						
-					</cell>
-					<cell>
-							
-						<numberbox id="tcTimeNeed" float="true"> 
-							<validation>
-								<validator cond='{case when (dd_result.selectedKey = "success") then tcTimeNeed.number is not NULL AND tcTimeNeed.number > 0 else true END}' message='Give the time needed for run the TC'/>
-							</validation>
-						</numberbox>
-					</cell>
-				</row>
-			</table>
-		</chapter>
-	</if>
-	
-	<if cond='{fSelectedJira}'>
-		<declarations><let id='fSelectedJira' shape='scalar' value='{(select count(*) from env_table_j.rows j) > 0}'/></declarations>
-		<chapter title='Your selected jira ticket'>
-			<!-- jira ticket -->
-			<table id='env_table_j' record='env_table_j_r' recordset='{
-			select "" as guid,"" as note, "" as result, "" as task_id  where false}'>
-				<header>
-					<row>
-						<cell>
-							<textview/>
-						</cell>
-						<cell>
-							<textview text='Task Id'/>
-						</cell>
-						<cell>
-							<textview text='Result'/>
-						</cell>  
-						<cell>
-							<textview text='Note'/>
-						</cell>
-					</row>           							
-				</header>
-				<row>
-					<declarations><let id="guid_tsk" shape="scalar" value="{env_table_j_r.guid}" /></declarations>
-					<cell>
-						<removebutton text='Cancel'/>
-					</cell>
-					<cell>
-						<textview id='selected_jira' text='{env_table_j_r.task_id}'/>
-					</cell>				
-					<cell>
-							<dropdown id='dd_result' 
-								choices='{table text ("not yet started"; "closed")}' 
-								keyMap='{text}' 
-								textMap='{text}'
-								selectedKey='{env_table_j_r.result}' >								
-								<declarations><let id="fChanged" shape="scalar" value='{coalesce(selectedKey,"") IS NOT coalesce(env_table_j_r.result,"")}'/></declarations>
-							</dropdown>
-					</cell>
-					<cell>
-						<textbox id='tb_note' text='{env_table_j_r.note}' >
-							<declarations><let id="fChanged" shape="scalar" value="{text IS NOT env_table_j_r.note}"/></declarations>
-						</textbox>
-					</cell>
-				</row>
-			</table>
-		</chapter>
-	</if>
-	
-	
-	<chapter title='Select task'>
-	<table style='{styles.taskAndList}' id='task_list_table' record='task_list_table_r' recordset='{
-		select tsk.guid, tsk.task_id, tsk.env_name, tsk.task_type, tsk.note, tsk.time_need, e.tester_name, e.tester_email, tcl.tc_prio, 
-		tcl.tc_impreg, tcl.tc_desc, j.Summary, tsk.result allResult
-		from task tsk 
-		left join tc_list tcl on tsk.task_id = tcl.tc_id  
-		left join jira_list j on tsk.task_id = j.Key
-		left join environment e on tsk.env_name = e.env_name
-		where (e.tester_email = act_tester or ch_all_user.checked) and 
-			tsk.platformID = platformID.selectedKey and 
-			((tsk.task_type is "t" and
-			(ch_not_yet_started.checked or not (tsk.result is "not yet started")) and
-			(ch_success.checked or not (tsk.result is "success")) and
-			(ch_failed.checked or not (tsk.result is "failed")) and
-			(ch_not_tested.checked or not (tsk.result is "not tested")) and
-			(ch_bad_testcase.checked or not (tsk.result is "bad test case")) and 
-			UPPER(tsk.task_id) LIKE "%" || UPPER(filter_taskid.text) || "%" and 
-			UPPER(tcl.tc_prio) LIKE "%" || UPPER(filter_priority.text) || "%" and
-			UPPER(tcl.tc_impreg) LIKE "%" || UPPER(filter_impreg.text) || "%") or
-			(tsk.task_type is "j" and
-			UPPER(tsk.task_id) LIKE "%" || UPPER(filter_taskid.text) || "%"))
-		}'> <!-- group by tsk.task_id --> <!-- group_concat(tsk.result, ", ") -->
-		<header>
-			<row>
-				<cell>
-					<textview text=' '/>
-				</cell>
-				<cell>
-					<if cond='{true}'>
-						<textview text='Task ID'/>
-						<textbox id='filter_taskid'/>
-					</if>
-				</cell>
-				<cell>
-					<textview text='priority'/>
-					<textbox id='filter_priority' />
-				</cell>  
-				<cell>
-					<textview text='imp/reg'/>
-					<textbox id='filter_impreg' />
-				</cell>					
-				<cell>
-					<textview text='description'/>
-				</cell>
-				<cell>
-					<textview text='results'/>
-				</cell>
-				<cell>
-					<textview text='Tester'/>
-				</cell>
-				<cell>
-					<textview text='Note'/>
-				</cell>
-				<cell>
-					<textview text='TC time need [min]'/>
-				</cell>
-			</row>           
-		</header>
-		<row>		
-			<cell>
-			<if cond='{NOT fSelectedTestcase AND NOT fSelectedJira}'>
-					<addbutton table='env_table_t' text='Select' linkIcon="{NULL}" records='{
-						select tsk.guid, tsk.note, tsk.result, tsk.version, tsk.task_id, tsk.env_name, tsk.env_detail 
-							from task_env_table tsk 
-							where 
-							tsk.task_id = task_list_table_r.task_id and tsk.result = task_list_table_r.allResult
-					}'/>
-			</if>
-			</cell>
-			<cell>		
-				<textview text='{task_list_table_r.task_id}'/>
-			</cell>				
-			<cell>
-				<textview id='tc_prio' text='{task_list_table_r.tc_prio}'/> 
-			</cell>
-			<cell>
-				<textview id='tc_impreg' text='{task_list_table_r.tc_impreg}'/> 
-			</cell>
-			<cell>
-				<textview text='{task_list_table_r.tc_desc}' /> 
-			</cell>
-			<cell>
-				<textview id='tc_allres' text='{task_list_table_r.allResult}'/> 
-			</cell>
-			<cell>
-				<textview text='{task_list_table_r.tester_name}'></textview>
-			</cell>
-			<cell>
-				<textview text='{task_list_table_r.note}'></textview>
-			</cell>
-			<cell>
-				<textview text='{task_list_table_r.time_need}'></textview>
-			</cell>
-		</row>
-	</table>
-	</chapter>
+                    </cell>
+                    <cell>
+                        <textview text="{task.task_id}"/>
+                    </cell>
+                    <cell>
+                        <textview text="{task.tc_description}"/>
+                    </cell>
+                    <cell>
+                        <if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task.task_id) > 0}'>
+						    <discardbutton text='Go to manual test' id="totestWrite" nextForm='{forms.manualTestWriter}'> 
+                            <params>
+                                <param id='test_Id' value='{task.task_id}'/>
+                                <param id='edit' value='{"2"}'/>
+                                <param id='fromForm' value='{"task_executionNew"}'/>
+                            </params>
+                            </discardbutton>
+					    </if>
+					    <if cond='{(SELECT Count(tc.TestId) FROM manualTests tc WHERE tc.TestId = task.task_id) = 0}'>
+                    	    <linkview id='tcLink' url="task.link" text=" Go to test"/>
+                	    </if>
+                    </cell>
+                    <cell>
+                        <textview text="{task.result}"/>
+                    </cell>
+                    <cell>
+                        <textview text="{task.version}"/>
+                    </cell>
+                    <cell>
+                        <textview text="{task.env_name}"/>
+                    </cell>
+                    <cell>
+                        <textview text="{task.time_need}"/>
+                    </cell>
+                    <cell>
+                        <textview text="{task.note}"/>
+                    </cell>
+                </row>
+            </table>
+        </if>
+    </chapter> 
 </form>

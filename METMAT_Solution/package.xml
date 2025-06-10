@@ -1,4 +1,4 @@
-<package xmlns="http://schemas.mobilengine.com/package/v1" name="METMAT" displayName="METMAT" version="1.0.5" mobilengineVersion="55" >
+<package xmlns="http://schemas.mobilengine.com/package/v1" name="METMAT" displayName="METMAT" version="1.0.10" mobilengineVersion="55" >
     <upgrade>
             <version name="1.0.1" >
                 <sql name="1.0.1" >
@@ -23,6 +23,35 @@
             <version name="1.0.5" >
                 <sql name="1.0.5" >
                     <table name="task" />
+                </sql>
+            </version>
+            <version name="1.0.6" >
+                <sql name="1.0.6" >
+                    <table name="test_case" />
+                </sql>
+            </version>
+            <version name="1.0.7" >
+                <sql name="1.0.7" >
+                    <table name="calculatedResults" />
+                </sql>
+            </version>
+            <version name="1.0.8" >
+                <sql name="1.0.8" >
+                    <table name="manualTestsMedia" />
+                    <table name="manualTests" />
+                    <table name="environmentValues" />
+                </sql>
+            </version>
+            <version name="1.0.9" >
+                <sql name="1.0.9" >
+                    <table name="tc_jira_list" />
+                    <table name="tc_list" />
+                    <table name="test_to_be_write_category" />
+                </sql>
+            </version>
+            <version name="1.0.10" >
+                <sql name="1.0.10" >
+                    <table name="testingChecklist" />
                 </sql>
             </version>
     </upgrade>

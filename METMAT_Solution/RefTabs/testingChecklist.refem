@@ -4,5 +4,6 @@
         <Column Name="done" Type="Integer" />
         <Column Name="task" Type="Text" />
         <Column Name="ordernum" Type="Integer" />
+        <Column Name="project" Type="Text" PrimaryKey="true" NotNull="true" InitialValue="Core"/>
     </Columns>
 </Reftab>

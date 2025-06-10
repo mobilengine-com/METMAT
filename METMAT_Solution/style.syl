@@ -27,6 +27,12 @@ styles {
 		}
 	}
 
+    style selectedTask{
+        textview{
+            backgroundColor = 31CA0A
+        }
+    }
+
     style hbox100w {
         hbox {
             sizes = 0

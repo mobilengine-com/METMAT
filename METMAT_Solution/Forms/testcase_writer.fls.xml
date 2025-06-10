@@ -12,12 +12,17 @@
             U.tester_email = sysp.user
         }' />
         <let id="iFinishedStatusEdit" shape="scalar" value="{0}" />
+
         <let id="bNewTestCaseAdded" shape="scalar" value="{false}" />
         <let id="iNewTestCaseAdded" shape="scalar" value="{0}" />
         <let id="bNewLabelAdded" shape="scalar" value="{false}" />
         <let id="iLabelEditedRows" shape="scalar" value="{0}" />
         <let id="adnlb" shape="scalar" value="{false}" />
-        <let id="unfinishedCategoryCount" shape="scalar" value="{loadNewerFromServer:SELECT COUNT(tcc.category) FROM test_to_be_write_category tcc WHERE NOT(tcc.finished = 1)}" />
+
+        <let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+        <let id='currentVersion' shape='scalar' value='{SELECT v.version FROM versions v WHERE v.current = 1 AND v.project = user_proj}' />
+
+        <let id="unfinishedCategoryCount" shape="scalar" value="{loadNewerFromServer:SELECT COUNT(tcc.category) FROM test_to_be_write_category tcc WHERE NOT(tcc.finished = 1) AND tcc.project = user_proj AND tcc.mainVersion = currentVersion}" />
         <let id="saveEdit" shape="scalar" value="{false}" />
     </declarations>
     <header></header>
@@ -54,7 +59,7 @@
             </if>
         </hbox>
         <table id="tcCat" record="tcCat" style="{styles.fullPageTable}"
-            recordset="{loadNewerFromServer:SELECT tcc.category, tcc.planned_count, tcc.finished, tcc.closedByTesters, tcc.testerWhoClosed, tcc.active, false new FROM test_to_be_write_category tcc}">
+            recordset="{loadNewerFromServer:SELECT tcc.category, tcc.planned_count, tcc.finished, tcc.closedByTesters, tcc.testerWhoClosed, tcc.active, false new FROM test_to_be_write_category tcc WHERE tcc.project = user_proj AND tcc.mainVersion = currentVersion}">
             <header>
                 <row>
                     <cell>
@@ -247,8 +252,8 @@
             id='drDoneTests'
             keyMap="{category}"
             textMap="{category}"
-            selectedKey="{loadNewerFromServer:SELECT tcc.category FROM test_to_be_write_category tcc LIMIT 1}"
-            choices='{loadNewerFromServer:SELECT tcc.category FROM test_to_be_write_category tcc}'>
+            selectedKey="{loadNewerFromServer:SELECT tcc.category FROM test_to_be_write_category tcc WHERE tcc.project = user_proj AND tcc.mainVersion = currentVersion LIMIT 1}"
+            choices='{loadNewerFromServer:SELECT tcc.category FROM test_to_be_write_category tcc WHERE tcc.project = user_proj AND tcc.mainVersion = currentVersion}'>
             <validation>
                 <validator
                     cond='{selectedKey IS NOT NULL OR ((SELECT COUNT(tcc.category) FROM test_to_be_write_category tcc) == 0)}'
@@ -260,9 +265,9 @@
     <if cond='{not adnlb}'>
         <declarations>
             <let id="categoryClosedStatusTester" shape="scalar"
-                value='{loadNewerFromServer:SELECT tcd.closedByTesters FROM test_to_be_write_category tcd WHERE tcd.category = drDoneTests.selectedKey}' />
+                value='{loadNewerFromServer:SELECT tcd.closedByTesters FROM test_to_be_write_category tcd WHERE tcd.category = drDoneTests.selectedKey AND tcd.project = user_proj AND tcd.mainVersion = currentVersion}' />
             <let id="categoryClosedStatusFinished" shape="scalar"
-                value='{loadNewerFromServer:SELECT tcd.finished FROM test_to_be_write_category tcd WHERE tcd.category = drDoneTests.selectedKey}' />
+                value='{loadNewerFromServer:SELECT tcd.finished FROM test_to_be_write_category tcd WHERE tcd.category = drDoneTests.selectedKey AND tcd.project = user_proj AND tcd.mainVersion = currentVersion}' />
         </declarations>
         <if cond="{categoryClosedStatusFinished == 1 OR categoryClosedStatusTester == 1}">
             <textview text="This category was closed" />

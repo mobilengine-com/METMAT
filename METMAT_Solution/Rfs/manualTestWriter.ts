@@ -29,11 +29,22 @@ function assertNotNull<T>(value: T | null | undefined): asserts value is T {
             }
             let stepT = int.Parse(ststepT);
             assertNotNull(stepT);
-            db.manualTests.Insert({TestId: cId, Expected: exp, Task: task, Step: stepT, Photo: mediaid==null?0:1, Platform: step.newTcPlatform.selectedKey})
-            db.test_case.Update({id: cId},{desc: nTd, PreCond: nTp})
+            db.manualTests.Insert({TestId: cId, 
+                Expected: exp, 
+                Task: task, 
+                Step: stepT, 
+                Photo: mediaid==null?0:1, 
+                Platform: step.newTcPlatform.selectedKey, 
+                project: form.user_proj})
+            db.test_case.Update({id: cId},{tc_description: nTd, PreCond: nTp})
 
             if (mediaid!=null) {
-                db.manualTestsMedia.Insert({TestId: cId, mediaId: mediaid, Step: stepT})
+                db.manualTestsMedia.Insert({
+                    TestId: cId, 
+                    mediaId: mediaid, 
+                    Step: stepT, 
+                    project: form.user_proj
+                })
             }
         }
     }else{
@@ -41,8 +52,8 @@ function assertNotNull<T>(value: T | null | undefined): asserts value is T {
         let nTd = form.newTcDesc.text.Trim(" ")
         let nTp = form.newTcPrecond.text.Trim(" ")
         if (form.deletedStep == 1) {
-            db.manualTests.DeleteMany({TestId: nId})
-            db.manualTestsMedia.DeleteMany({TestId: nId})
+            db.manualTests.DeleteMany({TestId: nId, project: form.user_proj})
+            db.manualTestsMedia.DeleteMany({TestId: nId, project: form.user_proj})
         }
         let inserted =-1
         for (let step of form.editTC.rows) {
@@ -69,12 +80,28 @@ function assertNotNull<T>(value: T | null | undefined): asserts value is T {
                 mediaid = step.mediaIdPhoto;
             }
 
-            db.manualTests.InsertOrUpdate({TestId: form.originalTestId, Step: int.Parse(stepT)},{TestId: nId, Expected: exp, Task: task, Step: int.Parse(stepT), Photo: mediaid==null?0:1, Platform: step.newTcPlatform.selectedKey})
+            db.manualTests.InsertOrUpdate({
+                TestId: form.originalTestId, 
+                Step: int.Parse(stepT)},{TestId: nId, 
+                Expected: exp, 
+                Task: task, 
+                Step: int.Parse(stepT), 
+                Photo: mediaid==null?0:1, 
+                Platform: step.newTcPlatform.selectedKey, 
+                project: form.user_proj
+            })
 
             if (mediaid!=null) {
-                db.manualTestsMedia.InsertOrUpdate({TestId: nId, Step:int.Parse(stepT)},{TestId: nId, mediaId: mediaid, Step:int.Parse(stepT)})
+                db.manualTestsMedia.InsertOrUpdate({
+                    TestId: nId, 
+                    Step:int.Parse(stepT)},{TestId: nId, 
+                    mediaId: mediaid, 
+                    Step:int.Parse(stepT), 
+                    project: form.user_proj
+
+                })
             }else{
-                db.manualTestsMedia.DeleteMany({TestId: nId, Step:int.Parse(stepT)})
+                db.manualTestsMedia.DeleteMany({TestId: nId, Step:int.Parse(stepT), project: form.user_proj})
             }
         }
 
@@ -84,16 +111,36 @@ function assertNotNull<T>(value: T | null | undefined): asserts value is T {
                 const element = form.editTC.rows[index-1]
                 Log("---------------Have to move----------------")
                 Log(element)
-                db.manualTests.Update({TestId: form.originalTestId, Step: int.Parse(element.stepCount)},{Step: int.Parse(element.stepCount+1)})
+                db.manualTests.Update({
+                    TestId: form.originalTestId, 
+                    Step: int.Parse(element.stepCount),
+                    project: form.user_proj
+                },{
+                    Step: int.Parse(element.stepCount+1),
+
+                })
                 if (element.mediaIdPhoto!= null) {
-                    db.manualTestsMedia.Update({TestId: nId, Step:int.Parse(element.stepCount)},{Step:int.Parse(element.stepCount+1)})
+                    db.manualTestsMedia.Update({
+                        TestId: nId, Step:int.Parse(element.stepCount),
+                        project: form.user_proj
+                    },{
+                        Step:int.Parse(element.stepCount+1)
+                    })
                 }
             }
-            db.manualTests.Insert({TestId: nId, Expected: "", Task: "", Step: inserted, Photo: 0, Platform: ""})
+            db.manualTests.Insert({
+                TestId: nId, 
+                Expected: "", 
+                Task: "", 
+                Step: inserted, 
+                Photo: 0, 
+                Platform: "",
+                project: form.user_proj
+            })
         }
 
         if (form.stfromForm == "testcase_monitor") {
-            db.test_case.Update({id: form.TcId.text},{desc: nTd, PreCond: nTp})
+            db.test_case.Update({id: form.TcId.text},{tc_description: nTd, PreCond: nTp})
         } else if (form.stfromForm == "testcase_writer"){
             db.test_to_be_write_done.Update({id: form.originalTestId},{id: nId, label: nTd, PreCond: nTp})
             db.test_to_be_write_tags.UpdateMany({id: form.originalTestId},{id: nId})

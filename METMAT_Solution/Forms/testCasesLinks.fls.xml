@@ -7,13 +7,16 @@
 		<let id="testCount" shape="scalar" value='{SELECT Count(tcs.id) FROM selectedTestsTable tcs }' />
 		<let id="iLabelEditedRows" shape="scalar" value="{0}" />
 		<let id="iLabelDeletedRows" shape="scalar" value="{0}" />
-		<let id="selectedTestsTable" shape="table" value='{loadNewerFromServer:SELECT tcst.id, tcst.desc, tcst.platform, tcst.link, tcst.time, formatDtl(tcst.lastAssigned, (dtf yyyy"-"MM"-"dd" "HH":"mm":"ss)) lastAssigned FROM test_case tcst where UPPER(tcst.id) LIKE "%" || UPPER(tcs.filter_taskid.text) || "%" and 
-	UPPER(tcst.desc) LIKE "%" || UPPER(tcs.filter_desc.text) || "%" and	(CASE WHEN tcs.assigned_date_filter.date IS NULL THEN true ELSE tcst.lastAssigned >= tcs.assigned_date_filter.date END) and
+		<let id="selectedTestsTable" shape="table" value='{loadNewerFromServer:SELECT tcst.id, tcst.tc_description, tcst.platform, tcst.link, tcst.time, formatDtl(tcst.lastAssigned, (dtf yyyy"-"MM"-"dd" "HH":"mm":"ss)) lastAssigned FROM test_case tcst where tcst.project = user_proj AND UPPER(tcst.id) LIKE "%" || UPPER(tcs.filter_taskid.text) || "%" and 
+	UPPER(tcst.tc_description) LIKE "%" || UPPER(tcs.filter_desc.text) || "%" and	(CASE WHEN tcs.assigned_date_filter.date IS NULL THEN true ELSE tcst.lastAssigned >= tcs.assigned_date_filter.date END) and
 	(tcst.platform = tcs.filter_platform.selectedKey OR tcs.filter_platform.selectedKey IS NULL) and
 	(exists (select t.tag from test_case_tag t where t.tag = tcs.tag_filter.text and t.tc_id = tcst.id) OR tcs.tag_filter.text="") order by id}' />
 	
 		<let id='user_proj' shape='scalar' value='{SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
 		<let id='currentVersion' shape='scalar' value='{SELECT v.version FROM versions v WHERE v.current = 1 AND v.project = user_proj}' />
+		
+		<let id='all_selected_tests' shape='table' value='{loadNewerFromServer:SELECT ta.guid, ta.task_id, ta.result, ta.platformID FROM task ta where ta.assigned_version = currentVersion AND ta.project = user_proj}'/>
+		<let id='selected_tests' shape='table' value='{loadNewerFromServer:SELECT ta.guid, ta.task_id, ta.result, ta.platformID FROM task ta where ta.assigned_version = currentVersion AND ta.project = user_proj AND ta.env_name = selected_environment.selectedKey order by task_id}'/>
 	</declarations>
 	<header>
 		<discardbutton text="X"/>
@@ -48,7 +51,7 @@
 		<if cond="{iLabelDeletedRows>0}">
 			<submitbutton id="prDelete" text="Process delete" closeForm="{false}"></submitbutton>
 		</if>
-		<table id="assignedTb" label="Assigned tests" record="at" recordset="{loadNewerFromServer:SELECT ta.guid, ta.task_id, ta.result, ta.platformID FROM task ta where ta.assigned_version = currentVersion AND ta.project = user_proj AND ta.env_name = selected_environment.selectedKey order by task_id}">
+		<table id="assignedTb" label="Assigned tests" record="at" recordset="{SELECT ta.guid, ta.task_id, ta.result, ta.platformID FROM selected_tests ta}">
 			
 			<header>
 				<row>
@@ -64,8 +67,10 @@
 					<let id="edited" shape="scalar" value="{false}" />
 					<let id="delete" shape="scalar" value="{false}" />
 				</declarations>
-				<cell><textview id="move_task" text='{at.task_id}'/> <if cond="{false}"><textview id="move_task_guid" text='{at.guid}'/></if></cell>
-				
+				<cell>
+					<textview id="move_task" text='{at.task_id}'/>
+					 <if cond="{false}"><textview id="move_task_guid" text='{at.guid}'/></if>
+					</cell>
 				<cell><textview text='{at.result}'/></cell>
 				<cell><textview text='{at.platformID}'/></cell>
 				<cell>
@@ -106,7 +111,7 @@
 		</table>
 	</if>
 	
-	<table id='tcs' label='TCs' record='tcs' recordset='{ SELECT stt.id, stt.desc, stt.platform, stt.link, stt.time, stt.lastAssigned FROM selectedTestsTable stt  limit 20 offset letpage*20}'>
+	<table id='tcs' label='TCs' record='tcs' recordset='{ SELECT stt.id, stt.tc_description, stt.platform, stt.link, stt.time, stt.lastAssigned FROM selectedTestsTable stt  limit 20 offset letpage*20}'>
 		<header>
 			<row>
 				<cell>
@@ -157,15 +162,16 @@
 		<row>
 			<declarations>
 				<let id='bToDelete' shape='scalar' value='{false}'/>
+				<let id="already_selected" shape="scalar" value="{SELECT Count(ast.task_id) FROM all_selected_tests ast WHERE ast.task_id = tcs.id}" />
 			</declarations>
 			<cell>
 				<checkbox id= 'mark_to_run' checked='{updateUserInput:SELECT defaultCheckboxState}'/>
 			</cell>
 			<cell>
-				<textview id="tcsid" text='{tcs.id}'/>
+				<textview id="tcsid" text='{tcs.id}' style='{SELECT CASE WHEN already_selected > 0 THEN styles.selectedTask ELSE null END}'/>
 			</cell>
 			<cell>
-				<textview id="tcsdesc" text='{tcs.desc}'/>
+				<textview id="tcsdesc" text='{tcs.tc_description}'/>
 			</cell>
 			<cell>
 				<textview id="tcsplatform" text='{tcs.platform}'/>

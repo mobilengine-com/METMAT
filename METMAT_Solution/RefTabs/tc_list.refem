@@ -7,5 +7,7 @@
 		<Column Name="last_status" Type="Text" />
 		<Column Name="last_sent_in" Type="Date" />
 		<Column Name="note" Type="Text" />
+		<Column Name="mainVersion" Type="Text" />
+		<Column Name="project" Type="Text" />
 	</Columns>
 </Reftab>

@@ -2,5 +2,7 @@
 	<Columns>
 	  <Column Name="name" Type="Text" />
 	  <Column Name="filterdate" Type="Date" />
+	<Column Name= "project" Type="Text" />
+	<Column Name= "version" Type="Text" />
 	</Columns>
   </Reftab>

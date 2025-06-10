@@ -17,8 +17,3 @@ if (form.adminPanel.saveOrder.submitter) {
         db.testingChecklist.Update({id:row.id},{ordernum: int.Parse(row.editedOrder.text)})
      }
 }
-
-if (form.adminPanel.startNew.submitter) {
-    let now = dtl.Now()
-    db.environmentValues.Update({},{})
-}

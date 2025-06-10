@@ -10,5 +10,7 @@
 		<Column Name="finishDate" Type="Date" />
         <Column Name="finishDateExtended" Type="Date" />
 		<Column Name="plannedFinish" Type="Date" />
+		<Column Name="project" Type="Text" />
+		<Column Name="version" Type="Text" />
 	</Columns>
 </Reftab>

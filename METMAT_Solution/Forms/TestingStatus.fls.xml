@@ -10,12 +10,10 @@
             U.tester_email = sysp.user
         }' />
         <let id="editOrder" shape="scalar" value="{false}" />
+        <let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
     </declarations>
     
     <if id="adminPanel" cond='{stLoggedUserRole == "Admin"}'>
-        <chapter title="">
-            <submitbutton text="Start new test stage" id="startNew"/>
-        </chapter>
         <hbox style="{styles.hbox100w}">
             <submitbutton text="Save changes" id="saveChange"/>
             <if cond="{ not editOrder}">
@@ -38,7 +36,7 @@
             </if>
         </hbox>
     </if>
-    <table id="tasks" record="t" recordset="{loadnewerfromserver:SELECT tc.id, tc.done, tc.task, tc.ordernum FROM testingChecklist tc ORDER BY ordernum asc}">
+    <table id="tasks" record="t" recordset="{loadnewerfromserver:SELECT tc.id, tc.done, tc.task, tc.ordernum FROM testingChecklist tc WHERE tc.project = user_proj ORDER BY ordernum asc}">
         <header>
             <row>
                 <cell><textview/></cell>

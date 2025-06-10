@@ -3,5 +3,6 @@
 		<Column Name="TestId" Type="Text"/>
 		<Column Name="mediaId" Type="Text"/>
         <Column Name="Step" Type="Integer"/>
+		<Column Name="project" Type="Text" NotNull="true"/>
 	</Columns>
 </Reftab>

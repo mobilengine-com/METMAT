@@ -6,5 +6,6 @@
 		<Column Name="Task" Type="Text"/>
         <Column Name="Photo" Type="Integer" />
 		<Column Name="Platform" Type="Text" />
+		<Column Name="project" Type="Text" NotNull="true"/>
 	</Columns>
 </Reftab>

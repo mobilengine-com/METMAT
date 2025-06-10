@@ -5,6 +5,7 @@
         <let id="deletedStep" shape="scalar" value="{0}" />
         <let id="stfromForm" shape="scalar" value="{params.fromForm}" />
         <let id="originalTestId" shape="scalar" value="{params.test_Id}" />
+        <let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
     </declarations>
     <header>
         <if cond='{not (edit = 2)}'>
@@ -30,8 +31,8 @@
     <if cond='{SELECT stfromForm IS NULL}'>
         <textbox id="createTcId" style='{styles.tcWriteId}' label="Test id" text='{""}' />
     </if>
-    <textarea disabled = '{edit = 2}' id="newTcDesc" style='{styles.tcWriteId}' lines="3" label="Description" text='{Select COALESCE((SELECT tc.desc FROM test_case tc WHERE tc.id = params.test_Id), (SELECT tc.label FROM test_to_be_write_done tc WHERE tc.id = params.test_Id), "")}'/>
-    <textarea disabled = '{edit = 2}' id="newTcPrecond" style='{styles.tcWriteId}' lines="5" label="Pre-Conditions" text='{Select COALESCE((SELECT tc.PreCond FROM test_case tc WHERE tc.id = params.test_Id), (SELECT tc.PreCond FROM test_to_be_write_done tc WHERE tc.id = params.test_Id), "")}'/>
+    <textarea disabled = '{edit = 2}' id="newTcDesc" style='{styles.tcWriteId}' lines="3" label="Description" text='{Select COALESCE((SELECT tc.tc_description FROM test_case tc WHERE tc.id = params.test_Id AND tc.project = user_proj), (SELECT tc.label FROM test_to_be_write_done tc WHERE tc.id = params.test_Id), "")}'/>
+    <textarea disabled = '{edit = 2}' id="newTcPrecond" style='{styles.tcWriteId}' lines="5" label="Pre-Conditions" text='{Select COALESCE((SELECT tc.PreCond FROM test_case tc WHERE tc.id = params.test_Id AND tc.project = user_proj), (SELECT tc.PreCond FROM test_to_be_write_done tc WHERE tc.id = params.test_Id), "")}'/>
     <if cond='{edit = 0}'>
         <textview text="New" />
     <table id="newTC" style="{styles.fullPageTableForTestCase}" record="test" recordset='{SELECT "" TestId, "" Expected, "" Task, 1 Step}'>
@@ -84,11 +85,11 @@
     </combinedbutton>
     </if>
         <textview text='{SELECT CASE WHEN edit = 2 THEN "styles.mtCountTaskRead" ELSE "styles.mtCountTask" END}' />
-    <table id="editTC" style="{SELECT CASE WHEN edit = 2 THEN styles.fullPageTableForTestView ELSE styles.fullPageTableForTestCase END}" record="editTest" recordset='{loadNewerFromServer:SELECT tc.TestId, tc.Expected, tc.Task, tc.Step, tc.Platform FROM manualTests tc WHERE tc.TestId = params.test_Id order by Step}'>
+    <table id="editTC" style="{SELECT CASE WHEN edit = 2 THEN styles.fullPageTableForTestView ELSE styles.fullPageTableForTestCase END}" record="editTest" recordset='{loadNewerFromServer:SELECT tc.TestId, tc.Expected, tc.Task, tc.Step, tc.Platform FROM manualTests tc WHERE tc.TestId = params.test_Id AND tc.project = user_proj order by Step}'>
         <row>
         <declarations>
             <let id="hasPhoto" shape="scalar" value="{0}" />
-            <let id="mediaIdPhoto" shape="scalar" value="{SELECT p.mediaId FROM manualTestsMedia p WHERE p.TestId = editTest.TestId AND p.Step = editTest.Step}" />
+            <let id="mediaIdPhoto" shape="scalar" value="{SELECT p.mediaId FROM manualTestsMedia p WHERE p.TestId = editTest.TestId AND p.Step = editTest.Step AND p.project = user_proj}" />
             <let id="stepCount" shape="scalar" value="{editTestIndex}" />
         </declarations>
             <cell>

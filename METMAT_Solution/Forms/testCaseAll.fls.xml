@@ -16,11 +16,13 @@
         WHERE
             U.tester_email = sysp.user
         }' />
+        <let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
 
         <let id="tcCount" shape="scalar" value='{loadNewerFromServer:SELECT COUNT(DISTINCT tc.id) FROM test_case tc LEFT JOIN test_case_tag tct ON tc.id = tct.tc_id 
-            WHERE COALESCE(tcTable.platSc.selectedKey,tc.platform) = tc.platform 
+            WHERE tc.project = user_proj
+            AND COALESCE(tcTable.platSc.selectedKey,tc.platform) = tc.platform 
             AND  tc.id LIKE "%" || COALESCE(tcTable.idSc.text,"") || "%" 
-            AND tc.desc LIKE "%" || COALESCE(tcTable.descSc.text,"") || "%" 
+            AND tc.tc_description LIKE "%" || COALESCE(tcTable.descSc.text,"") || "%" 
             AND CASE WHEN tcTable.dateSc.date IS NULL THEN true ELSE tc.addedDate >= tcTable.dateSc.date END
             AND CASE WHEN LENGTH(stscTags)>0 THEN INSTR(stavailableTags, tc.id) != 0 ELSE true END
             }' />
@@ -100,10 +102,11 @@
         </if>
     </hbox>
     <table id="tcTable" record="tcTable" style="{styles.fullPageTable}"
-        recordset='{loadNewerFromServer:SELECT DISTINCT TR.id, TR.desc, TR.platform, TR.time, TR.link, TR.addedDate, TR.PreCond FROM test_case TR
-            WHERE   COALESCE(platSc.selectedKey,TR.platform) = TR.platform 
+        recordset='{loadNewerFromServer:SELECT DISTINCT TR.id, TR.tc_description, TR.platform, TR.time, TR.link, TR.addedDate, TR.PreCond FROM test_case TR
+            WHERE   TR.project = user_proj
+                    AND COALESCE(platSc.selectedKey,TR.platform) = TR.platform 
                     AND  TR.id LIKE "%" || COALESCE(idSc.text,"") || "%" 
-                    AND TR.desc LIKE "%" || COALESCE(descSc.text,"") || "%"
+                    AND TR.tc_description LIKE "%" || COALESCE(descSc.text,"") || "%"
                     AND CASE WHEN dateSc.date IS NULL THEN true ELSE TR.addedDate >= dateSc.date END
                     AND CASE WHEN LENGTH(stscTags)>0 THEN INSTR(stavailableTags, TR.id) != 0 ELSE true END
                     ORDER BY id LIMIT 20 OFFSET letpage*20}'>
@@ -154,10 +157,10 @@
             </cell>
             <cell>
                 <if cond="{edited}">
-                    <textbox id='tcEditedDesc' text="{tcTable.desc}" />
+                    <textbox id='tcEditedDesc' text="{tcTable.tc_description}" />
                 </if>
                 <if cond="{not edited}">
-                    <textview id='tcDesc' text="{tcTable.desc}" />
+                    <textview id='tcDesc' text="{tcTable.tc_description}" />
                 </if>
             </cell>
             <cell>
@@ -200,7 +203,7 @@
                         </params>
                     </discardbutton>
                         <textview id="newTcId" style='{styles.tcWriteId}' label="Test id" text='{tcTable.id}' />
-                        <textview id="newTcDesc" style='{styles.tcWriteId}' label="Description" text='{tcTable.desc}'/>
+                        <textview id="newTcDesc" style='{styles.tcWriteId}' label="Description" text='{tcTable.tc_description}'/>
                         <textview id="newTcPrecond" style='{styles.tcWriteId}'  label="Pre-Conditions" text='{tcTable.PreCond}'/>
                         <table style="{styles.fullPageTableForTestView}" record="test" recordset="{SELECT tc.TestId, tc.Expected, tc.Task, tc.Step, tc.Platform FROM manualTests tc WHERE tc.TestId = tcTable.id}">
                             <header>
@@ -221,7 +224,7 @@
                                 <hbox style='{styles.mtCountExp}'>
                                     <textview  text="{tostring(test.Step)}" />
                                     <textarea style='{styles.centerText}' text="{test.Expected}" lines="10"/>
-                                    <photoview photos='{SELECT p.mediaId FROM manualTestsMedia p WHERE p.TestId = test.TestId AND p.Step = test.Step}'/>
+                                    <photoview photos='{SELECT p.mediaId FROM manualTestsMedia p WHERE p.TestId = test.TestId AND p.Step = test.Step AND p.project = user_proj}'/>
                                 </hbox>
                                 </cell>
                             </row>

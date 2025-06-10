@@ -1,6 +1,11 @@
 <form id='badtestcaselist' menuName='Bad test cases' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
 
-	<table id='badtclist' record='badtc' recordset='{loadNewerFromServer:select tl.tc_id, tl.last_status, tl.note from tc_list tl where tl.last_status="bad test case" group by tl.tc_id}'>
+	<declarations>
+		<let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+		<let id='currentVersion' shape='scalar' value='{SELECT v.version FROM versions v WHERE v.current = 1 AND v.project = user_proj}' />
+	</declarations>	
+
+	<table id='badtclist' record='badtc' recordset='{loadNewerFromServer:select tl.tc_id, tl.last_status, tl.note from tc_list tl where tl.last_status="bad test case" AND tl.mainVersion = currentVersion AND tl.project = user_proj group by tl.tc_id}'>
 			<header>
 				<row>
 					<cell>

@@ -7,5 +7,7 @@
         <Column Name="testerWhoClosed" Type="Text" />
         <Column Name="result_count" Type="Integer" />
         <Column Name="active" Type="Integer" InitialValue="0"/>
+        <Column Name="mainVersion" Type="Text"/>
+        <Column Name="project" Type="Text"/>
 	</Columns>
 </Reftab>

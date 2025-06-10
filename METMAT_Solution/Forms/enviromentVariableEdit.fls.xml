@@ -1,10 +1,13 @@
 <form id='enviromentVariableEdit' menuName='Enviroment variable edit' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
 
+	<declarations>
+		<let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+	</declarations>
     <header>
         <submitbutton text="Submit" closeForm="{false}"/>
         <discardbutton text="Back to dashboard" confirm="{false}"/>
     </header>
-	<table id='envVariableTb' record='evt' recordset='{select ev.name, ev.value from environmentValues ev}'>
+	<table id='envVariableTb' record='evt' recordset='{select ev.name, ev.value from environmentValues ev WHERE ev.project = user_proj}'>
 			<header>
 				<row>
 					<cell>

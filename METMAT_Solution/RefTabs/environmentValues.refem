@@ -2,5 +2,6 @@
 	<Columns>
 		<Column Name="name" Type="Text" PrimaryKey='true' NotNull='true'/>
 		<Column Name="value" Type="Text" />
+		<Column Name="project" Type="Text" NotNull='true'/>
 	</Columns>
 </Reftab>

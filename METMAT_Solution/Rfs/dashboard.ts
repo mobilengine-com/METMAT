@@ -12,12 +12,13 @@ import { assertNotNull, parseToFloat  } from "./lib";
 let nowHour = form.info.dtlSubmit.Hour
 let nowMinute = form.info.dtlSubmit.Minute
 
-let holidayAdvancedInPeriod
 
 let left_from_today_hour = nowHour >= 9 ? nowHour >= 17 ? 0 : 16-nowHour : 8
 let left_from_today_minute = nowHour >= 9 ? nowHour >= 17 ? 0 : 60-nowMinute : 0
 let left_from_today_total = left_from_today_hour+left_from_today_minute/60
-let stavgRunTime = db.environmentValues.Read({name:"hrAvgTestRuntime"})[0].value as string
+let tpstavgRunTime = db.environmentValues.Read({name:"hrAvgTestRuntime", project: form.user_proj})
+let stavgRunTime = tpstavgRunTime.Count() == 1 ? tpstavgRunTime[0].value as string : "";
+
 
 let avgRunTime = parseToFloat(stavgRunTime)
 Log(form)
@@ -114,7 +115,7 @@ if (form.recWrite.submitter) {
     });
     Log("sum_participate: "+sum_participate)
     let totalTestToWriteCount = 0
-    db.test_to_be_write_category.ReadFields({active: 1},["planned_count"]).forEach(a=> {
+    db.test_to_be_write_category.ReadFields({active: 1, project: form.user_proj, mainVersion: form.currentVersion},["planned_count"]).forEach(a=> {
         assertNotNull(a.planned_count);
         totalTestToWriteCount += a.planned_count as number
         return totalTestToWriteCount

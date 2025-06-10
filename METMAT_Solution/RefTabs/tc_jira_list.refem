@@ -6,5 +6,7 @@
 		<Column Name="platform" Type="Text"/>
 		<Column Name="tested_version" Type="Text"/>
 		<Column Name="jira_state" Type="Text"/>
+		<Column Name="mainVersion" Type="Text"/>
+		<Column Name="project" Type="Text" />
 	</Columns>
 </Reftab>

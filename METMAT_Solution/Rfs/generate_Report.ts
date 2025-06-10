@@ -2,11 +2,14 @@
 //# using report 'generate_Report';
 //# using reftab 'test_case';
 {
+	Log(form);
 	if(form.generateTcReport.submitter){
 		let rep = reports.generate_Report.New();
 		rep.Params.Add({
 			name: form.name.text,
-			filterdate: form.filterdate.date.DtlToDtdb()
+			filterdate: form.filterdate.date.DtlToDtdb(),
+			project: form.user_proj,
+			version: form.currentVersion
 		});
 		rep.Run(); 
 	}else if(form.generateAssignedTcList.submitter){
@@ -16,7 +19,7 @@
 		list.SetValue(sheetName,0,0,"Assigned date");
 		list.SetValue(sheetName,0,1,"Test name");
 		list.SetValue(sheetName,0,2,"Link");
-		let assignedTests = db.test_case.Read({lastAssigned:{greaterOrEqual: form.filterdate.date.DtlToDtdb()}});
+		let assignedTests = db.test_case.Read({lastAssigned:{greaterOrEqual: form.filterdate.date.DtlToDtdb()}, project: form.user_proj});
 		let i = 1;
 		for (let a of assignedTests) {
 			list.SetValue(sheetName,i,0,a.lastAssigned);
@@ -29,7 +32,7 @@
 			recipients: [form.to.text],
 			body: "",
 			subject: "Assigned test list "+ToString(form.filterdate.date),
-			attachments: [{fileref: fileref.Parse(resultMediaId+"|1") , filename: "Assigned_tests.xlsx"}]
+			attachments: [{fileref: fileref.Parse(resultMediaId+"|1") , filename: "Assigned_tests_"+form.user_proj+".xlsx"}]
 		});
 	
 	}

@@ -1,5 +1,9 @@
 <form id="generate_Report"  menuName="Generate Report"  title='Generate Report'  platforms="ios web" xmlns="http://schemas.mobilengine.com/fls/v2">
-	  <header></header>
+	<declarations>
+		<let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+		<let id='currentVersion' shape='scalar' value='{SELECT v.version FROM versions v WHERE v.current = 1 AND v.project = user_proj}' />
+	</declarations>  
+	<header></header>
 	  <textbox id="name" label="Name" >
 		<validation>
 			<validator cond='{length(name.text) > 0}' message='Give a name'/>
