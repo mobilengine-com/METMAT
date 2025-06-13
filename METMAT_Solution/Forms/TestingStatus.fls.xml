@@ -3,14 +3,18 @@
         <let id='stLoggedUserRole' shape='scalar'
             value='{
         SELECT
-            U.tester_role
+            U.role
         FROM
-            tester U
+            userRole U
         WHERE
-            U.tester_email = sysp.user
+            U.tester_email = sysp.user AND
+            U.project = user_proj
         }' />
         <let id="editOrder" shape="scalar" value="{false}" />
-        <let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+        <let id='user_proj' shape='scalar' value='{
+        loadNewerFromServer:SELECT us.active_project 
+        FROM userState us INNER JOIN tester t ON us.tester_name = t.tester_name
+        WHERE t.tester_email = sysp.user}'/>
     </declarations>
     
     <if id="adminPanel" cond='{stLoggedUserRole == "Admin"}'>

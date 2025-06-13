@@ -12,7 +12,10 @@
 	(tcst.platform = tcs.filter_platform.selectedKey OR tcs.filter_platform.selectedKey IS NULL) and
 	(exists (select t.tag from test_case_tag t where t.tag = tcs.tag_filter.text and t.tc_id = tcst.id) OR tcs.tag_filter.text="") order by id}' />
 	
-		<let id='user_proj' shape='scalar' value='{SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+		<let id='user_proj' shape='scalar' value='{
+        loadNewerFromServer:SELECT us.active_project 
+        FROM userState us INNER JOIN tester t ON us.tester_name = t.tester_name
+        WHERE t.tester_email = sysp.user}'/>
 		<let id='currentVersion' shape='scalar' value='{SELECT v.version FROM versions v WHERE v.current = 1 AND v.project = user_proj}' />
 		
 		<let id='all_selected_tests' shape='table' value='{loadNewerFromServer:SELECT ta.guid, ta.task_id, ta.result, ta.platformID FROM task ta where ta.assigned_version = currentVersion AND ta.project = user_proj}'/>

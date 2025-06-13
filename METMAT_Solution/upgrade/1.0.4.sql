@@ -1,8 +1,8 @@
 -- Update the main version in the testedVersion table to 'S54'
-INSERT INTO testedVersion (version, platformID, mainVersion, addedDate)
+REPLACE INTO testedVersion (version, platformID, mainVersion, addedDate)
 SELECT
-    vo.version,
-    vo.platformID,
-    vo.mainVersion,
-    vo.addedDate
-FROM testedVersion_old vo;
+    tvo.version,
+    tvo.platformID,
+    'S56' mainVersion,
+    tvo.addedDate
+FROM testedVersion_old tvo;

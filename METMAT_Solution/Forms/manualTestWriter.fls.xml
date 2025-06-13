@@ -5,7 +5,10 @@
         <let id="deletedStep" shape="scalar" value="{0}" />
         <let id="stfromForm" shape="scalar" value="{params.fromForm}" />
         <let id="originalTestId" shape="scalar" value="{params.test_Id}" />
-        <let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+        <let id='user_proj' shape='scalar' value='{
+        loadNewerFromServer:SELECT us.active_project 
+        FROM userState us INNER JOIN tester t ON us.tester_name = t.tester_name
+        WHERE t.tester_email = sysp.user}'/>
     </declarations>
     <header>
         <if cond='{not (edit = 2)}'>

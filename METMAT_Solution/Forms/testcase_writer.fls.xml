@@ -5,11 +5,12 @@
         <let id='stLoggedUserRole' shape='scalar'
             value='{
         SELECT
-            U.tester_role
+            U.role
         FROM
-            tester U
+            userRole U
         WHERE
-            U.tester_email = sysp.user
+            U.tester_email = sysp.user AND
+            U.project = user_proj
         }' />
         <let id="iFinishedStatusEdit" shape="scalar" value="{0}" />
 
@@ -19,7 +20,10 @@
         <let id="iLabelEditedRows" shape="scalar" value="{0}" />
         <let id="adnlb" shape="scalar" value="{false}" />
 
-        <let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+        <let id='user_proj' shape='scalar' value='{
+        loadNewerFromServer:SELECT us.active_project 
+        FROM userState us INNER JOIN tester t ON us.tester_name = t.tester_name
+        WHERE t.tester_email = sysp.user}'/>
         <let id='currentVersion' shape='scalar' value='{SELECT v.version FROM versions v WHERE v.current = 1 AND v.project = user_proj}' />
 
         <let id="unfinishedCategoryCount" shape="scalar" value="{loadNewerFromServer:SELECT COUNT(tcc.category) FROM test_to_be_write_category tcc WHERE NOT(tcc.finished = 1) AND tcc.project = user_proj AND tcc.mainVersion = currentVersion}" />

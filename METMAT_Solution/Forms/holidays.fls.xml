@@ -1,14 +1,16 @@
 <form id='holidaysDayOff' menuName='Holidays and day off' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
 	<declarations>
         <let id='stLoggedUserRole' shape='scalar'
-        value='{
-    SELECT
-        U.tester_role
-    FROM
-        tester U
-    WHERE
-        U.tester_email = sysp.user
-    }' />
+            value='{
+        SELECT
+            U.role
+        FROM
+            userRole U
+        WHERE
+            U.tester_email = sysp.user
+            AND U.role IN ("Admin")
+        LIMIT 1
+        }' />
     <let id="eventsAll" shape="table" value='{loadNewerFromServer:SELECT h.id, h.categoryId, h.dateFrom, h.dateTo, h.user label from holidays h WHERE CASE
     WHEN stLoggedUserRole == "Admin" THEN true
     WHEN h.user == sysp.user THEN true

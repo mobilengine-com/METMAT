@@ -7,13 +7,13 @@ if (form.adminPanel.saveChange.submitter) {
     for (let row of form.tasks.rows) {
         if (row.edit) {
             Log(row.id)
-            db.testingChecklist.Update({id:row.id},{done:row.editedResult.selectedKey})
+            db.testingChecklist.Update({id:row.id, project: form.user_proj},{done:row.editedResult.selectedKey})
         }
         
      }
 }
 if (form.adminPanel.saveOrder.submitter) {
     for (let row of form.tasks.rows) {
-        db.testingChecklist.Update({id:row.id},{ordernum: int.Parse(row.editedOrder.text)})
+        db.testingChecklist.Update({id:row.id, project: form.user_proj},{ordernum: int.Parse(row.editedOrder.text)})
      }
 }

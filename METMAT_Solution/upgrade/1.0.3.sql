@@ -1,9 +1,6 @@
 -- Update the main version in the testedVersion table to 'S54'
-INSERT INTO testedVersion (version, platformID, mainVersion, mainVersion_test, addedDate)
-SELECT
-    vo.version,
-    vo.platformID,
-    vo.mainVersion,
-    'unset' mainVersion_test,
-    vo.addedDate
-FROM testedVersion_old vo;
+UPDATE tester
+SET selected_project = 'Core';
+
+INSERT INTO versions (project, version, current)
+VALUES ('Core', 'S56', 1);

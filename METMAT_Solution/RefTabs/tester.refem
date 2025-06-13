@@ -2,10 +2,8 @@
 	<Columns>
 		<Column Name="tester_name" Type="Text" />
 		<Column Name="tester_email" Type="Text" />
-		<Column Name="tester_role" Type="Text" />
 		<Column Name="work_type" Type="Text" />
 		<Column Name="tester_active" Type="Text" />
 		<Column Name="participation" Type="Float" />
-		<Column Name="selected_project" Type="Text" />
 	</Columns>
 </Reftab>

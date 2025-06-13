@@ -10,13 +10,17 @@
         <let id='stLoggedUserRole' shape='scalar'
             value='{
         SELECT
-            U.tester_role
+            U.role
         FROM
-            tester U
+            userRole U
         WHERE
-            U.tester_email = sysp.user
+            U.tester_email = sysp.user AND
+            U.project = user_proj
         }' />
-        <let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+        <let id='user_proj' shape='scalar' value='{
+        loadNewerFromServer:SELECT us.active_project 
+        FROM userState us INNER JOIN tester t ON us.tester_name = t.tester_name
+        WHERE t.tester_email = sysp.user}'/>
 
         <let id="tcCount" shape="scalar" value='{loadNewerFromServer:SELECT COUNT(DISTINCT tc.id) FROM test_case tc LEFT JOIN test_case_tag tct ON tc.id = tct.tc_id 
             WHERE tc.project = user_proj

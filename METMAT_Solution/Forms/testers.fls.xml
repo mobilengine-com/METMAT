@@ -1,16 +1,22 @@
 <form id='testers' menuName='Testers' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
     <declarations>
+        <let id='user_proj' shape='scalar' value='{
+        loadNewerFromServer:SELECT us.active_project 
+        FROM userState us INNER JOIN tester t ON us.tester_name = t.tester_name
+        WHERE t.tester_email = sysp.user}'/>
+
         <let id='stLoggedUserRole' shape='scalar' value='{
-            SELECT
-                U.tester_role
-            FROM
-                tester U
-            WHERE
-                U.tester_email = sysp.user
-            }'/>
+        SELECT
+            U.role
+        FROM
+            userRole U
+        WHERE
+            U.tester_email = sysp.user AND
+            U.project = user_proj
+        }' />
     </declarations>
     <chapter title='Testers'>
-        <table id='tester_table' record='r' recordset='{select t.tester_name, t.tester_email, t.tester_role, t.work_type, t.tester_active, t.participation from tester t}'>
+        <table id='tester_table' record='r' recordset='{select t.tester_name, t.tester_email, t.work_type, t.tester_active, t.participation from tester t}'>
             <header>
                 <row>
                     <cell>
@@ -60,17 +66,52 @@
                     </if>
                 </cell>
                 <cell>
-                    <if cond='{stLoggedUserRole == "Admin"}'>
-                        <dropdown id='drRole' 
-                        keyMap="{v}" 
-                        textMap="{v}"
-                        selectedKey="{r.tester_role}"
-                        choices='{["Tester", "Admin"]}'>
-                        </dropdown>
-                    </if>
-                    <if cond='{not (stLoggedUserRole == "Admin")}'>
-                        <textview text="{r.tester_role}"/>
-                    </if>
+                    <popup title="Role" openMode="dialog">
+                        <backbutton text="X"></backbutton>
+                        <table id="role_table" record="tr" recordset='{SELECT ur.role, ur.project, 0 new FROM userRole ur WHERE ur.tester_email = r.tester_email}'>
+                            <header>
+                                <row>
+                                    <cell><textview text="Role"/></cell>
+                                    <cell><textview text="Project"/></cell>
+                                </row>
+                            </header>
+                            <row>
+                                <cell>
+                                    <if cond='{stLoggedUserRole == "Admin"}'>
+                                        <dropdown id='drRole' 
+                                        keyMap="{v}" 
+                                        textMap="{v}"
+                                        selectedKey="{tr.role}"
+                                        choices='{["Tester", "Admin"]}'>
+                                        </dropdown>
+                                    </if>
+                                    <if cond='{not (stLoggedUserRole == "Admin")}'>
+                                        <textview text="{tr.role}"/>
+                                    </if>
+                                </cell>
+                                <cell>
+                                    <if cond="{tr.new = 1}">
+                                        <dropdown id='newProj' 
+                                        keyMap="{project}" 
+                                        textMap="{project}"
+                                        choices='{SELECT v.project FROM versions v GROUP BY v.project}'>
+                                        </dropdown>
+                                    </if>
+                                    <if cond="{not (tr.new = 1)}">
+                                        <textview id="projName" text="{tr.project}"/>
+                                    </if>
+                                </cell>
+                            </row>
+                        </table>
+                        <hbox>
+                            <if cond='{stLoggedUserRole == "Admin"}'>
+                                <addbutton records='{SELECT "Tester" role, "" project, 1 new}' table='role_table' text='Add new project role'></addbutton>
+                                <submitbutton closeForm="{false}" id="btnSaveRoles" text="Save" ></submitbutton>
+                            </if>
+                        </hbox>
+                        
+                    </popup>
+
                 </cell>
                 <cell>
                     <if cond='{stLoggedUserRole == "Admin"}'>
@@ -123,7 +164,7 @@
             </row>
         </table>
         <if cond='{stLoggedUserRole == "Admin"}'>
-            <addbutton records='{select "" tester_name, "" tester_email, "" tester_role, "Testing" work_type, "Inactive" tester_active, 1 participation}' table='tester_table' text='Add tester'></addbutton>
+            <addbutton records='{select "" tester_name, "" tester_email, "Testing" work_type, "Inactive" tester_active, 1 participation}' table='tester_table' text='Add tester'></addbutton>
         </if>
     </chapter>
 </form>

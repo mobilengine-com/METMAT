@@ -1,7 +1,10 @@
 <form id='badtestcaselist' menuName='Bad test cases' platforms="web" xmlns="http://schemas.mobilengine.com/fls/v2">
 
 	<declarations>
-		<let id='user_proj' shape='scalar' value='{loadNewerFromServer:SELECT t.selected_project FROM tester t WHERE t.tester_email = sysp.user}' />
+		<let id='user_proj' shape='scalar' value='{
+        loadNewerFromServer:SELECT us.active_project 
+        FROM userState us INNER JOIN tester t ON us.tester_name = t.tester_name
+        WHERE t.tester_email = sysp.user}'/>
 		<let id='currentVersion' shape='scalar' value='{SELECT v.version FROM versions v WHERE v.current = 1 AND v.project = user_proj}' />
 	</declarations>	
 

@@ -1,18 +1,9 @@
-<package xmlns="http://schemas.mobilengine.com/package/v1" name="METMAT" displayName="METMAT" version="1.0.10" mobilengineVersion="55" >
+<package xmlns="http://schemas.mobilengine.com/package/v1" name="METMAT" displayName="METMAT" version="1.0.11" mobilengineVersion="55" >
     <upgrade>
-            <version name="1.0.1" >
-                <sql name="1.0.1" >
-                    <table name="versions" />
-                </sql>
-            </version>
-            <version name="1.0.2" >
-                <sql name="1.0.2" >
-                    <table name="testedVersion" />
-                </sql>
-            </version>
-            <version name="1.0.3" >
+        <version name="1.0.3" >
                 <sql name="1.0.3" >
-                    <table name="testedVersion" />
+                    <table name="tester" />
+                    <table name="versions" />
                 </sql>
             </version>
             <version name="1.0.4" >
@@ -52,6 +43,13 @@
             <version name="1.0.10" >
                 <sql name="1.0.10" >
                     <table name="testingChecklist" />
+                </sql>
+            </version>
+            <version name="1.0.11" >
+                <sql name="1.0.11" >
+                    <table name="tester"/>
+                    <table name="userState" />
+                    <table name="userRole" />
                 </sql>
             </version>
     </upgrade>

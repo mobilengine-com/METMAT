@@ -1,0 +1,6 @@
+<Reftab Name="userState" Push="true" xmlns="http://schemas.mobilengine.com/reftab/v1" >
+	<Columns>
+		<Column Name="tester_name" Type="Text" PrimaryKey="true" NotNull="true" />
+		<Column Name="active_project" Type="Text" PrimaryKey="true" NotNull="true"/>
+	</Columns>
+</Reftab>

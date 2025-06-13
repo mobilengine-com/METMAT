@@ -6,6 +6,7 @@
 //# using reftab 'test_to_be_write_category';
 //# using reftab 'test_to_be_write_done';
 //# using reftab 'calculatedResults';
+//# using reftab 'userState';
 
 
 import { assertNotNull, parseToFloat  } from "./lib";
@@ -48,7 +49,11 @@ function calculateFinish(req_days:number, holidays:number, currentDate:dtl, acum
 }
 for (let element of form.changeppop.projectTable.rows) {
     if (element.changeProjectSubmit.submitter) {
-        db.tester.Update({tester_email: form.info.user.name}, {selected_project: element.project.text})
+        let userName = db.tester.ReadFields({tester_email: form.info.user.name},["tester_name"])[0].tester_name;
+        Log("userName: "+userName)
+        Log(assertNotNull(userName))
+        Log(db.userState)
+        db.userState.Update({tester_name: assertNotNull(userName)},{active_project: element.project.text})
     }
 }
 
@@ -62,9 +67,9 @@ if (form.recRun.submitter) {
     });
     
     Log("avgTime "+ avgRunTime)
-    let done_task_sum_count = db.task.Read({result:["success", "bad test case", "failed"]}).Count()
+    let done_task_sum_count = db.task.Read({result:["success", "bad test case", "failed"], project: form.user_proj, assigned_version: form.currentVersion}).Count()
     Log("done_task_sum_count "+ done_task_sum_count)
-    let remaining_task_count = db.task.Read({result: "not yet started"}).Count()
+    let remaining_task_count = db.task.Read({result: "not yet started", project: form.user_proj, assigned_version: form.currentVersion}).Count()
     Log("remaining_task_count "+ remaining_task_count)
     
     let requiredWorkingHours = 0;
@@ -83,15 +88,17 @@ if (form.recRun.submitter) {
     let finish_date = calculateFinish(round_days, 0, form.info.dtlSubmit, 0)
     Log("finish_date "+finish_date)
 
-    if (db.calculatedResults.Read({Type: "Run"}).Count() == 1) {
-        db.calculatedResults.Update({Type: "Run"},{
+    if (db.calculatedResults.Read({Type: "Run", project: form.user_proj, version: form.currentVersion}).Count() == 1) {
+        db.calculatedResults.Update({Type: "Run", project: form.user_proj, version: form.currentVersion},{
             participate: sum_participate,
             totalCount: done_task_sum_count+remaining_task_count,
             doneCount: done_task_sum_count,
             leftCount: remaining_task_count,
             requiredHours: requiredWorkingHours,
             requiredDays: round_days,
-            finishDate: finish_date.DtlToDtdb()
+            finishDate: finish_date.DtlToDtdb(),
+            project: form.user_proj,
+            version: form.currentVersion
         })
     }else{
         db.calculatedResults.Insert({Type: "Run",
@@ -101,7 +108,10 @@ if (form.recRun.submitter) {
             leftCount: remaining_task_count,
             requiredHours: requiredWorkingHours,
             requiredDays: round_days,
-            finishDate: finish_date.DtlToDtdb()})
+            finishDate: finish_date.DtlToDtdb(),
+            project: form.user_proj,
+            version: form.currentVersion
+        })
     }
 }   
 
@@ -122,7 +132,7 @@ if (form.recWrite.submitter) {
     })
     
     Log("totalTestToWriteCount "+totalTestToWriteCount)
-    let totalTestWriteDone = db.test_to_be_write_done.Read({status: "Done"}).Count()
+    let totalTestWriteDone = db.test_to_be_write_done.Read({status: "Done", project: form.user_proj, version: form.currentVersion}).Count()
     Log("totalTestWriteDone "+totalTestWriteDone)
     let requiredWorkingHoursToWrite = 0
     if (totalTestToWriteCount != 0) {
@@ -141,8 +151,8 @@ if (form.recWrite.submitter) {
     let finish_date_plus_extra_time = calculateFinish(round_days+12, 0, form.info.dtlSubmit, 0)
     Log("finish_date_plus_extra_time "+finish_date_plus_extra_time)
 
-    if (db.calculatedResults.Read({Type: "Write"}).Count() == 1) {
-        db.calculatedResults.Update({Type: "Write"},{
+    if (db.calculatedResults.Read({Type: "Write", project: form.user_proj, version: form.currentVersion}).Count() == 1) {
+        db.calculatedResults.Update({Type: "Write", project: form.user_proj, version: form.currentVersion},{
             participate: sum_participate,
             totalCount: totalTestToWriteCount,
             doneCount: totalTestWriteDone,
@@ -161,16 +171,18 @@ if (form.recWrite.submitter) {
             requiredHours: requiredWorkingHoursToWrite,
             requiredDays: round_days,
             finishDate: finish_date.DtlToDtdb(),
-            finishDateExtended: finish_date_plus_extra_time.DtlToDtdb()
+            finishDateExtended: finish_date_plus_extra_time.DtlToDtdb(),
+            project: form.user_proj,
+            version: form.currentVersion
         })
     }
     
 }
 if (form.savePlannedWrite.submitter) {
-    let currnet = db.calculatedResults.Read({Type: "Write"})
-    db.calculatedResults.Update({Type: "Write"},{plannedFinish: currnet[0].finishDateExtended})
+    let currnet = db.calculatedResults.Read({Type: "Write", project: form.user_proj, version: form.currentVersion})
+    db.calculatedResults.Update({Type: "Write", project: form.user_proj, version: form.currentVersion},{plannedFinish: currnet[0].finishDateExtended})
 }
 if (form.savePlannedRun.submitter) {
-    let currnet = db.calculatedResults.Read({Type: "Run"})
-    db.calculatedResults.Update({Type: "Run"},{plannedFinish: currnet[0].finishDate})
+    let currnet = db.calculatedResults.Read({Type: "Run", project: form.user_proj, version: form.currentVersion})
+    db.calculatedResults.Update({Type: "Run", project: form.user_proj, version: form.currentVersion},{plannedFinish: currnet[0].finishDate})
 }

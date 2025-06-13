@@ -10,5 +10,7 @@
 		<Column Name="creator" Type="Text" />
 		<Column Name="note" Type="Text" />
 		<Column Name="PreCond" Type="Text" InitialValue="" />
+		<Column Name="project" Type="Text" InitialValue="" />
+		<Column Name="version" Type="Text" InitialValue="" />
 	</Columns>
 </Reftab>

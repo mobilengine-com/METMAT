@@ -14,5 +14,5 @@ SELECT
     tko.time_need,
     tko.saved,
     'Core' project,
-    'S55' assigned_version
+    'S56' assigned_version
 FROM task_old tko;
