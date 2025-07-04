@@ -58,11 +58,16 @@ for (let element of form.changeppop.projectTable.rows) {
 }
 
 if (form.recRun.submitter) {
-    let testerForTesting = db.tester.Read({work_type: "Testing", tester_active: "Active"})
+    let leftCountFromTestWriteResult = db.calculatedResults.ReadFields({Type: "Write", project: form.user_proj, version: form.currentVersion},["leftCount"])[0].leftCount as number;
+    let dbTesterForTesting = db.tester.ReadFields({work_type: ["Testing", "Testing/Writing"], tester_active: "Active"},["work_type", "tester_name", "participation"]) as {work_type: string, tester_name: string, participation: number}[];
+    let onCurrentProjTesters = db.userState.ReadFields({active_project: form.user_proj, tester_name: dbTesterForTesting.map(a => a.tester_name)},["tester_name"]) as {tester_name: string}[];
     let sum_participate = 0
-    testerForTesting.forEach(a => {
-        if (a && a.participation != null) {
-            sum_participate += a.participation;
+    dbTesterForTesting.forEach(a => {
+        assertNotNull(a.participation);
+        if (onCurrentProjTesters.some(b => b.tester_name === a.tester_name)) {
+            // only add participation of testers that are on the current project
+            let rParticipation = a.work_type === "Testing/Writing" && leftCountFromTestWriteResult > 3 ? a.participation * 0.5 : a.participation as number;
+            sum_participate += rParticipation;
         }
     });
     
@@ -116,12 +121,17 @@ if (form.recRun.submitter) {
 }   
 
 if (form.recWrite.submitter) {
-    let dbTesterForTesting = db.tester.Read({work_type: "Test writing", tester_active: "Active"})
+    let leftCountFromTestRunResult = db.calculatedResults.ReadFields({Type: "Run", project: form.user_proj, version: form.currentVersion},["leftCount"])[0].leftCount as number;
+    let dbTesterForTesting = db.tester.ReadFields({work_type: ["Test writing", "Testing/Writing"], tester_active: "Active"},["work_type", "tester_name", "participation"]) as {work_type: string, tester_name: string, participation: number}[];
+    let onCurrentProjTesters = db.userState.ReadFields({active_project: form.user_proj, tester_name: dbTesterForTesting.map(a => a.tester_name)},["tester_name"]) as {tester_name: string}[];
     let sum_participate = 0
     dbTesterForTesting.forEach(a => {
         assertNotNull(a.participation);
-        sum_participate += a.participation as number
-        return sum_participate
+        if (onCurrentProjTesters.some(b => b.tester_name === a.tester_name)) {
+            // only add participation of testers that are on the current project
+            let rParticipation = a.work_type === "Testing/Writing" && leftCountFromTestRunResult > 3 ? a.participation * 0.5 : a.participation as number;
+            sum_participate += rParticipation;
+        }
     });
     Log("sum_participate: "+sum_participate)
     let totalTestToWriteCount = 0

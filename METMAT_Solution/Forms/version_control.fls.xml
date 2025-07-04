@@ -7,7 +7,7 @@
         WHERE t.tester_email = sysp.user}'/>
         
     </declarations>
-        <popup id="addNewProj" title="Add new project or version" openMode="dialog">
+        <popup id="addNewProj" title="Add new project" openMode="dialog">
             <backbutton text="Close"/>
             <vbox>
                 <textview text="Add new project" />
@@ -21,7 +21,7 @@
                 
             </vbox>
         </popup>
-        <popup id="addNewVer" title="Add new project or version" openMode="dialog">
+        <popup id="addNewVer" title="Add new version" openMode="dialog">
             <backbutton text="Close"/>
             <vbox>
                 <textview text="Select project for new version" />

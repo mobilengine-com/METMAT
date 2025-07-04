@@ -1,4 +1,5 @@
 //# server typescript program testcase_monitor for form testcase_monitor
+//# using reftab 'task';
 //# using reftab 'test_case';
 //# using reftab 'test_case_tag';
 
@@ -41,6 +42,7 @@
                 Log("Delete "+row.tcId.text)
                 db.test_case_tag.DeleteMany({tc_id:row.tcId.text, platform: row.tcPlatform.text})
                 db.test_case.Delete({id:row.tcId.text, platform: row.tcPlatform.text})
+                db.task.DeleteMany({task_id: row.tcId.text, project: form.user_proj})
             }else if (row.edited) {
                 Log("Edited "+row.tcId.text)
                 db.test_case.Update({id:row.tcId.text},{

@@ -56,7 +56,10 @@
                 creator:form.info.user.name,
                 location:row.add_tcs_lc.text.Trim(" "),
                 note:row.add_tcs_note.text.Trim(" "),
-                platform:row.add_tcs_platform.selectedKey
+                platform:row.add_tcs_platform.selectedKey,
+                project: form.user_proj,
+                version: form.currentVersion,
+                
 
             })
             for(var newTag of row.add_tcs_tags.selectedTags){

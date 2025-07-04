@@ -61,6 +61,7 @@
 			</table>
 		</popup>
 	</hbox>
+	<textview style="{styles.projectDisplay}" text='{"Current selected main version is: "||currentVersion}'/>
 	<chapter title='Test run finish date'>
 	<declarations>
 		<let id="result" shape="table" value='{loadNewerFromServer:SELECT cr.plannedFinish, cr.doneCount, cr.totalCount, cr.participate, cr.leftCount, cr.requiredHours, cr.requiredDays, cr.finishDate 

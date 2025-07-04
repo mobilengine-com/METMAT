@@ -19,8 +19,8 @@
 				db.test_case.Update({id: act_task_id,platform: act_tc_platform},{lastAssigned: dtl.Now().DtlToDtdb()});
 				db.task.Insert({guid: guid.Generate().ToStringN(), task_id: act_task_id, env_name: act_env_name, result: "not yet started", task_type: "t",platformID: act_tc_platform, time_need: act_tc_timeneed, saved: 0, assigned_version: form.currentVersion, project: form.user_proj});
 				db.tc_list.InsertOrUpdate({tc_id: act_task_id},
-				{tc_id: act_task_id, tc_prio: "1", tc_impreg: "imp", tc_desc: tcsTableRow.tcsdesc.text});
-				
+				{tc_id: act_task_id, tc_prio: "1", tc_impreg: "imp", tc_desc: tcsTableRow.tcsdesc.text, mainVersion: form.currentVersion, project: form.user_proj});
+
 			}		
 		}
 	}

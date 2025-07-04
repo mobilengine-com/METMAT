@@ -119,7 +119,7 @@
                         keyMap="{v}" 
                         textMap="{v}"
                         selectedKey="{r.work_type}"
-                        choices='{["Test writing", "Testing", "Spectator"]}'>
+                        choices='{["Test writing", "Testing", "Testing/Writing", "Spectator"]}'>
                         </dropdown>
                     </if>
                     <if cond='{not (stLoggedUserRole == "Admin")}'>
