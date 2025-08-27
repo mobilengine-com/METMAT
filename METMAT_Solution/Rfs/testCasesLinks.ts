@@ -25,9 +25,6 @@
 		}
 	}
 
-	if(form.wipe_assignement.submitter) {
-		db.task.DeleteMany({})
-	}
 
 	if(form.save_tags.submitter) {
 		//var act_env_name = form.selected_tester.CHOICE!!!!!!!!

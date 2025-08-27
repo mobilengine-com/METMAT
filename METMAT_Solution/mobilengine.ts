@@ -2269,28 +2269,6 @@ declare global {
 	}
 }
 declare global {
-/** column type for reference table environmentValues */
-	type reftab_columns_environmentValues = 'name'|'value'|'project'
-/** row type for reference table environmentValues */
-	interface reftab_row_environmentValues {
-/** column name: Text primary key, not null */
-		"name": string
-/** column value: Text  */
-		"value": string | null
-/** column project: Text primary key, not null */
-		"project": string
-	}
-/** filter type for reference table environmentValues */
-	interface reftab_filter_environmentValues {
-		"name"?: string | Array<string> | null | __rtab_filter<string>
-		"value"?: string | Array<string> | null | __rtab_filter<string>
-		"project"?: string | Array<string> | null | __rtab_filter<string>
-		 _limit?: number
-		 _offset?: number
-		 _orderBy?: Array<reftab_columns_environmentValues>
-	}
-}
-declare global {
 /** column type for reference table environment */
 	type reftab_columns_environment = 'env_name'|'tester_email'|'tester_name'|'env_detail'|'default_workingday'
 /** row type for reference table environment */
@@ -2319,25 +2297,25 @@ declare global {
 	}
 }
 declare global {
-/** column type for reference table jira_list */
-	type reftab_columns_jira_list = 'Key'|'Summary'|'Reporter'
-/** row type for reference table jira_list */
-	interface reftab_row_jira_list {
-/** column Key: Text  */
-		"Key": string | null
-/** column Summary: Text  */
-		"Summary": string | null
-/** column Reporter: Text  */
-		"Reporter": string | null
+/** column type for reference table environmentValues */
+	type reftab_columns_environmentValues = 'name'|'value'|'project'
+/** row type for reference table environmentValues */
+	interface reftab_row_environmentValues {
+/** column name: Text primary key, not null */
+		"name": string
+/** column value: Text  */
+		"value": string | null
+/** column project: Text primary key, not null */
+		"project": string
 	}
-/** filter type for reference table jira_list */
-	interface reftab_filter_jira_list {
-		"Key"?: string | Array<string> | null | __rtab_filter<string>
-		"Summary"?: string | Array<string> | null | __rtab_filter<string>
-		"Reporter"?: string | Array<string> | null | __rtab_filter<string>
+/** filter type for reference table environmentValues */
+	interface reftab_filter_environmentValues {
+		"name"?: string | Array<string> | null | __rtab_filter<string>
+		"value"?: string | Array<string> | null | __rtab_filter<string>
+		"project"?: string | Array<string> | null | __rtab_filter<string>
 		 _limit?: number
 		 _offset?: number
-		 _orderBy?: Array<reftab_columns_jira_list>
+		 _orderBy?: Array<reftab_columns_environmentValues>
 	}
 }
 declare global {
@@ -2366,6 +2344,28 @@ declare global {
 		 _limit?: number
 		 _offset?: number
 		 _orderBy?: Array<reftab_columns_holidays>
+	}
+}
+declare global {
+/** column type for reference table jira_list */
+	type reftab_columns_jira_list = 'Key'|'Summary'|'Reporter'
+/** row type for reference table jira_list */
+	interface reftab_row_jira_list {
+/** column Key: Text  */
+		"Key": string | null
+/** column Summary: Text  */
+		"Summary": string | null
+/** column Reporter: Text  */
+		"Reporter": string | null
+	}
+/** filter type for reference table jira_list */
+	interface reftab_filter_jira_list {
+		"Key"?: string | Array<string> | null | __rtab_filter<string>
+		"Summary"?: string | Array<string> | null | __rtab_filter<string>
+		"Reporter"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_jira_list>
 	}
 }
 declare global {
@@ -2530,6 +2530,43 @@ declare global {
 	}
 }
 declare global {
+/** column type for reference table tc_jira_list */
+	type reftab_columns_tc_jira_list = 'jira_id'|'task_id'|'env_name'|'platform'|'tested_version'|'jira_state'|'mainVersion'|'project'
+/** row type for reference table tc_jira_list */
+	interface reftab_row_tc_jira_list {
+/** column jira_id: Text  */
+		"jira_id": string | null
+/** column task_id: Text  */
+		"task_id": string | null
+/** column env_name: Text  */
+		"env_name": string | null
+/** column platform: Text  */
+		"platform": string | null
+/** column tested_version: Text  */
+		"tested_version": string | null
+/** column jira_state: Text  */
+		"jira_state": string | null
+/** column mainVersion: Text  */
+		"mainVersion": string | null
+/** column project: Text  */
+		"project": string | null
+	}
+/** filter type for reference table tc_jira_list */
+	interface reftab_filter_tc_jira_list {
+		"jira_id"?: string | Array<string> | null | __rtab_filter<string>
+		"task_id"?: string | Array<string> | null | __rtab_filter<string>
+		"env_name"?: string | Array<string> | null | __rtab_filter<string>
+		"platform"?: string | Array<string> | null | __rtab_filter<string>
+		"tested_version"?: string | Array<string> | null | __rtab_filter<string>
+		"jira_state"?: string | Array<string> | null | __rtab_filter<string>
+		"mainVersion"?: string | Array<string> | null | __rtab_filter<string>
+		"project"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_tc_jira_list>
+	}
+}
+declare global {
 /** column type for reference table tc_list */
 	type reftab_columns_tc_list = 'tc_id'|'tc_prio'|'tc_impreg'|'tc_desc'|'last_status'|'last_sent_in'|'note'|'mainVersion'|'project'
 /** row type for reference table tc_list */
@@ -2570,96 +2607,6 @@ declare global {
 	}
 }
 declare global {
-/** column type for reference table testedVersion */
-	type reftab_columns_testedVersion = 'version'|'platformID'|'mainVersion'|'addedDate'
-/** row type for reference table testedVersion */
-	interface reftab_row_testedVersion {
-/** column version: Text primary key, not null */
-		"version": string
-/** column platformID: Text not null */
-		"platformID": string
-/** column mainVersion: Text primary key, not null */
-		"mainVersion": string
-/** column addedDate: Date  */
-		"addedDate": dtdb | null
-	}
-/** filter type for reference table testedVersion */
-	interface reftab_filter_testedVersion {
-		"version"?: string | Array<string> | null | __rtab_filter<string>
-		"platformID"?: string | Array<string> | null | __rtab_filter<string>
-		"mainVersion"?: string | Array<string> | null | __rtab_filter<string>
-		"addedDate"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
-		 _limit?: number
-		 _offset?: number
-		 _orderBy?: Array<reftab_columns_testedVersion>
-	}
-}
-declare global {
-/** column type for reference table tc_jira_list */
-	type reftab_columns_tc_jira_list = 'jira_id'|'task_id'|'env_name'|'platform'|'tested_version'|'jira_state'|'mainVersion'|'project'
-/** row type for reference table tc_jira_list */
-	interface reftab_row_tc_jira_list {
-/** column jira_id: Text  */
-		"jira_id": string | null
-/** column task_id: Text  */
-		"task_id": string | null
-/** column env_name: Text  */
-		"env_name": string | null
-/** column platform: Text  */
-		"platform": string | null
-/** column tested_version: Text  */
-		"tested_version": string | null
-/** column jira_state: Text  */
-		"jira_state": string | null
-/** column mainVersion: Text  */
-		"mainVersion": string | null
-/** column project: Text  */
-		"project": string | null
-	}
-/** filter type for reference table tc_jira_list */
-	interface reftab_filter_tc_jira_list {
-		"jira_id"?: string | Array<string> | null | __rtab_filter<string>
-		"task_id"?: string | Array<string> | null | __rtab_filter<string>
-		"env_name"?: string | Array<string> | null | __rtab_filter<string>
-		"platform"?: string | Array<string> | null | __rtab_filter<string>
-		"tested_version"?: string | Array<string> | null | __rtab_filter<string>
-		"jira_state"?: string | Array<string> | null | __rtab_filter<string>
-		"mainVersion"?: string | Array<string> | null | __rtab_filter<string>
-		"project"?: string | Array<string> | null | __rtab_filter<string>
-		 _limit?: number
-		 _offset?: number
-		 _orderBy?: Array<reftab_columns_tc_jira_list>
-	}
-}
-declare global {
-/** column type for reference table tester */
-	type reftab_columns_tester = 'tester_name'|'tester_email'|'work_type'|'tester_active'|'participation'
-/** row type for reference table tester */
-	interface reftab_row_tester {
-/** column tester_name: Text  */
-		"tester_name": string | null
-/** column tester_email: Text  */
-		"tester_email": string | null
-/** column work_type: Text  */
-		"work_type": string | null
-/** column tester_active: Text  */
-		"tester_active": string | null
-/** column participation: Float  */
-		"participation": number | null
-	}
-/** filter type for reference table tester */
-	interface reftab_filter_tester {
-		"tester_name"?: string | Array<string> | null | __rtab_filter<string>
-		"tester_email"?: string | Array<string> | null | __rtab_filter<string>
-		"work_type"?: string | Array<string> | null | __rtab_filter<string>
-		"tester_active"?: string | Array<string> | null | __rtab_filter<string>
-		"participation"?: number | Array<number> | null | __rtab_filter<number>
-		 _limit?: number
-		 _offset?: number
-		 _orderBy?: Array<reftab_columns_tester>
-	}
-}
-declare global {
 /** column type for reference table tc_tag */
 	type reftab_columns_tc_tag = 'tag'
 /** row type for reference table tc_tag */
@@ -2673,6 +2620,46 @@ declare global {
 		 _limit?: number
 		 _offset?: number
 		 _orderBy?: Array<reftab_columns_tc_tag>
+	}
+}
+declare global {
+/** column type for reference table test_case */
+	type reftab_columns_test_case = 'id'|'tc_description'|'platform'|'link'|'time'|'addedDate'|'lastAssigned'|'PreCond'|'project'
+/** row type for reference table test_case */
+	interface reftab_row_test_case {
+/** column id: Text primary key, not null */
+		"id": string
+/** column tc_description: Text  */
+		"tc_description": string | null
+/** column platform: Text primary key, not null */
+		"platform": string
+/** column link: Text  */
+		"link": string | null
+/** column time: Float  */
+		"time": number | null
+/** column addedDate: Date  */
+		"addedDate": dtdb | null
+/** column lastAssigned: Date  */
+		"lastAssigned": dtdb | null
+/** column PreCond: Text  */
+		"PreCond": string | null
+/** column project: Text not null */
+		"project": string
+	}
+/** filter type for reference table test_case */
+	interface reftab_filter_test_case {
+		"id"?: string | Array<string> | null | __rtab_filter<string>
+		"tc_description"?: string | Array<string> | null | __rtab_filter<string>
+		"platform"?: string | Array<string> | null | __rtab_filter<string>
+		"link"?: string | Array<string> | null | __rtab_filter<string>
+		"time"?: number | Array<number> | null | __rtab_filter<number>
+		"addedDate"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"lastAssigned"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		"PreCond"?: string | Array<string> | null | __rtab_filter<string>
+		"project"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_test_case>
 	}
 }
 declare global {
@@ -2698,31 +2685,43 @@ declare global {
 	}
 }
 declare global {
-/** column type for reference table testingChecklist */
-	type reftab_columns_testingChecklist = 'id'|'done'|'task'|'ordernum'|'project'
-/** row type for reference table testingChecklist */
-	interface reftab_row_testingChecklist {
-/** column id: Text primary key, not null */
-		"id": string
-/** column done: Integer  */
-		"done": number | null
-/** column task: Text  */
-		"task": string | null
-/** column ordernum: Integer  */
-		"ordernum": number | null
-/** column project: Text primary key, not null */
-		"project": string
+/** column type for reference table test_to_be_write_category */
+	type reftab_columns_test_to_be_write_category = 'category'|'planned_count'|'finished'|'closedByTesters'|'testerWhoClosed'|'result_count'|'active'|'mainVersion'|'project'
+/** row type for reference table test_to_be_write_category */
+	interface reftab_row_test_to_be_write_category {
+/** column category: Text  */
+		"category": string | null
+/** column planned_count: Integer  */
+		"planned_count": number | null
+/** column finished: Integer  */
+		"finished": number | null
+/** column closedByTesters: Integer  */
+		"closedByTesters": number | null
+/** column testerWhoClosed: Text  */
+		"testerWhoClosed": string | null
+/** column result_count: Integer  */
+		"result_count": number | null
+/** column active: Integer  */
+		"active": number | null
+/** column mainVersion: Text  */
+		"mainVersion": string | null
+/** column project: Text  */
+		"project": string | null
 	}
-/** filter type for reference table testingChecklist */
-	interface reftab_filter_testingChecklist {
-		"id"?: string | Array<string> | null | __rtab_filter<string>
-		"done"?: number | Array<number> | null | __rtab_filter<number>
-		"task"?: string | Array<string> | null | __rtab_filter<string>
-		"ordernum"?: number | Array<number> | null | __rtab_filter<number>
+/** filter type for reference table test_to_be_write_category */
+	interface reftab_filter_test_to_be_write_category {
+		"category"?: string | Array<string> | null | __rtab_filter<string>
+		"planned_count"?: number | Array<number> | null | __rtab_filter<number>
+		"finished"?: number | Array<number> | null | __rtab_filter<number>
+		"closedByTesters"?: number | Array<number> | null | __rtab_filter<number>
+		"testerWhoClosed"?: string | Array<string> | null | __rtab_filter<string>
+		"result_count"?: number | Array<number> | null | __rtab_filter<number>
+		"active"?: number | Array<number> | null | __rtab_filter<number>
+		"mainVersion"?: string | Array<string> | null | __rtab_filter<string>
 		"project"?: string | Array<string> | null | __rtab_filter<string>
 		 _limit?: number
 		 _offset?: number
-		 _orderBy?: Array<reftab_columns_testingChecklist>
+		 _orderBy?: Array<reftab_columns_test_to_be_write_category>
 	}
 }
 declare global {
@@ -2794,86 +2793,6 @@ declare global {
 	}
 }
 declare global {
-/** column type for reference table test_to_be_write_category */
-	type reftab_columns_test_to_be_write_category = 'category'|'planned_count'|'finished'|'closedByTesters'|'testerWhoClosed'|'result_count'|'active'|'mainVersion'|'project'
-/** row type for reference table test_to_be_write_category */
-	interface reftab_row_test_to_be_write_category {
-/** column category: Text  */
-		"category": string | null
-/** column planned_count: Integer  */
-		"planned_count": number | null
-/** column finished: Integer  */
-		"finished": number | null
-/** column closedByTesters: Integer  */
-		"closedByTesters": number | null
-/** column testerWhoClosed: Text  */
-		"testerWhoClosed": string | null
-/** column result_count: Integer  */
-		"result_count": number | null
-/** column active: Integer  */
-		"active": number | null
-/** column mainVersion: Text  */
-		"mainVersion": string | null
-/** column project: Text  */
-		"project": string | null
-	}
-/** filter type for reference table test_to_be_write_category */
-	interface reftab_filter_test_to_be_write_category {
-		"category"?: string | Array<string> | null | __rtab_filter<string>
-		"planned_count"?: number | Array<number> | null | __rtab_filter<number>
-		"finished"?: number | Array<number> | null | __rtab_filter<number>
-		"closedByTesters"?: number | Array<number> | null | __rtab_filter<number>
-		"testerWhoClosed"?: string | Array<string> | null | __rtab_filter<string>
-		"result_count"?: number | Array<number> | null | __rtab_filter<number>
-		"active"?: number | Array<number> | null | __rtab_filter<number>
-		"mainVersion"?: string | Array<string> | null | __rtab_filter<string>
-		"project"?: string | Array<string> | null | __rtab_filter<string>
-		 _limit?: number
-		 _offset?: number
-		 _orderBy?: Array<reftab_columns_test_to_be_write_category>
-	}
-}
-declare global {
-/** column type for reference table test_case */
-	type reftab_columns_test_case = 'id'|'tc_description'|'platform'|'link'|'time'|'addedDate'|'lastAssigned'|'PreCond'|'project'
-/** row type for reference table test_case */
-	interface reftab_row_test_case {
-/** column id: Text primary key, not null */
-		"id": string
-/** column tc_description: Text  */
-		"tc_description": string | null
-/** column platform: Text primary key, not null */
-		"platform": string
-/** column link: Text  */
-		"link": string | null
-/** column time: Float  */
-		"time": number | null
-/** column addedDate: Date  */
-		"addedDate": dtdb | null
-/** column lastAssigned: Date  */
-		"lastAssigned": dtdb | null
-/** column PreCond: Text  */
-		"PreCond": string | null
-/** column project: Text not null */
-		"project": string
-	}
-/** filter type for reference table test_case */
-	interface reftab_filter_test_case {
-		"id"?: string | Array<string> | null | __rtab_filter<string>
-		"tc_description"?: string | Array<string> | null | __rtab_filter<string>
-		"platform"?: string | Array<string> | null | __rtab_filter<string>
-		"link"?: string | Array<string> | null | __rtab_filter<string>
-		"time"?: number | Array<number> | null | __rtab_filter<number>
-		"addedDate"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
-		"lastAssigned"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
-		"PreCond"?: string | Array<string> | null | __rtab_filter<string>
-		"project"?: string | Array<string> | null | __rtab_filter<string>
-		 _limit?: number
-		 _offset?: number
-		 _orderBy?: Array<reftab_columns_test_case>
-	}
-}
-declare global {
 /** column type for reference table test_to_be_write_tickets */
 	type reftab_columns_test_to_be_write_tickets = 'id'|'ticket'
 /** row type for reference table test_to_be_write_tickets */
@@ -2893,22 +2812,87 @@ declare global {
 	}
 }
 declare global {
-/** column type for reference table userState */
-	type reftab_columns_userState = 'tester_name'|'active_project'
-/** row type for reference table userState */
-	interface reftab_row_userState {
-/** column tester_name: Text primary key, not null */
-		"tester_name": string
-/** column active_project: Text primary key, not null */
-		"active_project": string
+/** column type for reference table testedVersion */
+	type reftab_columns_testedVersion = 'version'|'platformID'|'mainVersion'|'addedDate'
+/** row type for reference table testedVersion */
+	interface reftab_row_testedVersion {
+/** column version: Text primary key, not null */
+		"version": string
+/** column platformID: Text primary key, not null */
+		"platformID": string
+/** column mainVersion: Text primary key, not null */
+		"mainVersion": string
+/** column addedDate: Date  */
+		"addedDate": dtdb | null
 	}
-/** filter type for reference table userState */
-	interface reftab_filter_userState {
+/** filter type for reference table testedVersion */
+	interface reftab_filter_testedVersion {
+		"version"?: string | Array<string> | null | __rtab_filter<string>
+		"platformID"?: string | Array<string> | null | __rtab_filter<string>
+		"mainVersion"?: string | Array<string> | null | __rtab_filter<string>
+		"addedDate"?: dtdb | Array<dtdb> | null | __rtab_filter<dtdb>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_testedVersion>
+	}
+}
+declare global {
+/** column type for reference table tester */
+	type reftab_columns_tester = 'tester_name'|'tester_email'|'work_type'|'tester_active'|'participation'|'active_project'
+/** row type for reference table tester */
+	interface reftab_row_tester {
+/** column tester_name: Text  */
+		"tester_name": string | null
+/** column tester_email: Text  */
+		"tester_email": string | null
+/** column work_type: Text  */
+		"work_type": string | null
+/** column tester_active: Text  */
+		"tester_active": string | null
+/** column participation: Float  */
+		"participation": number | null
+/** column active_project: Text  */
+		"active_project": string | null
+	}
+/** filter type for reference table tester */
+	interface reftab_filter_tester {
 		"tester_name"?: string | Array<string> | null | __rtab_filter<string>
+		"tester_email"?: string | Array<string> | null | __rtab_filter<string>
+		"work_type"?: string | Array<string> | null | __rtab_filter<string>
+		"tester_active"?: string | Array<string> | null | __rtab_filter<string>
+		"participation"?: number | Array<number> | null | __rtab_filter<number>
 		"active_project"?: string | Array<string> | null | __rtab_filter<string>
 		 _limit?: number
 		 _offset?: number
-		 _orderBy?: Array<reftab_columns_userState>
+		 _orderBy?: Array<reftab_columns_tester>
+	}
+}
+declare global {
+/** column type for reference table testingChecklist */
+	type reftab_columns_testingChecklist = 'id'|'done'|'task'|'ordernum'|'project'
+/** row type for reference table testingChecklist */
+	interface reftab_row_testingChecklist {
+/** column id: Text primary key, not null */
+		"id": string
+/** column done: Integer  */
+		"done": number | null
+/** column task: Text  */
+		"task": string | null
+/** column ordernum: Integer  */
+		"ordernum": number | null
+/** column project: Text primary key, not null */
+		"project": string
+	}
+/** filter type for reference table testingChecklist */
+	interface reftab_filter_testingChecklist {
+		"id"?: string | Array<string> | null | __rtab_filter<string>
+		"done"?: number | Array<number> | null | __rtab_filter<number>
+		"task"?: string | Array<string> | null | __rtab_filter<string>
+		"ordernum"?: number | Array<number> | null | __rtab_filter<number>
+		"project"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_testingChecklist>
 	}
 }
 declare global {
@@ -2934,6 +2918,25 @@ declare global {
 	}
 }
 declare global {
+/** column type for reference table userState */
+	type reftab_columns_userState = 'tester_name'|'active_project'
+/** row type for reference table userState */
+	interface reftab_row_userState {
+/** column tester_name: Text primary key, not null */
+		"tester_name": string
+/** column active_project: Text primary key, not null */
+		"active_project": string
+	}
+/** filter type for reference table userState */
+	interface reftab_filter_userState {
+		"tester_name"?: string | Array<string> | null | __rtab_filter<string>
+		"active_project"?: string | Array<string> | null | __rtab_filter<string>
+		 _limit?: number
+		 _offset?: number
+		 _orderBy?: Array<reftab_columns_userState>
+	}
+}
+declare global {
 /** column type for reference table versions */
 	type reftab_columns_versions = 'project'|'version'|'current'
 /** row type for reference table versions */
@@ -2954,49 +2957,6 @@ declare global {
 		 _offset?: number
 		 _orderBy?: Array<reftab_columns_versions>
 	}
-}
-declare global {
-    interface form_enviromentVariableEdit extends __form_base_type {
-        "envVariableTb": {
-            "rows": Array<{
-                "envName": {
-                    "text": string
-                }
-                "envValue": {
-                    "text": string
-                }
-            }>
-        }
-        "user_proj": string
-        "submissionTitle": string
-        "submitButton": any
-    }
-}
-declare global {
-    interface form_badtestcaselist extends __form_base_type {
-        "badtclist": {
-            "rows": Array<{
-                "task_id": {
-                    "text": string
-                }
-                "result": {
-                    "text": string
-                }
-                "note": {
-                    "text": string
-                }
-                "fixSubmit": {
-                    "submitter": boolean
-                    "closeForm": boolean
-                    "validatorGroup": string
-                }
-            }>
-        }
-        "user_proj": string
-        "currentVersion": string
-        "submissionTitle": string
-        "submitButton": any
-    }
 }
 declare global {
     interface form_dashboard extends __form_base_type {
@@ -3128,6 +3088,49 @@ declare global {
     }
 }
 declare global {
+    interface form_enviromentVariableEdit extends __form_base_type {
+        "envVariableTb": {
+            "rows": Array<{
+                "envName": {
+                    "text": string
+                }
+                "envValue": {
+                    "text": string
+                }
+            }>
+        }
+        "user_proj": string
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_badtestcaselist extends __form_base_type {
+        "badtclist": {
+            "rows": Array<{
+                "task_id": {
+                    "text": string
+                }
+                "result": {
+                    "text": string
+                }
+                "note": {
+                    "text": string
+                }
+                "fixSubmit": {
+                    "submitter": boolean
+                    "closeForm": boolean
+                    "validatorGroup": string
+                }
+            }>
+        }
+        "user_proj": string
+        "currentVersion": string
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
     interface form_holidaysDayOff extends __form_base_type {
         "calPage1": {
             "date": dtl
@@ -3199,6 +3202,110 @@ declare global {
             "dateTo": dtl
             "label": string
         }>
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_manualTestWriter extends __form_base_type {
+        "TcId": {
+            "text": string
+        }
+        "newTcId": {
+            "text": string
+        }
+        "createTcId": {
+            "text": string
+        }
+        "newTcDesc": {
+            "text": string
+        }
+        "newTcPrecond": {
+            "text": string
+        }
+        "newTC": {
+            "rows": Array<{
+                "iStep": {
+                    "submitter": boolean
+                    "closeForm": boolean
+                    "validatorGroup": string
+                }
+                "stepTask": {
+                    "text": string
+                }
+                "newTcPlatform": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "task": {
+                    "text": string
+                }
+                "expect": {
+                    "text": string
+                }
+                "photoUpload": {
+                    "photos": Array<{
+                        "photoId": string
+                        "datetime": dtl
+                        "locationLatitude": number
+                        "locationLongitude": number
+                        "locationAltitude": number
+                        "locationAccuracy": number
+                        "locationDtuAcquired": dtl
+                        "fileSize": number
+                        "height": number
+                        "width": number
+                        "type": string
+                        "duration": number
+                    }>
+                }
+                "hasPhoto": number
+                "stepCount": number
+            }>
+        }
+        "editTC": {
+            "rows": Array<{
+                "iStep": {
+                    "submitter": boolean
+                    "closeForm": boolean
+                    "validatorGroup": string
+                }
+                "stepTask": {
+                    "text": string
+                }
+                "newTcPlatform": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "task": {
+                    "text": string
+                }
+                "expect": {
+                    "text": string
+                }
+                "photoUpload": {
+                    "photos": Array<{
+                        "photoId": string
+                        "mediaId": string
+                    }>
+                }
+                "hasPhoto": number
+                "mediaIdPhoto": string
+                "stepCount": number
+            }>
+        }
+        "currentStep": number
+        "edit": number
+        "deletedStep": number
+        "stfromForm": string
+        "originalTestId": string
+        "user_proj": string
         "submissionTitle": string
         "submitButton": any
     }
@@ -3336,110 +3443,6 @@ declare global {
             "validatorGroup": string
         }
         "letpage": number
-        "submissionTitle": string
-        "submitButton": any
-    }
-}
-declare global {
-    interface form_manualTestWriter extends __form_base_type {
-        "TcId": {
-            "text": string
-        }
-        "newTcId": {
-            "text": string
-        }
-        "createTcId": {
-            "text": string
-        }
-        "newTcDesc": {
-            "text": string
-        }
-        "newTcPrecond": {
-            "text": string
-        }
-        "newTC": {
-            "rows": Array<{
-                "iStep": {
-                    "submitter": boolean
-                    "closeForm": boolean
-                    "validatorGroup": string
-                }
-                "stepTask": {
-                    "text": string
-                }
-                "newTcPlatform": {
-                    "selectedKey": string
-                    "selectedText": string
-                    "selectedValue": {
-                        "v": string
-                    }
-                }
-                "task": {
-                    "text": string
-                }
-                "expect": {
-                    "text": string
-                }
-                "photoUpload": {
-                    "photos": Array<{
-                        "photoId": string
-                        "datetime": dtl
-                        "locationLatitude": number
-                        "locationLongitude": number
-                        "locationAltitude": number
-                        "locationAccuracy": number
-                        "locationDtuAcquired": dtl
-                        "fileSize": number
-                        "height": number
-                        "width": number
-                        "type": string
-                        "duration": number
-                    }>
-                }
-                "hasPhoto": number
-                "stepCount": number
-            }>
-        }
-        "editTC": {
-            "rows": Array<{
-                "iStep": {
-                    "submitter": boolean
-                    "closeForm": boolean
-                    "validatorGroup": string
-                }
-                "stepTask": {
-                    "text": string
-                }
-                "newTcPlatform": {
-                    "selectedKey": string
-                    "selectedText": string
-                    "selectedValue": {
-                        "v": string
-                    }
-                }
-                "task": {
-                    "text": string
-                }
-                "expect": {
-                    "text": string
-                }
-                "photoUpload": {
-                    "photos": Array<{
-                        "photoId": string
-                        "mediaId": string
-                    }>
-                }
-                "hasPhoto": number
-                "mediaIdPhoto": string
-                "stepCount": number
-            }>
-        }
-        "currentStep": number
-        "edit": number
-        "deletedStep": number
-        "stfromForm": string
-        "originalTestId": string
-        "user_proj": string
         "submissionTitle": string
         "submitButton": any
     }
@@ -3698,68 +3701,6 @@ declare global {
             "result": string
             "platformID": string
         }>
-        "submissionTitle": string
-        "submitButton": any
-    }
-}
-declare global {
-    interface form_testers extends __form_base_type {
-        "tester_table": {
-            "rows": Array<{
-                "tb_tester_name": {
-                    "text": string
-                }
-                "tb_tester_email": {
-                    "text": string
-                }
-                "role_table": {
-                    "rows": Array<{
-                        "drRole": {
-                            "selectedKey": string
-                            "selectedText": string
-                            "selectedValue": {
-                                "v": string
-                            }
-                        }
-                        "newProj": {
-                            "selectedKey": string
-                            "selectedText": string
-                            "selectedValue": {
-                                "project": string
-                            }
-                        }
-                        "projName": {
-                            "text": string
-                        }
-                    }>
-                }
-                "btnSaveRoles": {
-                    "submitter": boolean
-                    "closeForm": boolean
-                    "validatorGroup": string
-                }
-                "drWork": {
-                    "selectedKey": string
-                    "selectedText": string
-                    "selectedValue": {
-                        "v": string
-                    }
-                }
-                "drActive": {
-                    "selectedKey": string
-                    "selectedText": string
-                    "selectedValue": {
-                        "v": string
-                    }
-                }
-                "part": {
-                    "number": number
-                }
-                "bDelete": boolean
-            }>
-        }
-        "user_proj": string
-        "stLoggedUserRole": string
         "submissionTitle": string
         "submitButton": any
     }
@@ -4118,6 +4059,78 @@ declare global {
         "currentVersion": string
         "unfinishedCategoryCount": number
         "saveEdit": boolean
+        "submissionTitle": string
+        "submitButton": any
+    }
+}
+declare global {
+    interface form_testers extends __form_base_type {
+        "tester_table": {
+            "rows": Array<{
+                "tb_tester_name": {
+                    "text": string
+                }
+                "tb_tester_email": {
+                    "text": string
+                }
+                "role_table": {
+                    "rows": Array<{
+                        "drRole": {
+                            "selectedKey": string
+                            "selectedText": string
+                            "selectedValue": {
+                                "v": string
+                            }
+                        }
+                        "newProj": {
+                            "selectedKey": string
+                            "selectedText": string
+                            "selectedValue": {
+                                "project": string
+                            }
+                        }
+                        "projName": {
+                            "text": string
+                        }
+                    }>
+                }
+                "btnSaveRoles": {
+                    "submitter": boolean
+                    "closeForm": boolean
+                    "validatorGroup": string
+                }
+                "drWork": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "drActive": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "v": string
+                    }
+                }
+                "part": {
+                    "number": number
+                }
+                "drActiveProject": {
+                    "selectedKey": string
+                    "selectedText": string
+                    "selectedValue": {
+                        "project": string
+                    }
+                }
+                "bDelete": boolean
+            }>
+        }
+        "user_proj": string
+        "stLoggedUserRole": string
+        "availableProjects": Array<{
+            "project": string
+        }>
         "submissionTitle": string
         "submitButton": any
     }

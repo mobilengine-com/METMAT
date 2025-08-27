@@ -58,17 +58,19 @@ for (let element of form.changeppop.projectTable.rows) {
 }
 
 if (form.recRun.submitter) {
-    let leftCountFromTestWriteResult = db.calculatedResults.ReadFields({Type: "Write", project: form.user_proj, version: form.currentVersion},["leftCount"])[0].leftCount as number;
-    let dbTesterForTesting = db.tester.ReadFields({work_type: ["Testing", "Testing/Writing"], tester_active: "Active"},["work_type", "tester_name", "participation"]) as {work_type: string, tester_name: string, participation: number}[];
-    let onCurrentProjTesters = db.userState.ReadFields({active_project: form.user_proj, tester_name: dbTesterForTesting.map(a => a.tester_name)},["tester_name"]) as {tester_name: string}[];
+
+    let leftCountFromTestWriteResult = 4;
+    if (db.calculatedResults.Read({Type: "Write", project: form.user_proj, version: form.currentVersion}).Count() != 0) {  
+        leftCountFromTestWriteResult = db.calculatedResults.ReadFields({Type: "Write", project: form.user_proj, version: form.currentVersion},["leftCount"])[0].leftCount as number;
+    }
+
+    let dbTesterForTesting = db.tester.ReadFields({work_type: ["Testing", "Testing/Writing"], tester_active: "Active", active_project: form.user_proj},["work_type", "tester_name", "participation"]) as {work_type: string, tester_name: string, participation: number}[];
     let sum_participate = 0
     dbTesterForTesting.forEach(a => {
         assertNotNull(a.participation);
-        if (onCurrentProjTesters.some(b => b.tester_name === a.tester_name)) {
-            // only add participation of testers that are on the current project
-            let rParticipation = a.work_type === "Testing/Writing" && leftCountFromTestWriteResult > 3 ? a.participation * 0.5 : a.participation as number;
-            sum_participate += rParticipation;
-        }
+        // only add participation of testers that are on the current project
+        let rParticipation = a.work_type === "Testing/Writing" && leftCountFromTestWriteResult > 3 ? a.participation * 0.5 : a.participation as number;
+        sum_participate += rParticipation;
     });
     
     Log("avgTime "+ avgRunTime)
@@ -76,6 +78,7 @@ if (form.recRun.submitter) {
     Log("done_task_sum_count "+ done_task_sum_count)
     let remaining_task_count = db.task.Read({result: "not yet started", project: form.user_proj, assigned_version: form.currentVersion}).Count()
     Log("remaining_task_count "+ remaining_task_count)
+    Log("sum_participate "+ sum_participate)
     
     let requiredWorkingHours = 0;
     if (remaining_task_count != 0) {
@@ -85,7 +88,13 @@ if (form.recRun.submitter) {
     if (requiredWorkingHoursOrN === undefined) {
         throw new Error("requiredWorkingHoursOrN is undefined");
     }
-    requiredWorkingHours = requiredWorkingHoursOrN
+    if (sum_participate == 0) {
+            Log( "Calculation cancelled, no participation found")
+            requiredWorkingHours = 0;
+    }else{
+        requiredWorkingHours = requiredWorkingHoursOrN
+    }
+    
     Log("requiredWorkingHours "+requiredWorkingHours)
     let more_day_then_today = requiredWorkingHours-left_from_today_total>0 ? requiredWorkingHours-left_from_today_total : 0; 
     let round_days = Math.ceil(more_day_then_today/8)
@@ -121,17 +130,18 @@ if (form.recRun.submitter) {
 }   
 
 if (form.recWrite.submitter) {
-    let leftCountFromTestRunResult = db.calculatedResults.ReadFields({Type: "Run", project: form.user_proj, version: form.currentVersion},["leftCount"])[0].leftCount as number;
-    let dbTesterForTesting = db.tester.ReadFields({work_type: ["Test writing", "Testing/Writing"], tester_active: "Active"},["work_type", "tester_name", "participation"]) as {work_type: string, tester_name: string, participation: number}[];
-    let onCurrentProjTesters = db.userState.ReadFields({active_project: form.user_proj, tester_name: dbTesterForTesting.map(a => a.tester_name)},["tester_name"]) as {tester_name: string}[];
+    let leftCountFromTestRunResult = 4;
+    if (db.calculatedResults.Read({Type: "Run", project: form.user_proj, version: form.currentVersion}).Count() != 0) {  
+        leftCountFromTestRunResult = db.calculatedResults.ReadFields({Type: "Run", project: form.user_proj, version: form.currentVersion},["leftCount"])[0].leftCount as number;
+    }
+    let dbTesterForTesting = db.tester.ReadFields({work_type: ["Test writing", "Testing/Writing"], tester_active: "Active", active_project: form.user_proj},["work_type", "tester_name", "participation"]) as {work_type: string, tester_name: string, participation: number}[];
+
     let sum_participate = 0
     dbTesterForTesting.forEach(a => {
         assertNotNull(a.participation);
-        if (onCurrentProjTesters.some(b => b.tester_name === a.tester_name)) {
             // only add participation of testers that are on the current project
             let rParticipation = a.work_type === "Testing/Writing" && leftCountFromTestRunResult > 3 ? a.participation * 0.5 : a.participation as number;
             sum_participate += rParticipation;
-        }
     });
     Log("sum_participate: "+sum_participate)
     let totalTestToWriteCount = 0
@@ -150,8 +160,14 @@ if (form.recWrite.submitter) {
         if (temp === undefined) {
             throw new Error("requiredWorkingHoursToWrite is undefined");
         }
-        requiredWorkingHoursToWrite = temp
+        if (sum_participate == 0) {
+            Log( "Calculation cancelled, no participation found")
+            requiredWorkingHoursToWrite = 0;
+        }else{
+            requiredWorkingHoursToWrite = temp
+        }        
     }
+
     Log("requiredWorkingHoursToWrite "+requiredWorkingHoursToWrite)
     let more_day_then_today = requiredWorkingHoursToWrite-left_from_today_total>0 ? requiredWorkingHoursToWrite-left_from_today_total : 0; 
     let round_days = Math.ceil(more_day_then_today/8)

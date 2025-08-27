@@ -14,9 +14,15 @@
             U.tester_email = sysp.user AND
             U.project = user_proj
         }' />
+
+        <let id="availableProjects" shape="table" value="{
+            SELECT v.project
+            FROM versions v
+            GROUP BY v.project
+        }" />
     </declarations>
     <chapter title='Testers'>
-        <table id='tester_table' record='r' recordset='{select t.tester_name, t.tester_email, t.work_type, t.tester_active, t.participation from tester t}'>
+        <table id='tester_table' record='r' recordset='{select t.tester_name, t.tester_email, t.work_type, t.tester_active, t.participation, t.active_project from tester t}'>
             <header>
                 <row>
                     <cell>
@@ -38,7 +44,7 @@
                         <textview text='Participation'/>
                     </cell>
                     <cell>
-                        <textview text='Day off'/>
+                        <textview text='Working on project'/>
                     </cell>
                     <cell>
                         <textview text=''/>
@@ -149,6 +155,18 @@
                 </cell>
                 <cell>
                     <if cond='{stLoggedUserRole == "Admin"}'>
+                        <dropdown id="drActiveProject" 
+                        keyMap="{project}" 
+                        textMap="{project}" 
+                        selectedKey="{r.active_project}"
+                        choices='{SELECT ap.project FROM availableProjects ap}'></dropdown>
+                    </if>
+                    <if cond='{not (stLoggedUserRole == "Admin")}'>
+                        <textview text="{r.active_project}"/>
+                    </if>
+                </cell>
+                <cell>
+                    <if cond='{stLoggedUserRole == "Admin"}'>
                         <if cond="{bDelete}">
                             <actionbutton text="Undo">
                                 <set value="{false}" target="bDelete" />
@@ -164,7 +182,7 @@
             </row>
         </table>
         <if cond='{stLoggedUserRole == "Admin"}'>
-            <addbutton records='{select "" tester_name, "" tester_email, "Testing" work_type, "Inactive" tester_active, 1 participation}' table='tester_table' text='Add tester'></addbutton>
+            <addbutton records='{select "" tester_name, "" tester_email, "Testing" work_type, "Inactive" tester_active, 1 participation, "" active_project}' table='tester_table' text='Add tester'></addbutton>
         </if>
     </chapter>
 </form>

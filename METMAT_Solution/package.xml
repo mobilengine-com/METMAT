@@ -1,4 +1,4 @@
-<package xmlns="http://schemas.mobilengine.com/package/v1" name="METMAT" displayName="METMAT" version="1.0.12" mobilengineVersion="55" >
+<package xmlns="http://schemas.mobilengine.com/package/v1" name="METMAT" displayName="METMAT" version="1.0.13" mobilengineVersion="55" >
     <upgrade>
         <version name="1.0.3" >
                 <sql name="1.0.3" >
@@ -55,6 +55,11 @@
             <version name="1.0.12" >
                 <sql name="1.0.12" >
                     <table name="environmentValues"/>
+                </sql>
+            </version>
+            <version name="1.0.13" >
+                <sql name="1.0.13" >
+                    <table name="testedVersion"/>
                 </sql>
             </version>
     </upgrade>
