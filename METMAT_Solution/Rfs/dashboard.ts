@@ -74,7 +74,7 @@ if (form.recRun.submitter) {
     });
     
     Log("avgTime "+ avgRunTime)
-    let done_task_sum_count = db.task.Read({result:["success", "bad test case", "failed"], project: form.user_proj, assigned_version: form.currentVersion}).Count()
+    let done_task_sum_count = db.task.Read({result:["success", "bad test case", "failed", "resolved"], project: form.user_proj, assigned_version: form.currentVersion}).Count()
     Log("done_task_sum_count "+ done_task_sum_count)
     let remaining_task_count = db.task.Read({result: "not yet started", project: form.user_proj, assigned_version: form.currentVersion}).Count()
     Log("remaining_task_count "+ remaining_task_count)

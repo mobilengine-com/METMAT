@@ -132,7 +132,7 @@
         db.test_to_be_write_category.Update({category:form.drDoneTests.selectedKey},{closedByTesters:1, testerWhoClosed:form.info.user.name})
     }
     if (form.adminPanel.sbSaveToDb.submitter) {
-        var newTestCases = db.test_to_be_write_done.Read({type:"Manual"})
+        var newTestCases = db.test_to_be_write_done.Read({type:"Manual", project: form.user_proj, version: form.currentVersion})
         var counter = 0;
         for(var testCase of newTestCases){
             counter=counter+1;

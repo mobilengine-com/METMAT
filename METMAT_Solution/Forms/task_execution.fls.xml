@@ -29,7 +29,7 @@
         </dropdown>
     </chapter>
     <chapter title='Filter by status'>
-        <dropdown id="ddstatus" keyMap='{v}' textMap='{v}' choices='{["not yet started", "success", "failed", "not tested", "bad test case"]}' selectedKey='{"not yet started"}'/>
+        <dropdown id="ddstatus" keyMap='{v}' textMap='{v}' choices='{["not yet started", "success", "failed", "not tested", "bad test case","resolved"]}' selectedKey='{"not yet started"}'/>
     </chapter>
     <chapter title='Filter by user(s)'>
         <checkbox id='ch_all_user' text='all user' />
@@ -111,7 +111,7 @@
                         </if>
                     </cell>
                     <cell>
-                        <dropdown id="result" selectedKey="{task.result}" keyMap='{v}' textMap='{v}' choices='{["not yet started", "success", "failed", "not tested", "bad test case"]}'>
+                        <dropdown id="result" selectedKey="{task.result}" keyMap='{v}' textMap='{v}' choices='{["not yet started", "success", "failed", "not tested", "bad test case", "resolved"]}'>
                         <declarations><let id="fChanged" shape="scalar" value="{selectedKey IS NOT task.result}"/></declarations>
                         </dropdown>
                     </cell>
