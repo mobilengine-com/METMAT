@@ -402,7 +402,6 @@
     
     <table id="tcDone" record="tcDone" style="{styles.fullPageTable}"
         recordset="{loadNewerFromServer:SELECT tcwd.category, tcwd.id, tcwd.label, tcwd.type, tcwd.status, tcwd.creator, tcwd.location, tcwd.note, tcwd.platform FROM test_to_be_write_done tcwd WHERE tcwd.category = drDoneTests.selectedKey}"
-        recordLocal="{SELECT tcDone.category, tcDone.id, editedLabel.text label, editedType.selectedKey type, editedStatus.selectedKey status, tcDone.creator, editedLocation.text location, editedNote.text note, editedPlatform.selectedKey platform}"
         >
         <header>
             <row>

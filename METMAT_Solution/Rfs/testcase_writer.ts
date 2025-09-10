@@ -160,7 +160,7 @@
             }catch{
                 Log("Failed to add: "+ testCase.id)
             }
-           
+            Log("Total "+counter+" testcases added to test_case table")
         }
     }
     
